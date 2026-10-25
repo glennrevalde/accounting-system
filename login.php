@@ -57,7 +57,7 @@ $multi = Tenant::isMulti();
       <?php if ($multi): ?>
       <div class="login-join mt-3">New employee? <a href="<?= h(base_url() . '/register.php') ?>">Join your company with its Company Code</a></div>
       <?php endif; ?>
-      <p class="text-muted small mt-4 mb-0">Every login, failed attempt and action is recorded in the audit trail. TESTING</p>
+      <p class="text-muted small mt-4 mb-0">Every login, failed attempt and action is recorded in the audit trail.</p>
       <?php if (Manual::available()): ?>
       <div class="login-help"><a href="<?= h(Manual::forPage('login')) ?>" target="_blank" rel="noopener"><i class="bi bi-book"></i> User's Manual</a></div>
       <?php endif; ?>
