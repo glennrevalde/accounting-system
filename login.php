@@ -40,7 +40,7 @@ $multi = Tenant::isMulti();
     <div class="card-body p-4 p-md-5">
       <div class="d-flex align-items-center gap-3 mb-4">
         <span class="brand-tile"><i class="bi bi-calculator"></i></span>
-        <div><h1 class="h5 mb-0 fw-bold"><?= h($app) ?></h1><div class="text-muted small"><?= $multi ? 'Log in to your company' : h(Settings::get('company_name')) ?></div></div>
+        <div><h1 class="h5 mb-0 fw-bold"><?= h($app) ?></h1><div class="text-muted small"><?= $multi ? 'Log in to your company haha' : h(Settings::get('company_name')) ?></div></div>
       </div>
       <?php foreach (take_flash() as [$type, $msg]): ?>
         <div class="alert alert-<?= h($type) ?> py-2"><?= h($msg) ?></div>
@@ -65,4 +65,5 @@ $multi = Tenant::isMulti();
   </div>
 </div>
 </body>
+
 </html>
