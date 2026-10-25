@@ -1,0 +1,5 @@
+{
+    "primary_db": "accounting_system",
+    "master_db": "accounting_system_master",
+    "enabled_at": "2026-09-28T10:25:23+08:00"
+}

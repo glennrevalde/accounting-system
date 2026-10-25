@@ -1,0 +1,113 @@
+G-SMaRT Accounting - version 27 (2026-11-05)
+=============================================
+
+This package holds only the files that were added or changed since version 26.
+Copy the accounting-system folder over your installation, keeping the folder
+structure. config/config.php is not included and is never changed.
+
+Database
+--------
+Run ONE new migration on your database (phpMyAdmin: select the database > Import;
+Navicat: Execute SQL File), after backing it up:
+
+    database/migrations/2026_11_05_item_groups_receiving_lists.sql
+
+It adds an empty column group_variance_account_id on items, five empty group
+columns on transaction_lines (group_item_id, group_ref, group_qty, group_rate,
+group_role), the table item_group_sales, the account "Item Group Price Variance"
+(Income, code 4070 or the next free code) with its module default account, and an
+empty column received_via on transactions, filled in for the item receipts already
+saved. It adds the report pages Sales by Item Group (Customers > Sales Reports,
+for the roles that may open Sales by Item Summary) and POS Sales by Item Group
+(Point of Sale > Reports, for the roles that may open POS Sales by Item), each with
+its print right. Nothing is deleted and no amount changes. Written for MySQL 5.5,
+safe to run twice. With several companies, run it on every company database (Super
+Admin: Companies > Database updates > Update all companies). Until it is run, the
+program shows a page naming it.
+
+database/accounting_system.sql and accounting_system_clean.sql (new installs only)
+include the change. Do NOT import those two files over a live database.
+
+After copying the files, press Ctrl+F5 once in the browser so it loads the new
+assets/css/app.css.
+
+What is new (the requests of "ADDITIONAL_REVISED FEATURES ... v27.xlsx")
+--------------------------------------------------------------------------
+Item groups (Inventory > Item List, type Group)
+ 1. Group price: the price followed on Estimates, Sales Orders, Sales Receipts,
+    Invoices and POS sales when the group is chosen (with the customer's price
+    level applied, like any item).
+ 2. Consolidated price: the sum of the prices of the items in the group (each
+    item's price times its quantity in the group), recalculated as items are
+    added, removed or their quantity changed.
+ 3. Price variance (Group price - Consolidated price), shown next to them.
+ 4. Price variance GL account: the account the variance is posted to. Left blank,
+    the module default "Item Group Price Variance" is used (Chart of Accounts >
+    Module Default Accounts).
+ 5. The items table of the group shows the Price and the Amount of each item, with
+    the sum of the individual prices (the consolidated price) at the foot.
+ 6. A "Sold as a group" card: the groups sold this month and this fiscal year and
+    what they sold for, with a link to Sales by Item Group.
+
+Settings (System Administration > Company, Security & Closing Date > Inventory and POS)
+ 7. "Track Item Group Sales transactions": when ticked, every group sold is
+    recorded in its own table (item_group_sales) and appears on Sales by Item Group
+    and POS Sales by Item Group. When not ticked, nothing new is recorded there.
+ 8. "Adopt the Group Price in the Item Group": when ticked, the Group price is
+    followed on sales; when not ticked (or the group has no Group price), the
+    consolidated price (the items' own prices) is followed.
+    Both are ticked as delivered.
+
+How a group is saved
+ 9. A group is entered as one line. On saving, the document keeps the items of the
+    group at their own prices (so stock, cost of goods sold and the item reports
+    stay correct) plus one price variance line on the Price variance GL account for
+    the difference, so the document total equals the group price. A discount on the
+    group line is carried by the variance line. All these lines remember the group,
+    its quantity and its price.
+10. Viewing or editing a saved Estimate, Sales Order, Sales Receipt, Invoice or POS
+    sale that has groups offers two buttons: "View by item group" (one line per
+    group, as entered; the default) and "View item details" (each item of the group
+    and the price variance line). Both can be edited and saved; the print follows
+    the view chosen. Groups carry over when an Estimate or Sales Order is turned
+    into an invoice, in part or in full.
+
+Point of Sale
+11. Item groups can be sold in the POS register like on the Customer Invoice:
+    search or scan the group, it goes into the cart as one line at its group price.
+    The receipt shows the groups with the same two views. Suspended sales, voids and
+    returns (whole groups) work with groups.
+
+Reports
+12. Sales by Item Group (Customers > Sales Reports): the groups sold in every
+    module (invoices, sales receipts, statement charges, POS sales, less credit
+    memos and POS returns). Filters: Dates, Customer, Site, Class, Sales rep, Item
+    group.
+13. POS Sales by Item Group (Point of Sale > Reports): POS sales less POS returns.
+    Filters: Dates, Terminal, Site, Cashier, Item group.
+    Both read Item Group Name / Qty / Group Price / Total with a Totals line, and
+    "Show the individual item details" lists the items of each group (and its price
+    variance) under it; "Show the transactions" lists the documents. Consolidated
+    price, Price variance, Tax and Transactions can be added in Modify Report.
+
+Lists with date filters
+14. Receipt Management: a "Receipt List" button opens the list of receipts with
+    Dates (From and To; by receipt date or upload date), Status, Vendor and Search,
+    a total and Export to CSV.
+15. Receive Items and Enter Bills: a "Receive Items and Enter Bills List" button
+    opens the bills entered on that page, with Dates and the usual filters.
+16. Receive Items: a "Receive Items List" button opens the item receipts (and the
+    bills they became), with Dates and the usual filters.
+
+Notes
+ - Documents saved before this version carry no group information: they show and
+   report their item lines as before, and are not on the item group reports.
+ - Bills entered before this version appear in the Receive Items and Enter Bills
+   List only when they can be recognised (memo "Received against ..." written by
+   that page); new ones are always recorded.
+ - Open each item group once and enter its Group price and, if needed, its Price
+   variance GL account. Until a Group price is entered, the consolidated price is
+   followed.
+
+The user's manual (Help button, Home > User's Manual) and the Word edition
+(GSMaRT_Accounting_Users_Manual_v27.docx) are updated for all of the above.

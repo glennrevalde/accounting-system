@@ -1,0 +1,69 @@
+G-SMaRT Accounting - version 26 (2026-10-29)
+=============================================
+
+This package holds only the files that were added or changed since version 25.
+Copy the accounting-system folder over your installation, keeping the folder
+structure. config/config.php is not included and is never changed.
+
+Database
+--------
+Run ONE new migration on your database (phpMyAdmin: select the database > Import;
+Navicat: Execute SQL File), after backing it up:
+
+    database/migrations/2026_10_29_pos_ending_inventory_shift_times.sql
+
+It adds the report page Ending Inventory - POS Cashier (Point of Sale > Reports),
+given to the roles that may open the X- and Z-Reading Summary (with their print
+right) and to the roles that may open Shifts, Cash Drops & Readings (the cashiers,
+who print their own). No table or column is added, nothing is deleted and no amount
+changes. Written for MySQL 5.5, safe to run twice. With several companies, run it on
+every company database (Super Admin: Companies > Database updates > Update all
+companies). Until it is run, the program shows a page naming it.
+
+database/accounting_system.sql and accounting_system_clean.sql (new installs only)
+include the change. Do NOT import those two files over a live database.
+
+After copying the files, press Ctrl+F5 once in the browser so it loads the new
+assets/css/app.css.
+
+What is new (the requests of "ADDITIONAL_REVISED FEATURES ... v26.xlsx")
+--------------------------------------------------------------------------
+Sheet 2
+ 1. Date-and-time filters on the Inventory Movement Summary Report, the Inventory
+    Movement Detailed Report and the Sales Report Through Inventory Movement (and the
+    Inventory Movement Transactions they open): a time after the From date and the
+    To date. A business open 24 hours with three shifts (12:01 AM - 8:00 AM,
+    8:01 AM - 2:00 PM, 2:01 PM - 12:00 AM) sees the beginning inventory, the sales,
+    purchases, other in and out transactions and the ending inventory of each shift.
+    The From time counts from the start of its minute and the To time to the end of
+    its minute, so the shifts follow each other without a gap; empty times mean whole
+    days. A transaction counts on its date at the time of day it was recorded (a POS
+    sale at the moment it was rung up). The ending inventory of one shift is the
+    beginning inventory of the next, and the three shifts add up to the day.
+ 2. Cashier filter on the Inventory Movement Summary and Detailed Reports (the
+    Sales report already had it): the site becomes the outlet the cashier worked at
+    in the period, the stock the cashier is answerable for. A Shift filter on all
+    three reports sets the dates and times to the moment a POS shift was opened and
+    closed, with its cashier and site.
+ 3. Sales Report Through Inventory Movement: "Exclude zero sales" leaves out the
+    items with no sales in the date range (of the cashier, when one is chosen).
+Sheet 1
+ 4. Ending Inventory - POS Cashier (Point of Sale > Reports): the quantity on hand of
+    every item at a cashier's outlet at the cut-off. Filters: Dates with From and To
+    date and time, Item, Site, Class, Category, Cashier, Shift (places the time the
+    cashier opened and closed the shift automatically), Report type and "Exclude
+    inventory with zero balance". Report type A: Item code and Total, in item-code
+    order; report type B: Description and Total, in description order. TOTAL line;
+    signature lines "Inventory Turnovered by:" and "Inventory Received by:" whose
+    captions, names and foot text can be changed in Modify Report (customizable
+    footer). "Print to POS printer" prints the slip (QUANTITY ON HAND BY CASHIER,
+    By Item Code / By Item Description, Cut-off: To:, Site:, Cashier:) sized to the
+    58 mm or 80 mm roll, with A or B chosen on the print page, and through the
+    Bluetooth printer when it is switched on. A cashier sees only their own shifts and
+    the report opens on their latest shift. Shifts, Cash Drops & Readings has an
+    Ending inventory button on each shift.
+
+The demo data now records yesterday's POS sales at times within the demo shift.
+
+The user's manual (Help button, Home > User's Manual) and the Word edition
+(GSMaRT_Accounting_Users_Manual_v26.docx) are updated for all of the above.
