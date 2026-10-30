@@ -30,7 +30,8 @@ SET NAMES utf8mb4;
 --  1. The menu name
 -- ---------------------------------------------------------------------
 
-UPDATE modules SET name = 'Financial Set-up & Reports' WHERE code = 'coa';
+-- only while it still has its old name: since v32 (2026_12_03) the menu is called Financial
+UPDATE modules SET name = 'Financial Set-up & Reports' WHERE code = 'coa' AND name = 'Chart of Accounts';
 
 -- ---------------------------------------------------------------------
 --  2. The eight reports

@@ -12,6 +12,10 @@ declare(strict_types=1);
  * deposit again through Txn::save, so the closed-period and bank-reconciliation protections and the audit trail
  * (before / after, with the reason) apply. A shift's line always takes the shift's figures as they are now, so a
  * deposit follows a correction of the shift's closing entries (see Pos::correctShift).
+ *
+ * v32: in the Details window of a card or e-wallet clearing account, the receipts not yet settled can be ticked (Settle),
+ * as the cash of the closed POS shifts is ticked: their total goes into Gross settled, and once the deposit is saved
+ * those receipts are settled (app/Clearing.php, table clearing_settlements) and are no longer listed as unsettled.
  */
 
 require_once APP_ROOT . '/modules/txn/_common.php';
@@ -135,9 +139,24 @@ handle_post(function () use ($pageKey, $pending, $shifts, $uf, $dep, $depId, $in
         $shiftIds[] = (int)$s['id'];
     }
     $clearById = $clearing;
+    $ticks = [];
     foreach ((array)($_POST['settle'] ?? []) as $aid => $r) {
         $gross = r2(to_num($r['gross'] ?? 0));
         $fee = r2(to_num($r['fee'] ?? 0));
+        // v32: the receipts ticked in Details ("id:amount,..."; the amounts are worked out again here)
+        $rids = array_values(array_filter(array_map(fn($x) => (int)explode(':', $x)[0], explode(',', (string)($r['receipts'] ?? '')))));
+        if ($rids && Clearing::ticksReady()) {
+            if (!isset($clearById[(int)$aid])) {
+                fail('That clearing account is no longer used by a card or e-wallet payment method. Refresh and try again.');
+            }
+            $ticked = Clearing::tickedOpen((int)$aid, $date, $rids);
+            $sumTicked = r2(array_sum($ticked));
+            if (abs($sumTicked - $gross) > 0.004) {
+                fail('Gross settled for ' . $clearById[(int)$aid]['name'] . ' (' . money($gross) . ') is not the total of the ' . count($ticked) . ' receipt(s) ticked to settle ('
+                    . money($sumTicked) . '). Open Details to change the ticks, or clear them to type the amount.');
+            }
+            $ticks[(int)$aid] = $ticked;
+        }
         if ($gross <= 0) {
             if ($fee > 0) {
                 fail('Enter the gross amount settled for ' . ($clearById[(int)$aid]['name'] ?? 'the clearing account') . ' with its fee.');
@@ -154,7 +173,8 @@ handle_post(function () use ($pageKey, $pending, $shifts, $uf, $dep, $depId, $in
         if ($fee > $gross + 0.004) {
             fail('The fee deducted for ' . $c['name'] . ' is more than the gross settled.');
         }
-        $lines[] = ['line_kind' => 'deposit', 'account_id' => (int)$aid, 'amount' => $gross, 'description' => 'Provider settlement ' . ($r['ref'] ?? '')];
+        $lines[] = ['line_kind' => 'deposit', 'account_id' => (int)$aid, 'amount' => $gross,
+            'description' => trim('Provider settlement ' . ($r['ref'] ?? '') . (isset($ticks[(int)$aid]) ? ' (' . count($ticks[(int)$aid]) . ' receipt' . (count($ticks[(int)$aid]) === 1 ? '' : 's') . ' ticked)' : ''))];
         if ($fee > 0) {
             $lines[] = ['line_kind' => 'deposit', 'account_id' => Accts::get('merchant_fees'), 'amount' => -$fee, 'description' => 'Merchant fee deducted'];
         }
@@ -186,8 +206,24 @@ handle_post(function () use ($pageKey, $pending, $shifts, $uf, $dep, $depId, $in
         'txn_date' => $date, 'account_id' => $bank, 'memo' => p('memo') ?: null, 'ref_no' => p('ref_no') ?: null,
         'cash_back_amount' => $cashBack, 'account2_id' => $cashBack > 0 ? pint('cash_back_account_id') : null, 'status' => 'open',
     ];
-    $id = DB::tx(function () use ($h, $lines, $depId, $shiftIds) {
+    $id = DB::tx(function () use ($h, $lines, $depId, $shiftIds, $ticks) {
         $id = Txn::save('deposit', $h, $lines, $depId ?: null, ['reason' => trim((string)p('reason')) ?: null]);
+        // v32: the receipts ticked to settle; an edited deposit keeps the ones it still holds the amount of
+        if (Clearing::ticksReady()) {
+            if ($depId) {
+                $held = [];
+                foreach ($lines as $l) {
+                    $held[(int)$l['account_id']] = ($held[(int)$l['account_id']] ?? 0.0) + (float)$l['amount'];
+                }
+                foreach ($ticks as $aid => $t) {
+                    $held[$aid] = ($held[$aid] ?? 0.0) - array_sum($t);
+                }
+                Clearing::keepTicks($id, $held);
+            }
+            foreach ($ticks as $aid => $t) {
+                Clearing::tick($id, (int)$aid, $t);
+            }
+        }
         // the shifts taken off the deposit wait to be deposited again; the ones on it point at it
         if ($depId) {
             [$in, $ip] = DB::in('ks', $shiftIds ?: [0]);
@@ -260,19 +296,21 @@ layout_start($title, ['actions' => $dep ? btn_link(Txn::url($dep), 'Back to the 
 </div>
 <?php endif; ?>
 <?php if ($clearing): $clrUrl = url($pageKey, ['a' => 'clearing']); ?>
-<div class="card mb-3" id="clrCard" data-clearing-url="<?= h($clrUrl) ?>"><div class="card-header dep-head"><span class="fw-semibold">Card and e-wallet settlements</span>
+<div class="card mb-3" id="clrCard" data-clearing-url="<?= h($clrUrl) ?>" data-ticks="<?= Clearing::ticksReady() ? '1' : '0' ?>"><div class="card-header dep-head"><span class="fw-semibold">Card and e-wallet settlements</span>
   <span class="small text-muted">Unsettled = the balance of the clearing account in the General Ledger on <span data-clr-date><?= h(fdate($clearDate)) ?></span>, as on the Trial Balance.</span></div>
   <div class="table-responsive"><table class="table table-sm mb-0 dep-table clr-table"><thead><tr><th>Clearing account</th><th class="num">Unsettled</th><th class="num">Gross settled</th><th class="num">Fee deducted</th><th>Reference</th></tr></thead>
   <?php foreach ($clearing as $c): $sp = $_POST['settle'][$c['id']] ?? []; ?>
     <tr data-clr-row="<?= (int)$c['id'] ?>"><td><?= h($c['code'] . ' - ' . $c['name']) ?><?php if ($c['methods']): ?><div class="small text-muted"><?= h(implode(', ', $c['methods'])) ?></div><?php endif; ?></td>
       <td class="num"><div class="clr-unsettled"><button type="button" class="btn btn-outline-primary btn-sm clr-details" data-clr-details="<?= (int)$c['id'] ?>" title="What the unsettled balance is made of"><i class="bi bi-list-ul"></i> Details</button>
         <span data-clr-bal class="<?= $c['bal'] < 0 ? 'text-danger' : '' ?>"><?= money($c['bal']) ?></span></div></td>
-      <td><input class="form-control form-control-sm text-end ms-auto" style="width:120px" name="settle[<?= (int)$c['id'] ?>][gross]" value="<?= h($sp['gross'] ?? '') ?>" inputmode="decimal" data-sum aria-label="Gross settled"></td>
+      <td><input class="form-control form-control-sm text-end ms-auto" style="width:120px" name="settle[<?= (int)$c['id'] ?>][gross]" value="<?= h($sp['gross'] ?? '') ?>" inputmode="decimal" data-sum data-clr-gross aria-label="Gross settled"<?= !empty($sp['receipts']) ? ' readonly' : '' ?>>
+        <input type="hidden" name="settle[<?= (int)$c['id'] ?>][receipts]" value="<?= h((string)($sp['receipts'] ?? '')) ?>" data-clr-receipts>
+        <div class="clr-ticked" data-clr-ticked<?= empty($sp['receipts']) ? ' hidden' : '' ?>><span data-clr-ticked-text><?= !empty($sp['receipts']) ? count(explode(',', (string)$sp['receipts'])) . ' receipt(s) ticked' : '' ?></span> <button type="button" class="btn btn-link btn-sm p-0 align-baseline" data-clr-clear>Clear</button></div></td>
       <td><input class="form-control form-control-sm text-end ms-auto sub-fee" style="width:100px" name="settle[<?= (int)$c['id'] ?>][fee]" value="<?= h($sp['fee'] ?? '') ?>" inputmode="decimal" aria-label="Fee deducted"></td>
       <td><input class="form-control form-control-sm" name="settle[<?= (int)$c['id'] ?>][ref]" value="<?= h($sp['ref'] ?? '') ?>" aria-label="Reference"></td></tr>
   <?php endforeach; ?>
   </table></div>
-  <div class="card-body small text-muted py-2">Merchant fees are recorded as Bank and Merchant Charges; the bank receives the gross less the fee. Details lists the sales, refunds and settlements behind each balance.<?= $dep ? ' Settlements already on this deposit are listed under Other receipts.' : '' ?></div>
+  <div class="card-body small text-muted py-2">Merchant fees are recorded as Bank and Merchant Charges; the bank receives the gross less the fee. Details lists the sales, refunds and settlements behind each balance<?= Clearing::ticksReady() ? '; tick Settle on the receipts the provider paid and their total goes into Gross settled' : '' ?>.<?= $dep ? ' Settlements already on this deposit are listed under Other receipts.' : '' ?></div>
 </div>
 <div class="modal fade" id="clrModal" tabindex="-1" aria-labelledby="clrModalTitle" aria-hidden="true">
   <div class="modal-dialog modal-xl modal-dialog-scrollable modal-fullscreen-md-down"><div class="modal-content">
@@ -280,6 +318,10 @@ layout_start($title, ['actions' => $dep ? btn_link(Txn::url($dep), 'Back to the 
       <a class="btn btn-outline-secondary btn-sm ms-auto me-2" id="clrModalOpen" href="#" target="_blank" rel="noopener"><i class="bi bi-box-arrow-up-right"></i><span class="d-none d-sm-inline"> Open as a page</span></a>
       <button type="button" class="btn-close ms-0" data-bs-dismiss="modal" aria-label="Close"></button></div>
     <div class="modal-body" id="clrModalBody"></div>
+    <div class="modal-footer clr-modal-foot" id="clrModalFoot" hidden>
+      <div class="clr-foot-sum">Gross settled <strong data-clr-foot-sum>0.00</strong> <span class="text-muted small" data-clr-foot-count>no receipt ticked</span></div>
+      <button type="button" class="btn btn-primary btn-sm" data-bs-dismiss="modal"><i class="bi bi-check-lg"></i> Done</button>
+    </div>
   </div></div>
 </div>
 <?php endif; ?>
@@ -334,6 +376,8 @@ layout_start($title, ['actions' => $dep ? btn_link(Txn::url($dep), 'Back to the 
   if (dateF) {
     dateF.addEventListener('change', function () {
       if (!dateF.value) { return; }
+      // the receipts ticked were unsettled on the old date: tick them again for the new one
+      card.querySelectorAll('[data-clr-row]').forEach((tr) => { if (tr.querySelector('[data-clr-receipts]').value) { writeTicks(tr.dataset.clrRow, new Map()); } });
       fetch(base + '&format=json&as_of=' + encodeURIComponent(dateF.value), { headers: { 'Accept': 'application/json' } })
         .then((r) => r.json()).then((d) => {
           card.querySelectorAll('[data-clr-date]').forEach((el) => { el.textContent = d.date_label; });
@@ -348,16 +392,92 @@ layout_start($title, ['actions' => $dep ? btn_link(Txn::url($dep), 'Back to the 
   const modalEl = document.getElementById('clrModal');
   const body = document.getElementById('clrModalBody');
   const openLink = document.getElementById('clrModalOpen');
+  const foot = document.getElementById('clrModalFoot');
+  const ticksOn = card.dataset.ticks === '1';
+  let current = null;   // the clearing account whose Details are open
+
+  // v32: the receipts ticked to settle, per clearing account: kept in the row's hidden input as "id:amount,..."
+  const rowOf = (aid) => card.querySelector('[data-clr-row="' + aid + '"]');
+  const readTicks = (aid) => {
+    const m = new Map();
+    const tr = rowOf(aid);
+    const v = tr ? tr.querySelector('[data-clr-receipts]').value : '';
+    v.split(',').filter(Boolean).forEach((x) => { const p = x.split(':'); m.set(p[0], AppFmt.num(p[1] || '0')); });
+    return m;
+  };
+  const writeTicks = (aid, m) => {
+    const tr = rowOf(aid);
+    if (!tr) { return; }
+    const hid = tr.querySelector('[data-clr-receipts]');
+    const gross = tr.querySelector('[data-clr-gross]');
+    const note = tr.querySelector('[data-clr-ticked]');
+    let sum = 0;
+    const parts = [];
+    m.forEach((amt, id) => { sum += amt; parts.push(id + ':' + amt.toFixed(2)); });
+    hid.value = parts.join(',');
+    if (m.size) {
+      gross.value = AppFmt.fmt(sum);
+      gross.readOnly = true;
+      note.hidden = false;
+      note.querySelector('[data-clr-ticked-text]').textContent = m.size + (m.size === 1 ? ' receipt ticked' : ' receipts ticked');
+    } else {
+      if (gross.readOnly) { gross.value = ''; }
+      gross.readOnly = false;
+      note.hidden = true;
+    }
+    gross.dispatchEvent(new Event('input', { bubbles: true }));
+    showFoot(m, sum);
+  };
+  const showFoot = (m, sum) => {
+    if (!foot || foot.hidden) { return; }
+    foot.querySelector('[data-clr-foot-sum]').textContent = AppFmt.fmt(sum);
+    foot.querySelector('[data-clr-foot-count]').textContent = m.size ? (m.size + (m.size === 1 ? ' receipt ticked' : ' receipts ticked')) : 'no receipt ticked';
+  };
+  const syncBoxes = () => {
+    if (current === null) { return; }
+    const m = readTicks(current);
+    const boxes = body.querySelectorAll('.clr-settle');
+    boxes.forEach((cb) => { cb.checked = m.has(cb.value); cb.closest('tr').classList.toggle('clr-on', cb.checked); });
+    const all = body.querySelector('[data-clr-settle-all]');
+    if (all) { all.checked = boxes.length > 0 && m.size >= boxes.length && [...boxes].every((cb) => cb.checked); }
+    let sum = 0; m.forEach((a) => { sum += a; });
+    showFoot(m, sum);
+  };
+  body.addEventListener('change', function (e) {
+    if (current === null) { return; }
+    const m = readTicks(current);
+    if (e.target.matches('[data-clr-settle-all]')) {
+      body.querySelectorAll('.clr-settle').forEach((cb) => { if (e.target.checked) { m.set(cb.value, AppFmt.num(cb.dataset.open)); } else { m.delete(cb.value); } });
+    } else if (e.target.matches('.clr-settle')) {
+      if (e.target.checked) { m.set(e.target.value, AppFmt.num(e.target.dataset.open)); } else { m.delete(e.target.value); }
+    } else { return; }
+    writeTicks(current, m);
+    syncBoxes();
+  });
+  // a click on the row of a receipt ticks it too (not on its document link)
+  body.addEventListener('click', function (e) {
+    if (e.target.closest('a, input, label, button')) { return; }
+    const tr = e.target.closest('.clr-settle-tbl tbody tr');
+    const cb = tr ? tr.querySelector('.clr-settle') : null;
+    if (cb) { cb.checked = !cb.checked; cb.dispatchEvent(new Event('change', { bubbles: true })); }
+  });
   card.addEventListener('click', function (e) {
+    const clr = e.target.closest('[data-clr-clear]');
+    if (clr) { e.preventDefault(); writeTicks(clr.closest('[data-clr-row]').dataset.clrRow, new Map()); return; }
     const b = e.target.closest('[data-clr-details]');
     if (!b) { return; }
     e.preventDefault();
-    const u = base + '&account_id=' + encodeURIComponent(b.dataset.clrDetails) + '&as_of=' + encodeURIComponent(asOf());
+    current = b.dataset.clrDetails;
+    const u = base + '&account_id=' + encodeURIComponent(current) + '&as_of=' + encodeURIComponent(asOf());
     openLink.href = u;
+    if (foot) { foot.hidden = true; }
     body.innerHTML = '<div class="text-center text-muted py-5"><span class="spinner-border spinner-border-sm"></span> Loading...</div>';
     bootstrap.Modal.getOrCreateInstance(modalEl).show();
-    fetch(u + '&partial=1').then((r) => r.text()).then((html) => { body.innerHTML = html; })
-      .catch(() => { body.innerHTML = '<div class="alert alert-danger">The details could not be loaded. Use Open as a page.</div>'; });
+    fetch(u + '&partial=1' + (ticksOn ? '&settle=1' : '')).then((r) => r.text()).then((html) => {
+      body.innerHTML = html;
+      if (foot) { foot.hidden = !body.querySelector('.clr-settle'); }
+      syncBoxes();
+    }).catch(() => { body.innerHTML = '<div class="alert alert-danger">The details could not be loaded. Use Open as a page.</div>'; });
   });
 })();
 </script>
@@ -369,6 +489,7 @@ layout_end();
 /**
  * bank.deposits&a=clearing: what the unsettled balance of a card / e-wallet clearing account is made of, as of a date.
  * &partial=1 gives the body only (the Details window of Make Deposits); &format=json the balances (the deposit date).
+ * &settle=1 (v32, the Details window) adds the Settle tick boxes to the receipts not yet settled.
  */
 function dep_clearing_details(string $pageKey): void
 {
@@ -388,6 +509,7 @@ function dep_clearing_details(string $pageKey): void
         $aid = (int)array_key_first($accts);
     }
     $partial = g('partial') === '1';
+    $settle = $partial && g('settle') === '1' && Clearing::ticksReady();
     if (!$partial) {
         layout_start('Card and E-wallet Balance Details', ['actions' => btn_link(url($pageKey), 'Make Deposits', 'btn-outline-secondary', 'arrow-left')
             . ' <button type="button" class="btn btn-sm btn-outline-secondary" onclick="window.print()"><i class="bi bi-printer"></i> Print</button>']);
@@ -425,7 +547,7 @@ function dep_clearing_details(string $pageKey): void
         return $u ? '<a href="' . h($u) . '" target="_blank" rel="noopener">' . h($docLabel($r)) . '</a>' : h($docLabel($r));
     };
     ?>
-    <div class="clr-details">
+    <div class="clr-details" data-clr-account="<?= (int)$aid ?>">
       <div class="clr-summary">
         <div class="clr-summary-main"><div class="small text-muted"><?= h($c['code'] . ' - ' . $c['name']) ?></div>
           <div class="clr-figure <?= $d['balance'] < 0 ? 'text-danger' : '' ?>"><?= money($d['balance']) ?></div>
@@ -467,17 +589,19 @@ function dep_clearing_details(string $pageKey): void
       <?php endif; ?>
 
       <h6 class="clr-h">Receipts not yet settled</h6>
-      <p class="small text-muted mb-1">Settlements are taken against the oldest receipts first, so these are the latest receipts that make up the unsettled balance. The oldest one may be partly settled.</p>
-      <div class="table-responsive"><table class="table table-sm clr-tbl">
-        <thead><tr><th>Date</th><th>Document</th><th>Customer / terminal</th><th>Method</th><th>Reference</th><th class="num">Amount</th><th class="num">Unsettled</th></tr></thead>
+      <p class="small text-muted mb-1">A settlement whose receipts were ticked settles those receipts; a settlement entered as an amount only is taken against the oldest receipts first. So these are the latest receipts that make up the unsettled balance, and the oldest one may be partly settled.<?= $settle ? ' Tick Settle on the receipts the provider paid: their total goes into Gross settled.' : '' ?></p>
+      <div class="table-responsive"><table class="table table-sm clr-tbl<?= $settle ? ' clr-settle-tbl' : '' ?>">
+        <thead><tr><th>Date</th><th>Document</th><th>Customer / terminal</th><th>Method</th><th>Reference</th><th class="num">Amount</th><th class="num">Unsettled</th>
+          <?php if ($settle): ?><th class="clr-settle-col"><label class="clr-settle-head"><span>Settle</span><input type="checkbox" class="form-check-input" data-clr-settle-all aria-label="Tick every receipt"<?= $d['unsettled'] ? '' : ' disabled' ?>></label></th><?php endif; ?></tr></thead>
         <tbody>
         <?php foreach ($d['unsettled'] as $r): ?>
           <tr><td class="text-nowrap"><?= h(fdate($r['txn_date'])) ?></td><td class="text-nowrap"><?= $docLink($r) ?></td><td><?= h($r['who']) ?></td><td><?= h($r['method']) ?></td><td class="small"><?= h($r['reference']) ?></td>
-            <td class="num"><?= money($r['amount']) ?></td><td class="num <?= abs((float)$r['open'] - (float)$r['amount']) >= 0.005 ? 'text-muted' : '' ?>"><?= money($r['open']) ?></td></tr>
+            <td class="num"><?= money($r['amount']) ?></td><td class="num <?= abs((float)$r['open'] - (float)$r['amount']) >= 0.005 ? 'text-muted' : '' ?>"><?= money($r['open']) ?></td>
+            <?php if ($settle): ?><td class="clr-settle-col"><input type="checkbox" class="form-check-input clr-settle" value="<?= (int)$r['id'] ?>" data-open="<?= h(number_format((float)$r['open'], 2, '.', '')) ?>" aria-label="Settle <?= h($docLabel($r)) ?>"></td><?php endif; ?></tr>
         <?php endforeach; ?>
-        <?php if (!$d['unsettled']): ?><tr><td colspan="7" class="text-muted text-center">Nothing is waiting to be settled.</td></tr><?php endif; ?>
+        <?php if (!$d['unsettled']): ?><tr><td colspan="<?= $settle ? 8 : 7 ?>" class="text-muted text-center">Nothing is waiting to be settled.</td></tr><?php endif; ?>
         </tbody>
-        <?php if ($d['unsettled']): ?><tfoot><tr class="total-row"><td colspan="5"><?= count($d['unsettled']) ?> receipt(s)</td><td></td><td class="num"><?= money($unsTot) ?></td></tr></tfoot><?php endif; ?>
+        <?php if ($d['unsettled']): ?><tfoot><tr class="total-row"><td colspan="5"><?= count($d['unsettled']) ?> receipt(s)</td><td></td><td class="num"><?= money($unsTot) ?></td><?= $settle ? '<td class="clr-settle-col"></td>' : '' ?></tr></tfoot><?php endif; ?>
       </table></div>
 
       <h6 class="clr-h">Latest settlements and other credits</h6>
@@ -485,7 +609,7 @@ function dep_clearing_details(string $pageKey): void
         <thead><tr><th>Date</th><th>Document</th><th>Description</th><th class="num">Amount</th></tr></thead>
         <tbody>
         <?php foreach ($d['credits'] as $r): ?>
-          <tr><td class="text-nowrap"><?= h(fdate($r['txn_date'])) ?></td><td class="text-nowrap"><?= $docLink($r) ?></td><td class="small"><?= h(trim((string)($r['descr'] ?: $r['memo']) . ($r['ref_no'] ? ' #' . $r['ref_no'] : ''))) ?></td><td class="num"><?= money($r['amount']) ?></td></tr>
+          <tr><td class="text-nowrap"><?= h(fdate($r['txn_date'])) ?></td><td class="text-nowrap"><?= $docLink($r) ?></td><td class="small"><?= h(trim((string)($r['descr'] ?: $r['memo']) . ($r['ref_no'] ? ' #' . $r['ref_no'] : ''))) ?><?php if ((int)($r['ticked'] ?? 0) > 0 && !str_contains((string)$r['descr'], 'ticked)')): ?><div class="text-muted"><?= (int)$r['ticked'] ?> receipt<?= (int)$r['ticked'] === 1 ? '' : 's' ?> ticked</div><?php endif; ?></td><td class="num"><?= money($r['amount']) ?></td></tr>
         <?php endforeach; ?>
         <?php if (!$d['credits']): ?><tr><td colspan="4" class="text-muted text-center">Nothing settled yet.</td></tr><?php endif; ?>
         </tbody>

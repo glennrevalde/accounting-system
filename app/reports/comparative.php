@@ -2,7 +2,7 @@
 declare(strict_types=1);
 
 /**
- * Comparative financial statements (v29), Financial Set-up & Reports > Reports:
+ * Comparative financial statements (v29), Financial > Reports:
  *   cmp_is_month    Comparative Income Statement by Month          one column per month of the date range
  *   cmp_is_quarter  Comparative Income Statement by Quarter        one column per quarter
  *   cmp_is_year     Comparative Income Statement by Year           one column per fiscal year

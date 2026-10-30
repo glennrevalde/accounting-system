@@ -13,6 +13,11 @@ declare(strict_types=1);
  * Every clearing account is listed once, however many payment methods point to it (GCash and Maya both on E-wallet
  * Clearing, for example). Before v28 the list joined the payment methods to the ledger lines, so an account shared by
  * two methods showed twice its balance.
+ *
+ * v32: the receipts a settlement pays can be ticked (Settle, in the Details window of Make Deposits), as the POS cash of
+ * closed shifts is ticked for a deposit. The ticked receipts are kept in clearing_settlements (deposit, clearing
+ * account, receipt, amount) and are no longer listed as unsettled; a settlement entered as an amount only is taken
+ * against the oldest receipts first, as before.
  */
 final class Clearing
 {
@@ -101,12 +106,73 @@ final class Clearing
         return r2((float)DB::value('SELECT COALESCE(SUM(debit - credit),0) FROM journal_lines WHERE account_id = :a AND txn_date <= :d', ['a' => $accountId, 'd' => $asOf]));
     }
 
+    /** v32: whether the table of ticked receipts is there (the 2026_12_03 migration) */
+    public static function ticksReady(): bool
+    {
+        static $ok = null;
+        if ($ok === null) {
+            try {
+                DB::value('SELECT COUNT(*) FROM clearing_settlements WHERE 1 = 0');
+                $ok = true;
+            } catch (Throwable $e) {
+                $ok = false;
+            }
+        }
+        return $ok;
+    }
+
+    /**
+     * v32: the receipts ticked on a settlement, checked against what is unsettled on the deposit date: [receipt id =>
+     * unsettled amount]. A receipt that is not (or no longer) unsettled on that date stops the save.
+     * @param int[] $receiptIds
+     */
+    public static function tickedOpen(int $accountId, string $asOf, array $receiptIds): array
+    {
+        $open = [];
+        foreach (self::details($accountId, $asOf)['unsettled'] as $r) {
+            $open[(int)$r['id']] = (float)$r['open'];
+        }
+        $out = [];
+        foreach (array_unique(array_map('intval', $receiptIds)) as $rid) {
+            if (!isset($open[$rid]) || $open[$rid] <= 0.004) {
+                $doc = DB::row('SELECT id, txn_type, txn_no, receipt_no FROM transactions WHERE id = :i', ['i' => $rid]);
+                fail(($doc ? Txn::label($doc['txn_type']) . ' ' . ($doc['receipt_no'] ?: $doc['txn_no']) : 'A ticked receipt')
+                    . ' is not unsettled on ' . fdate($asOf) . ' any more. Open Details again and tick the receipts once more.');
+            }
+            $out[$rid] = r2($open[$rid]);
+        }
+        return $out;
+    }
+
+    /** v32: records the receipts a deposit settles on a clearing account */
+    public static function tick(int $depositId, int $accountId, array $ticked): void
+    {
+        foreach ($ticked as $rid => $amt) {
+            DB::insert('clearing_settlements', ['deposit_txn_id' => $depositId, 'account_id' => $accountId, 'receipt_txn_id' => (int)$rid, 'amount' => r2((float)$amt)]);
+        }
+    }
+
+    /**
+     * v32: when a deposit is edited, the receipts it settled stay ticked as long as the deposit still holds that much on
+     * the clearing account; otherwise the ticks of that account are taken off (its receipts are unsettled again).
+     * @param array<int,float> $lineTotals clearing account id => the amount the deposit now holds on it
+     */
+    public static function keepTicks(int $depositId, array $lineTotals): void
+    {
+        foreach (DB::all('SELECT account_id, SUM(amount) AS amt FROM clearing_settlements WHERE deposit_txn_id = :d GROUP BY account_id', ['d' => $depositId]) as $t) {
+            if (($lineTotals[(int)$t['account_id']] ?? 0.0) + 0.004 < (float)$t['amt']) {
+                DB::run('DELETE FROM clearing_settlements WHERE deposit_txn_id = :d AND account_id = :a', ['d' => $depositId, 'a' => $t['account_id']]);
+            }
+        }
+    }
+
     /**
      * What the balance of a clearing account is made of, as of a date:
      *   sources     the ledger by kind of document (POS sales, payments, settlements...): documents, debits, credits
      *   methods     the card / e-wallet sales by payment method (POS tenders, payments and sales receipts)
-     *   unsettled   the receipts not yet settled: the latest money-in documents that make up the balance, the
-     *               settlements being taken against the oldest receipts first
+     *   unsettled   the receipts not yet settled: the latest money-in documents that make up the balance, less what
+     *               settlements ticked them for (v32); the other settlements being taken against the oldest receipts
+     *               first
      *   settlements the latest settlements and other credits
      */
     public static function details(int $accountId, string $asOf): array
@@ -152,26 +218,36 @@ final class Clearing
             uasort($methods, fn($x, $y) => strcmp($x['name'], $y['name']));
         }
 
-        // the receipts not yet settled: the latest money-in documents, newest first, until they make up the balance
+        // the receipts not yet settled: the latest money-in documents, newest first, less what settlements ticked them
+        // for (v32), until they make up the balance
         $unsettled = [];
         if ($balance > 0.004) {
             $left = $balance;
             $offset = 0;
+            $ticks = self::ticksReady();
+            $tg = $ticks
+                ? "LEFT JOIN (SELECT cs.receipt_txn_id, SUM(cs.amount) AS tagged FROM clearing_settlements cs
+                                JOIN transactions dp ON dp.id = cs.deposit_txn_id AND dp.is_voided = 0 AND dp.txn_date <= :d2
+                               WHERE cs.account_id = :a2 GROUP BY cs.receipt_txn_id) tg ON tg.receipt_txn_id = t.id"
+                : '';
+            $tgCol = $ticks ? 'COALESCE(tg.tagged, 0)' : '0';
+            $tgP = $ticks ? ['a2' => $accountId, 'd2' => $asOf] : [];
             while ($left > 0.004) {
                 $batch = DB::all("SELECT t.id, t.txn_type, t.txn_no, t.receipt_no, t.txn_date, t.ref_no, t.created_at, t.payment_method_id,
-                                         COALESCE(c.name, t.payee_name) AS party, pt2.name AS terminal, SUM(j.debit - j.credit) AS net
+                                         COALESCE(c.name, t.payee_name) AS party, pt2.name AS terminal, SUM(j.debit - j.credit) AS net, $tgCol AS tagged
                                     FROM journal_lines j JOIN transactions t ON t.id = j.txn_id
                                     LEFT JOIN customers c ON c.id = t.customer_id LEFT JOIN pos_terminals pt2 ON pt2.id = t.terminal_id
+                                    $tg
                                    WHERE j.account_id = :a AND j.txn_date <= :d
-                                   GROUP BY t.id, t.txn_type, t.txn_no, t.receipt_no, t.txn_date, t.ref_no, t.created_at, t.payment_method_id, c.name, t.payee_name, pt2.name
-                                  HAVING SUM(j.debit - j.credit) > 0.004
-                                   ORDER BY t.txn_date DESC, t.id DESC LIMIT 200 OFFSET $offset", ['a' => $accountId, 'd' => $asOf]);
+                                   GROUP BY t.id, t.txn_type, t.txn_no, t.receipt_no, t.txn_date, t.ref_no, t.created_at, t.payment_method_id, c.name, t.payee_name, pt2.name" . ($ticks ? ', tg.tagged' : '') . "
+                                  HAVING SUM(j.debit - j.credit) - $tgCol > 0.004
+                                   ORDER BY t.txn_date DESC, t.id DESC LIMIT 200 OFFSET $offset", ['a' => $accountId, 'd' => $asOf] + $tgP);
                 if (!$batch) {
                     break;
                 }
                 foreach ($batch as $r) {
                     $net = r2((float)$r['net']);
-                    $open = r2(min($net, $left));
+                    $open = r2(min($net - r2((float)$r['tagged']), $left));
                     $r['amount'] = $net;
                     $r['open'] = $open;
                     $unsettled[] = $r;
@@ -219,13 +295,15 @@ final class Clearing
         }
 
         // the latest settlements and other credits
+        $tickCol = self::ticksReady() ? '(SELECT COUNT(*) FROM clearing_settlements cs WHERE cs.deposit_txn_id = t.id AND cs.account_id = :a3)' : '0';
         $credits = DB::all("SELECT t.id, t.txn_type, t.txn_no, t.receipt_no, t.txn_date, t.ref_no, t.memo, SUM(j.credit - j.debit) AS amount,
-                                   (SELECT GROUP_CONCAT(DISTINCT l.description SEPARATOR '; ') FROM transaction_lines l WHERE l.txn_id = t.id AND l.account_id = :a2) AS descr
+                                   (SELECT GROUP_CONCAT(DISTINCT l.description SEPARATOR '; ') FROM transaction_lines l WHERE l.txn_id = t.id AND l.account_id = :a2) AS descr,
+                                   $tickCol AS ticked
                               FROM journal_lines j JOIN transactions t ON t.id = j.txn_id
                              WHERE j.account_id = :a AND j.txn_date <= :d
                              GROUP BY t.id, t.txn_type, t.txn_no, t.receipt_no, t.txn_date, t.ref_no, t.memo
                             HAVING SUM(j.credit - j.debit) > 0.004
-                             ORDER BY t.txn_date DESC, t.id DESC LIMIT 25", ['a' => $accountId, 'a2' => $accountId, 'd' => $asOf]);
+                             ORDER BY t.txn_date DESC, t.id DESC LIMIT 25", ['a' => $accountId, 'a2' => $accountId, 'd' => $asOf] + (self::ticksReady() ? ['a3' => $accountId] : []));
 
         return ['balance' => $balance, 'sources' => $sources, 'methods' => array_values($methods), 'unsettled' => $unsettled, 'credits' => $credits];
     }

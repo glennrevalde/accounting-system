@@ -1592,3 +1592,25 @@ input.is-auto { color: var(--ink-soft); font-style: italic; background-color: #f
 .inv-low { color: #b54708; font-weight: 650; }
 .rpt-table tr.avg-jump td, table tr.avg-jump td { color: #b42318; }
 table tr.avg-jump td a { color: inherit; text-decoration-color: rgba(180, 35, 24, .35); }
+
+/* =====================================================================
+   v32: Make Deposits, receipts ticked to settle (Settle in Details, Gross settled)
+   ===================================================================== */
+.clr-settle-col { width: 64px; text-align: center; }
+/* the Settle box stays in view when the table scrolls sideways on a phone (a sticky cell needs a table that does not clip) */
+.clr-tbl.clr-settle-tbl { overflow: visible; }
+.clr-settle-tbl .clr-settle-col { position: sticky; right: 0; z-index: 1; background: var(--surface); box-shadow: -6px 0 8px -6px rgba(16, 24, 40, .18); }
+.clr-settle-tbl thead .clr-settle-col, .clr-settle-tbl tfoot .clr-settle-col { background: var(--surface-2); }
+.clr-settle-head { display: inline-flex; align-items: center; gap: .4rem; margin: 0; cursor: pointer; }
+.clr-settle-tbl .form-check-input { width: 1.1em; height: 1.1em; margin: 0; cursor: pointer; box-shadow: var(--raise-1); }
+.clr-settle-tbl tbody tr.clr-on td { background-color: #f1f6ff; }
+.clr-settle-tbl tbody tr { cursor: pointer; }
+.clr-ticked { font-size: .74rem; color: var(--ink-soft); text-align: right; margin-top: .2rem; white-space: nowrap; }
+.clr-table input[readonly][data-clr-gross] { background: var(--surface-2); font-weight: 650; }
+.clr-modal-foot { justify-content: space-between; gap: .75rem; background: var(--surface-2); border-top: 1px solid var(--line); }
+.clr-foot-sum { display: flex; flex-wrap: wrap; align-items: baseline; gap: .25rem .6rem; }
+.clr-foot-sum strong { font-size: 1.1rem; font-variant-numeric: tabular-nums; }
+@media (max-width: 575.98px) {
+  .clr-modal-foot { flex-wrap: nowrap; }
+  .clr-ticked { text-align: left; }
+}

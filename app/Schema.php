@@ -8,7 +8,7 @@ declare(strict_types=1);
  */
 final class Schema
 {
-    private const FLAG = 'schema_ok_2026_11_26';
+    private const FLAG = 'schema_ok_2026_12_03';
 
     /**
      * file => one cheap probe.
@@ -94,12 +94,15 @@ final class Schema
                        + (SELECT COUNT(group_ref) + COUNT(group_role) FROM transaction_lines WHERE 1 = 0)
                        + (SELECT COUNT(group_variance_account_id) FROM items WHERE 1 = 0) + (SELECT COUNT(received_via) FROM transactions WHERE 1 = 0)
                        + (SELECT COUNT(*) FROM item_group_sales WHERE 1 = 0)', 2],
-        // comparative statements and the Financial Set-up & Reports menu
+        // comparative statements and the Financial Set-up & Reports menu (named Financial since v32)
         'database/migrations/2026_11_12_comparative_statements_menu.sql' =>
-            ['SELECT (SELECT COUNT(*) FROM pages WHERE page_key LIKE \'rpt.cmp\\_%\') + (SELECT COUNT(*) FROM modules WHERE code = \'coa\' AND name = \'Financial Set-up & Reports\')', 9],
+            ['SELECT (SELECT COUNT(*) FROM pages WHERE page_key LIKE \'rpt.cmp\\_%\') + (SELECT COUNT(*) FROM modules WHERE code = \'coa\' AND name IN (\'Financial Set-up & Reports\', \'Financial\'))', 9],
         // v31: the quantities on hand by site set to the totals of the movements; the Average Cost Changes report
         'database/migrations/2026_11_26_average_cost_books.sql' =>
             ['SELECT COUNT(*) FROM pages WHERE page_key = \'rpt.avg_cost_changes\'', 1],
+        // v32: the table of the receipts ticked to settle (the query fails without it), and the Financial menu
+        'database/migrations/2026_12_03_settle_receipts_financial_menu.sql' =>
+            ['SELECT (SELECT COUNT(*) FROM clearing_settlements WHERE 1 = 0) + (SELECT COUNT(*) FROM modules WHERE code = \'coa\' AND name = \'Financial\')', 1],
     ];
 
     private static ?array $pending = null;

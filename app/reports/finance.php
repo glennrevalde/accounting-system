@@ -282,7 +282,7 @@ Report::define('balance_sheet_class', [
             $note .= ' The columns ' . h(implode(', ', $off)) . ' do not balance on their own: some entries carry a different class on each side (journal entry or cash voucher lines with their own class, or payments applied across classes).';
         }
         if (!Classes::inUse()) {
-            $note .= ' No classes are set up yet, so everything is unclassified. Add classes under Financial Set-up &amp; Reports, Class List.';
+            $note .= ' No classes are set up yet, so everything is unclassified. Add classes under Financial, Class List.';
         }
         return ['grouped' => true, 'columns' => $columns, 'rows' => $rows, 'notes' => $note];
     },
@@ -432,7 +432,7 @@ Report::define('income_statement_class', [
         }
         unset($r);
         $note = Classes::inUse() ? 'One column per class; entries without a class are under Unclassified.'
-            : 'No classes are set up yet, so everything is unclassified. Add classes under Financial Set-up &amp; Reports, Class List.';
+            : 'No classes are set up yet, so everything is unclassified. Add classes under Financial, Class List.';
         return ['grouped' => true, 'columns' => $cols, 'rows' => $rows, 'notes' => $note];
     },
 ]);

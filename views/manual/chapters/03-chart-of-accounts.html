@@ -1,4 +1,4 @@
-<p>The <strong>Financial Set-up &amp; Reports</strong> module (called Chart of Accounts before version 29) holds the accounts that every transaction posts to, the lists the other modules share, the journal entries you make by hand, and the financial statements. Most entries reach the general ledger on their own: an invoice, a bill, a check or a POS sale writes its ledger lines the moment it is saved. This chapter explains how to set the accounts up, how to record what the modules cannot post for you, and how to read the ledger and the statements.</p>
+<p>The <strong>Financial</strong> module (called Financial Set-up &amp; Reports in versions 29 to 31, and Chart of Accounts before) holds the accounts that every transaction posts to, the lists the other modules share, the journal entries you make by hand, and the financial statements. Most entries reach the general ledger on their own: an invoice, a bill, a check or a POS sale writes its ledger lines the moment it is saved. This chapter explains how to set the accounts up, how to record what the modules cannot post for you, and how to read the ledger and the statements.</p>
 <p>In the sidebar the module has four groups:</p>
 <ul>
 <li><strong>Lists:</strong> Chart of Accounts, Class List, Employees &amp; Other Names, Memorized Transactions.</li>
@@ -9,7 +9,7 @@
 <div class="man-callout man-note"><div class="man-callout-t"><i class="bi bi-info-circle"></i>Note</div><p>You see only the pages and buttons your role allows (see <a href="manual.php?c=administration#pg-admin-page_access">Page Access Configuration</a>). Adding, changing or deleting accounts and changing the module default accounts also needs the special permission <strong>Can change the Chart of Accounts and default accounts</strong>, set in <a href="manual.php?c=administration#pg-admin-roles">User Role Configuration</a>.</p></div>
 <h2 id="pg-coa-accounts">Chart of Accounts<a class="man-hash" href="#pg-coa-accounts" aria-label="Link to this section"><i class="bi bi-link-45deg"></i></a></h2>
 <p>The Chart of Accounts is the list of every account the books use: cash and bank accounts, receivables, inventory, payables, equity, income and expenses. Here you add accounts, group them under parent accounts, mark the ones that keep a subsidiary ledger, and open the ledger or the register of any account.</p>
-<p><strong>Where to find it:</strong> Financial Set-up &amp; Reports &gt; Chart of Accounts</p>
+<p><strong>Where to find it:</strong> Financial &gt; Chart of Accounts</p>
 <figure class="man-fig"><a class="man-zoom" href="assets/manual/img/coa_accounts__main.jpg" title="Click to enlarge"><img src="assets/manual/img/coa_accounts__main.jpg" alt="The Chart of Accounts: accounts grouped by category, with sub-accounts indented under their parent" width="1094" height="1500" loading="lazy" decoding="async"></a><figcaption>The Chart of Accounts: accounts grouped by category, with sub-accounts indented under their parent</figcaption></figure>
 <p>The accounts are shown in five cards, <strong>Assets</strong>, <strong>Liabilities</strong>, <strong>Equity</strong>, <strong>Incomes</strong> and <strong>Expenses</strong>, each sorted by code. A sub-account is indented under its parent with an arrow, for example 1010 Cash in Bank - BDO Checking under 1000 Cash. Accounts that the modules need, such as 1100 Accounts Receivable, 1200 Inventory and 2000 Accounts Payable, carry a grey <strong>system</strong> tag. Tick <strong>Include inactive accounts</strong> above the list to show the accounts you have made inactive; they appear greyed out.</p>
 <h4 id="s-the-columns">The columns<a class="man-hash" href="#s-the-columns" aria-label="Link to this section"><i class="bi bi-link-45deg"></i></a></h4>
@@ -217,7 +217,7 @@
 <h4 id="s-step-by-step">Step by step<a class="man-hash" href="#s-step-by-step" aria-label="Link to this section"><i class="bi bi-link-45deg"></i></a></h4>
 <p><strong>To add an account:</strong></p>
 <ol>
-<li>Open <strong>Financial Set-up &amp; Reports &gt; Chart of Accounts</strong>.</li>
+<li>Open <strong>Financial &gt; Chart of Accounts</strong>.</li>
 <li>Click <strong>New account</strong>.</li>
 <li>Choose the <strong>Account type</strong>.</li>
 <li>Type the <strong>Code</strong> and the <strong>Name</strong>.</li>
@@ -274,7 +274,7 @@
 </ul>
 <h2 id="pg-coa-classes">Class List<a class="man-hash" href="#pg-coa-classes" aria-label="Link to this section"><i class="bi bi-link-45deg"></i></a></h2>
 <p>Classes split the books your own way: by branch, department, project or product line. Every transaction form has a <strong>Class</strong> box, the class is copied to every ledger line the transaction posts, and the financial reports can be filtered by class or shown with one column per class. You name the classes yourself and can rename them at any time.</p>
-<p><strong>Where to find it:</strong> Financial Set-up &amp; Reports &gt; Class List</p>
+<p><strong>Where to find it:</strong> Financial &gt; Class List</p>
 <figure class="man-fig"><a class="man-zoom" href="assets/manual/img/coa_classes__main.jpg" title="Click to enlarge"><img src="assets/manual/img/coa_classes__main.jpg" alt="The Class List with Head Office, Makati Store and Cebu Store, and the New class form on the right" width="1094" height="433" loading="lazy" decoding="async"></a><figcaption>The Class List with Head Office, Makati Store and Cebu Store, and the New class form on the right</figcaption></figure>
 <h4 id="s-the-columns_1">The columns<a class="man-hash" href="#s-the-columns_1" aria-label="Link to this section"><i class="bi bi-link-45deg"></i></a></h4>
 <div class="table-responsive man-table"><table class="table table-sm">
@@ -342,7 +342,7 @@
 <h4 id="s-step-by-step_1">Step by step<a class="man-hash" href="#s-step-by-step_1" aria-label="Link to this section"><i class="bi bi-link-45deg"></i></a></h4>
 <p><strong>To add a class:</strong></p>
 <ol>
-<li>Open <strong>Financial Set-up &amp; Reports &gt; Class List</strong>.</li>
+<li>Open <strong>Financial &gt; Class List</strong>.</li>
 <li>In the <strong>New class</strong> panel, type the <strong>Class name</strong>.</li>
 <li>Type the <strong>Order in lists</strong> and a <strong>Description</strong> if you want them.</li>
 <li>Click <strong>Save class</strong>, or <strong>Save class &amp; New</strong> to add another one straight away.</li>
@@ -370,7 +370,7 @@
 </ul>
 <h2 id="pg-coa-names">Employees &amp; Other Names<a class="man-hash" href="#pg-coa-names" aria-label="Link to this section"><i class="bi bi-link-45deg"></i></a></h2>
 <p>This list holds the people and bodies that are paid or tracked without being a customer or a supplier: employees (cash advances, reimbursements), owners, government offices and the like. The names appear in the <strong>Paid to</strong> and <strong>SL</strong> lists of cash vouchers, in the <strong>Name</strong> list of journal entries and in the <strong>Pay to the order of</strong> list of checks, next to the customers and suppliers.</p>
-<p><strong>Where to find it:</strong> Financial Set-up &amp; Reports &gt; Employees &amp; Other Names</p>
+<p><strong>Where to find it:</strong> Financial &gt; Employees &amp; Other Names</p>
 <figure class="man-fig"><a class="man-zoom" href="assets/manual/img/coa_names__main.jpg" title="Click to enlarge"><img src="assets/manual/img/coa_names__main.jpg" alt="Employees &amp; Other Names on the All tab" width="1094" height="672" loading="lazy" decoding="async"></a><figcaption>Employees &amp; Other Names on the All tab</figcaption></figure>
 <p>Three tabs filter the list: <strong>All</strong>, <strong>Employees</strong> and <strong>Other names</strong>.</p>
 <figure class="man-fig"><a class="man-zoom" href="assets/manual/img/coa_names__type_employee.jpg" title="Click to enlarge"><img src="assets/manual/img/coa_names__type_employee.jpg" alt="The Employees tab" width="1094" height="672" loading="lazy" decoding="async"></a><figcaption>The Employees tab</figcaption></figure>
@@ -461,7 +461,7 @@
 <h4 id="s-step-by-step_2">Step by step<a class="man-hash" href="#s-step-by-step_2" aria-label="Link to this section"><i class="bi bi-link-45deg"></i></a></h4>
 <p><strong>To add a name:</strong></p>
 <ol>
-<li>Open <strong>Financial Set-up &amp; Reports &gt; Employees &amp; Other Names</strong>.</li>
+<li>Open <strong>Financial &gt; Employees &amp; Other Names</strong>.</li>
 <li>In the <strong>New name</strong> panel, choose the <strong>Type</strong>.</li>
 <li>Type the <strong>Name</strong> and the other details you have.</li>
 <li>Click <strong>Save name</strong>, or <strong>Save name &amp; New</strong> to add another one.</li>
@@ -481,7 +481,7 @@
 </ul>
 <h2 id="pg-coa-memorized_txns">Memorized Transactions<a class="man-hash" href="#pg-coa-memorized_txns" aria-label="Link to this section"><i class="bi bi-link-45deg"></i></a></h2>
 <p>A memorized transaction is a saved copy of a transaction you enter again and again: the monthly rent check, a standing invoice, the payroll journal entry. It keeps the names, accounts, items and amounts; the date and the document number are given each time it is entered. You can enter it from the list whenever you need it, get a reminder when it is due, or let the program enter it on its due date.</p>
-<p><strong>Where to find it:</strong> Financial Set-up &amp; Reports &gt; Memorized Transactions. The Home page also shows <strong>Memorized transactions due</strong> with an <strong>Open</strong> button when a reminder is due (see <a href="manual.php?c=home-and-reports#pg-home-dashboard">Home Dashboard</a>).</p>
+<p><strong>Where to find it:</strong> Financial &gt; Memorized Transactions. The Home page also shows <strong>Memorized transactions due</strong> with an <strong>Open</strong> button when a reminder is due (see <a href="manual.php?c=home-and-reports#pg-home-dashboard">Home Dashboard</a>).</p>
 <figure class="man-fig"><a class="man-zoom" href="assets/manual/img/coa_memorized_txns__main.jpg" title="Click to enlarge"><img src="assets/manual/img/coa_memorized_txns__main.jpg" alt="The Memorized Transactions list with a bill and a check that are overdue" width="1094" height="372" loading="lazy" decoding="async"></a><figcaption>The Memorized Transactions list with a bill and a check that are overdue</figcaption></figure>
 <h4 id="s-the-columns_3">The columns<a class="man-hash" href="#s-the-columns_3" aria-label="Link to this section"><i class="bi bi-link-45deg"></i></a></h4>
 <div class="table-responsive man-table"><table class="table table-sm">
@@ -589,7 +589,7 @@
 </ol>
 <p><strong>To enter a memorized transaction now:</strong></p>
 <ol>
-<li>Open <strong>Financial Set-up &amp; Reports &gt; Memorized Transactions</strong>.</li>
+<li>Open <strong>Financial &gt; Memorized Transactions</strong>.</li>
 <li>Click <strong>Enter now</strong> on its line. The dialog <strong>Enter a memorized transaction</strong> opens.</li>
 <li>Check the <strong>Date of the entry</strong>. It starts at the next due date.</li>
 <li>Leave <strong>Move the schedule on to the next due date</strong> ticked if this entry is the one that was due. Untick it for an extra entry that should not move the schedule.</li>
@@ -620,7 +620,7 @@
 </ul>
 <h2 id="pg-coa-budgets">Set Up Budgets<a class="man-hash" href="#pg-coa-budgets" aria-label="Link to this section"><i class="bi bi-link-45deg"></i></a></h2>
 <p>A budget holds the amounts you plan for each account, month by month, for one fiscal year. A budget is for the income statement or for the balance sheet, and can be limited to one class. The <a href="#pg-rpt-budget_income">Income Statement vs Budget</a> and <a href="#pg-rpt-budget_balance">Balance Sheet vs Budget</a> reports put the actual figures beside it and show the difference.</p>
-<p><strong>Where to find it:</strong> Financial Set-up &amp; Reports &gt; Set Up Budgets. The same page, for sales forecasts per customer, is <strong>Customers &gt; Set Up Forecast</strong> (see <a href="manual.php?c=customers#pg-cust-forecast">Set Up Forecast</a>).</p>
+<p><strong>Where to find it:</strong> Financial &gt; Set Up Budgets. The same page, for sales forecasts per customer, is <strong>Customers &gt; Set Up Forecast</strong> (see <a href="manual.php?c=customers#pg-cust-forecast">Set Up Forecast</a>).</p>
 <figure class="man-fig"><a class="man-zoom" href="assets/manual/img/coa_budgets__main.jpg" title="Click to enlarge"><img src="assets/manual/img/coa_budgets__main.jpg" alt="Set Up Budgets with no budget yet" width="1094" height="258" loading="lazy" decoding="async"></a><figcaption>Set Up Budgets with no budget yet</figcaption></figure>
 <h4 id="s-the-columns_4">The columns<a class="man-hash" href="#s-the-columns_4" aria-label="Link to this section"><i class="bi bi-link-45deg"></i></a></h4>
 <div class="table-responsive man-table"><table class="table table-sm">
@@ -705,7 +705,7 @@
 <h4 id="s-step-by-step_4">Step by step<a class="man-hash" href="#s-step-by-step_4" aria-label="Link to this section"><i class="bi bi-link-45deg"></i></a></h4>
 <p><strong>To create a budget:</strong></p>
 <ol>
-<li>Open <strong>Financial Set-up &amp; Reports &gt; Set Up Budgets</strong>.</li>
+<li>Open <strong>Financial &gt; Set Up Budgets</strong>.</li>
 <li>Click <strong>New budget</strong>.</li>
 <li>Type the <strong>Name</strong>, choose <strong>What it budgets</strong> and type the <strong>Fiscal year</strong>.</li>
 <li>Choose a <strong>Class</strong> if the budget is for one class.</li>
@@ -729,7 +729,7 @@
 </ul>
 <h2 id="pg-coa-journal">Make Journal Entries<a class="man-hash" href="#pg-coa-journal" aria-label="Link to this section"><i class="bi bi-link-45deg"></i></a></h2>
 <p>A journal entry posts debits and credits directly to the accounts you choose. Routine activity posts automatically from invoices, bills, payments and the POS, so you use journal entries for what no other form records: opening balances, accruals, reclassifications, corrections and closing entries.</p>
-<p><strong>Where to find it:</strong> Financial Set-up &amp; Reports &gt; Make Journal Entries opens the list of journal entries. The Home page quick action <strong>Make Journal Entries</strong> opens a blank entry.</p>
+<p><strong>Where to find it:</strong> Financial &gt; Make Journal Entries opens the list of journal entries. The Home page quick action <strong>Make Journal Entries</strong> opens a blank entry.</p>
 <figure class="man-fig"><a class="man-zoom" href="assets/manual/img/coa_journal__main.jpg" title="Click to enlarge"><img src="assets/manual/img/coa_journal__main.jpg" alt="The Journal Entries list" width="1094" height="253" loading="lazy" decoding="async"></a><figcaption>The Journal Entries list</figcaption></figure>
 <p>The list shows the journal entries and opening balance entries of a date range (from 90 days back to 30 days ahead when it opens). Use <strong>From</strong>, <strong>To</strong>, <strong>Status</strong> (<strong>Posted</strong> or <strong>Void</strong>), <strong>Class</strong> and <strong>Search</strong> (number, name or memo), then click <strong>Filter</strong>. Click a number to open the entry. <strong>Export</strong> downloads the list.</p>
 <figure class="man-fig"><a class="man-zoom" href="assets/manual/img/coa_journal__new.jpg" title="Click to enlarge"><img src="assets/manual/img/coa_journal__new.jpg" alt="A new journal entry" width="1094" height="633" loading="lazy" decoding="async"></a><figcaption>A new journal entry</figcaption></figure>
@@ -811,7 +811,7 @@
 <h4 id="s-step-by-step_5">Step by step<a class="man-hash" href="#s-step-by-step_5" aria-label="Link to this section"><i class="bi bi-link-45deg"></i></a></h4>
 <p><strong>To make a journal entry:</strong></p>
 <ol>
-<li>Open <strong>Financial Set-up &amp; Reports &gt; Make Journal Entries</strong> and click <strong>New journal entry</strong>.</li>
+<li>Open <strong>Financial &gt; Make Journal Entries</strong> and click <strong>New journal entry</strong>.</li>
 <li>Check the <strong>Date</strong>.</li>
 <li>Type a <strong>Reference</strong> and a <strong>Memo</strong>.</li>
 <li>Choose the <strong>Class</strong> if you use classes.</li>
@@ -870,7 +870,7 @@
 </ul>
 <h2 id="pg-coa-default_accounts">Module Default Accounts<a class="man-hash" href="#pg-coa-default_accounts" aria-label="Link to this section"><i class="bi bi-link-45deg"></i></a></h2>
 <p>Each module posts to a set of default accounts: the receivable, the payable, the tax accounts, the inventory and cost of sales, the clearing accounts of the POS and so on. They are set up before any transaction is recorded. Items, tax codes, payment methods and fixed asset categories can carry their own accounts; the defaults are used when they do not.</p>
-<p><strong>Where to find it:</strong> Financial Set-up &amp; Reports &gt; Module Default Accounts, or the <strong>Module default accounts</strong> button on the Chart of Accounts.</p>
+<p><strong>Where to find it:</strong> Financial &gt; Module Default Accounts, or the <strong>Module default accounts</strong> button on the Chart of Accounts.</p>
 <figure class="man-fig"><a class="man-zoom" href="assets/manual/img/coa_default_accounts__main.jpg" title="Click to enlarge"><img src="assets/manual/img/coa_default_accounts__main.jpg" alt="Module Default Accounts for the demo company" width="1094" height="1263" loading="lazy" decoding="async"></a><figcaption>Module Default Accounts for the demo company</figcaption></figure>
 <h4 id="s-fields_5">Fields<a class="man-hash" href="#s-fields_5" aria-label="Link to this section"><i class="bi bi-link-45deg"></i></a></h4>
 <div class="table-responsive man-table"><table class="table table-sm">
@@ -1014,7 +1014,7 @@
 <h4 id="s-step-by-step_6">Step by step<a class="man-hash" href="#s-step-by-step_6" aria-label="Link to this section"><i class="bi bi-link-45deg"></i></a></h4>
 <p><strong>To change a default account:</strong></p>
 <ol>
-<li>Open <strong>Financial Set-up &amp; Reports &gt; Module Default Accounts</strong>.</li>
+<li>Open <strong>Financial &gt; Module Default Accounts</strong>.</li>
 <li>In the card of the module, choose the new account in the drop-down beside the label.</li>
 <li>Change any other defaults you need.</li>
 <li>Click <strong>Save default accounts</strong>. The message says how many defaults were changed.</li>
@@ -1024,12 +1024,12 @@
 <li>Changing a default affects only transactions saved from then on. Saved transactions keep what they posted, until they are edited and saved again.</li>
 <li>Only active accounts are offered. A default cannot be cleared back to <strong>— not set —</strong> once it is set.</li>
 <li>The boxes are greyed out, with the note "You need the "Chart of Accounts changes" permission to edit these.", for users who lack the edit permission on this page or the special permission <strong>Can change the Chart of Accounts and default accounts</strong>.</li>
-<li>If a default the program needs is missing, saving a transaction stops with "The default account "Undeposited Funds" is not set. Set it under Financial Set-up &amp; Reports &gt; Module Default Accounts."</li>
+<li>If a default the program needs is missing, saving a transaction stops with "The default account "Undeposited Funds" is not set. Set it under Financial &gt; Module Default Accounts."</li>
 <li>Every change is written to the audit trail with the old and the new account.</li>
 </ul>
 <h2 id="pg-coa-lists">Terms, Tax Codes &amp; Other Lists<a class="man-hash" href="#pg-coa-lists" aria-label="Link to this section"><i class="bi bi-link-45deg"></i></a></h2>
 <p>This page keeps the short lists the other modules use: payment terms, tax codes, payment methods, price levels, sales representatives, customer types, item categories and billing groups. Each list has its own tab.</p>
-<p><strong>Where to find it:</strong> Financial Set-up &amp; Reports &gt; Terms, Tax Codes &amp; Other Lists</p>
+<p><strong>Where to find it:</strong> Financial &gt; Terms, Tax Codes &amp; Other Lists</p>
 <figure class="man-fig"><a class="man-zoom" href="assets/manual/img/coa_lists__main.jpg" title="Click to enlarge"><img src="assets/manual/img/coa_lists__main.jpg" alt="Terms, Tax Codes &amp; Other Lists on the Payment terms tab" width="1094" height="489" loading="lazy" decoding="async"></a><figcaption>Terms, Tax Codes &amp; Other Lists on the Payment terms tab</figcaption></figure>
 <p>Every tab works the same way: the list is on the left, and the <strong>Add</strong> panel on the right adds a new entry. Click <strong>Edit</strong> on a line to change it in the <strong>Edit</strong> panel.</p>
 <figure class="man-fig"><a class="man-zoom" href="assets/manual/img/coa_lists__edit.jpg" title="Click to enlarge"><img src="assets/manual/img/coa_lists__edit.jpg" alt="Editing the payment terms &quot;2% 10 Net 30&quot;" width="1094" height="489" loading="lazy" decoding="async"></a><figcaption>Editing the payment terms &quot;2% 10 Net 30&quot;</figcaption></figure>
@@ -1224,12 +1224,12 @@
 <li>Every addition and change is written to the audit trail.</li>
 </ul>
 <h2 id="s-financial-reports">Financial reports<a class="man-hash" href="#s-financial-reports" aria-label="Link to this section"><i class="bi bi-link-45deg"></i></a></h2>
-<p>The reports of this module are listed under <strong>Financial Set-up &amp; Reports &gt; Reports</strong> in the sidebar, and in the Financial Reports card of the <a href="manual.php?c=home-and-reports#pg-home-reports">Report Center</a>. They all read the general ledger, so they always agree with each other and with the transactions.</p>
+<p>The reports of this module are listed under <strong>Financial &gt; Reports</strong> in the sidebar, and in the Financial Reports card of the <a href="manual.php?c=home-and-reports#pg-home-reports">Report Center</a>. They all read the general ledger, so they always agree with each other and with the transactions.</p>
 <p>Every report has the common report tools: <strong>Refresh</strong>, <strong>Print / PDF</strong>, <strong>Export to spreadsheet</strong>, <strong>Email link</strong>, <strong>Modify Report</strong> and <strong>Memorize</strong>, and a click on an account or a number opens the detail behind it. These are explained once in <a href="manual.php?c=home-and-reports#sec-reports">Working with reports</a>. This section describes what is special to each report.</p>
 <p>Most financial reports have a <strong>Class</strong> filter. <strong>All</strong> shows everything; a class shows only the ledger lines of that class; <strong>(Unclassified)</strong> shows only the lines that have no class.</p>
 <h3 id="pg-rpt-trial_balance">Trial Balance<a class="man-hash" href="#pg-rpt-trial_balance" aria-label="Link to this section"><i class="bi bi-link-45deg"></i></a></h3>
 <p>The Trial Balance lists every account with a balance on a date, in a Debit or a Credit column, and checks that the two totals agree. Use it at month-end before you prepare the statements.</p>
-<p><strong>Where to find it:</strong> Financial Set-up &amp; Reports &gt; Reports &gt; Trial Balance</p>
+<p><strong>Where to find it:</strong> Financial &gt; Reports &gt; Trial Balance</p>
 <figure class="man-fig"><a class="man-zoom" href="assets/manual/img/rpt_trial_balance__report.jpg" title="Click to enlarge"><img src="assets/manual/img/rpt_trial_balance__report.jpg" alt="The Trial Balance as of 09/27/2026" width="1094" height="1100" loading="lazy" decoding="async"></a><figcaption>The Trial Balance as of 09/27/2026</figcaption></figure>
 <p><strong>Filters:</strong> <strong>As of</strong> (the date of the balances) and <strong>Class</strong>.</p>
 <p><strong>The columns:</strong> <strong>Account</strong> (code and name; click it to open its General Ledger), <strong>Type</strong>, <strong>Debit</strong> and <strong>Credit</strong>. The <strong>TOTAL</strong> row adds each column.</p>
@@ -1237,7 +1237,7 @@
 <div class="man-callout man-tip"><div class="man-callout-t"><i class="bi bi-lightbulb"></i>Tip</div><p>Accounts with a zero balance are left out, so the list stays short.</p></div>
 <h3 id="pg-rpt-balance_sheet">Balance Sheet<a class="man-hash" href="#pg-rpt-balance_sheet" aria-label="Link to this section"><i class="bi bi-link-45deg"></i></a></h3>
 <p>The Balance Sheet shows what the company owns, owes and is worth on a date.</p>
-<p><strong>Where to find it:</strong> Financial Set-up &amp; Reports &gt; Reports &gt; Balance Sheet</p>
+<p><strong>Where to find it:</strong> Financial &gt; Reports &gt; Balance Sheet</p>
 <figure class="man-fig"><a class="man-zoom" href="assets/manual/img/rpt_balance_sheet__report.jpg" title="Click to enlarge"><img src="assets/manual/img/rpt_balance_sheet__report.jpg" alt="The Balance Sheet as of 09/27/2026" width="1094" height="1100" loading="lazy" decoding="async"></a><figcaption>The Balance Sheet as of 09/27/2026</figcaption></figure>
 <p><strong>Filters:</strong> <strong>As of</strong> and <strong>Class</strong>.</p>
 <p><strong>How to read it:</strong> the report has three parts. <strong>ASSETS</strong> has Current Assets (Bank, Accounts Receivable and Other Current Asset accounts), Fixed Assets and Other Assets. <strong>LIABILITIES</strong> has Current Liabilities (Accounts Payable, Credit Card and Other Current Liability accounts) and Long-term Liabilities. <strong>EQUITY</strong> lists the equity accounts and the line <strong>Net Income (fiscal year to date)</strong>; Retained Earnings includes the net income of earlier years. Each group has its total, and the last line is <strong>TOTAL LIABILITIES AND EQUITY</strong>.</p>
@@ -1245,34 +1245,34 @@
 <div class="man-callout man-note"><div class="man-callout-t"><i class="bi bi-info-circle"></i>Note</div><p>Filtered by class, the two sides may not agree, because a journal entry or cash voucher can carry a different class on each line. The note then explains this instead of showing an error.</p></div>
 <h3 id="pg-rpt-balance_sheet_class">Balance Sheet by Class<a class="man-hash" href="#pg-rpt-balance_sheet_class" aria-label="Link to this section"><i class="bi bi-link-45deg"></i></a></h3>
 <p>The same balance sheet with one column per class, an <strong>Unclassified</strong> column for entries without a class, and a <strong>Total</strong> column.</p>
-<p><strong>Where to find it:</strong> Financial Set-up &amp; Reports &gt; Reports &gt; Balance Sheet by Class, or the <strong>Balance Sheet by Class</strong> button on the <a href="#pg-coa-classes">Class List</a>.</p>
+<p><strong>Where to find it:</strong> Financial &gt; Reports &gt; Balance Sheet by Class, or the <strong>Balance Sheet by Class</strong> button on the <a href="#pg-coa-classes">Class List</a>.</p>
 <figure class="man-fig"><a class="man-zoom" href="assets/manual/img/rpt_balance_sheet_class__report.jpg" title="Click to enlarge"><img src="assets/manual/img/rpt_balance_sheet_class__report.jpg" alt="The Balance Sheet by Class with Head Office, Makati Store, Cebu Store and Unclassified" width="1094" height="1100" loading="lazy" decoding="async"></a><figcaption>The Balance Sheet by Class with Head Office, Makati Store, Cebu Store and Unclassified</figcaption></figure>
 <p><strong>Filters:</strong> <strong>As of</strong> only.</p>
 <p><strong>How to read it:</strong> every active class has a column, and an inactive class has one when it has entries. Click an amount in a class column to open the General Ledger of that account for that class. The note says "Assets = Liabilities + Equity in total." A single column rarely balances on its own, because a payment received by one branch may settle the invoice of another, or a journal line may carry its own class. The note names the columns that do not balance.</p>
 <h3 id="pg-rpt-trial_balance_range">Trial Balance by Date Range<a class="man-hash" href="#pg-rpt-trial_balance_range" aria-label="Link to this section"><i class="bi bi-link-45deg"></i></a></h3>
 <p>This trial balance shows only the movement of each account between two dates, not the balance carried from before.</p>
-<p><strong>Where to find it:</strong> Financial Set-up &amp; Reports &gt; Reports &gt; Trial Balance by Date Range</p>
+<p><strong>Where to find it:</strong> Financial &gt; Reports &gt; Trial Balance by Date Range</p>
 <figure class="man-fig"><a class="man-zoom" href="assets/manual/img/rpt_trial_balance_range__report.jpg" title="Click to enlarge"><img src="assets/manual/img/rpt_trial_balance_range__report.jpg" alt="The Trial Balance by Date Range for September 2026" width="1094" height="859" loading="lazy" decoding="async"></a><figcaption>The Trial Balance by Date Range for September 2026</figcaption></figure>
 <p><strong>Filters:</strong> <strong>Dates</strong> (a preset such as <strong>This month</strong>), <strong>From</strong>, <strong>To</strong> and <strong>Class</strong>.</p>
 <p><strong>The columns:</strong> <strong>Account</strong>, <strong>Type</strong>, and the net movement in <strong>Debit</strong> or <strong>Credit</strong>, with a <strong>TOTAL</strong> row.</p>
 <p><strong>How to read it:</strong> in the picture, 1010 Cash in Bank - BDO Checking has a debit of 203,828.98: the account went up by that much in September. Use it to review one month's activity or to check a period before you close it.</p>
 <h3 id="pg-rpt-trial_balance_totals">Trial Balance of Totals<a class="man-hash" href="#pg-rpt-trial_balance_totals" aria-label="Link to this section"><i class="bi bi-link-45deg"></i></a></h3>
 <p>For each account, the total of all debits and the total of all credits posted between two dates, and their difference.</p>
-<p><strong>Where to find it:</strong> Financial Set-up &amp; Reports &gt; Reports &gt; Trial Balance of Totals</p>
+<p><strong>Where to find it:</strong> Financial &gt; Reports &gt; Trial Balance of Totals</p>
 <figure class="man-fig"><a class="man-zoom" href="assets/manual/img/rpt_trial_balance_totals__report.jpg" title="Click to enlarge"><img src="assets/manual/img/rpt_trial_balance_totals__report.jpg" alt="The Trial Balance of Totals for September 2026" width="1094" height="848" loading="lazy" decoding="async"></a><figcaption>The Trial Balance of Totals for September 2026</figcaption></figure>
 <p><strong>Filters:</strong> <strong>Dates</strong>, <strong>From</strong>, <strong>To</strong> and <strong>Class</strong>.</p>
 <p><strong>The columns:</strong> <strong>Account</strong>, <strong>Type</strong>, <strong>Total debit</strong>, <strong>Total credit</strong> and <strong>Net movement</strong> (debits less credits). The <strong>TOTAL</strong> row shows the grand totals; when the books balance, the total debits equal the total credits and the net movement is 0.00.</p>
 <div class="man-callout man-example"><div class="man-callout-t"><i class="bi bi-journal-text"></i>Example</div><p>In September, 1010 Cash in Bank - BDO Checking received 288,828.98 and paid out 85,000.00, a net movement of 203,828.98. The Trial Balance by Date Range shows only the 203,828.98.</p></div>
 <h3 id="pg-rpt-balance_sheet_range">Balance Sheet by Date Range<a class="man-hash" href="#pg-rpt-balance_sheet_range" aria-label="Link to this section"><i class="bi bi-link-45deg"></i></a></h3>
 <p>A balance sheet built only from the transactions dated between two dates. Every figure is the change during the period, not the balance at the end of it.</p>
-<p><strong>Where to find it:</strong> Financial Set-up &amp; Reports &gt; Reports &gt; Balance Sheet by Date Range</p>
+<p><strong>Where to find it:</strong> Financial &gt; Reports &gt; Balance Sheet by Date Range</p>
 <figure class="man-fig"><a class="man-zoom" href="assets/manual/img/rpt_balance_sheet_range__report.jpg" title="Click to enlarge"><img src="assets/manual/img/rpt_balance_sheet_range__report.jpg" alt="The Balance Sheet by Date Range for September 2026" width="1094" height="942" loading="lazy" decoding="async"></a><figcaption>The Balance Sheet by Date Range for September 2026</figcaption></figure>
 <p><strong>Filters:</strong> <strong>Dates</strong>, <strong>From</strong>, <strong>To</strong> and <strong>Class</strong>.</p>
 <p><strong>The columns:</strong> <strong>Account</strong> and <strong>Change in the period</strong>.</p>
 <p><strong>How to read it:</strong> assets are shown debit-positive, and liabilities and equity credit-positive, so both sides agree. The <strong>Equity</strong> section includes <strong>Net income of the period</strong>. A negative asset figure means the asset went down; in the picture, 1200 Inventory fell by 129,128.33 during September.</p>
 <h3 id="pg-rpt-budget_income">Income Statement vs Budget<a class="man-hash" href="#pg-rpt-budget_income" aria-label="Link to this section"><i class="bi bi-link-45deg"></i></a></h3>
 <p>Puts the actual income and expenses beside an income statement budget and shows the difference.</p>
-<p><strong>Where to find it:</strong> Financial Set-up &amp; Reports &gt; Reports &gt; Income Statement vs Budget, the <strong>Income statement vs budget</strong> button on <a href="#pg-coa-budgets">Set Up Budgets</a>, or <strong>Compare with actual</strong> on a budget.</p>
+<p><strong>Where to find it:</strong> Financial &gt; Reports &gt; Income Statement vs Budget, the <strong>Income statement vs budget</strong> button on <a href="#pg-coa-budgets">Set Up Budgets</a>, or <strong>Compare with actual</strong> on a budget.</p>
 <figure class="man-fig"><a class="man-zoom" href="assets/manual/img/rpt_budget_income__report.jpg" title="Click to enlarge"><img src="assets/manual/img/rpt_budget_income__report.jpg" alt="Income Statement vs Budget before any budget is set up" width="1094" height="504" loading="lazy" decoding="async"></a><figcaption>Income Statement vs Budget before any budget is set up</figcaption></figure>
 <p><strong>Filters:</strong></p>
 <ul>
@@ -1283,74 +1283,74 @@
 </ul>
 <p><strong>The columns:</strong> <strong>Account</strong>, <strong>Actual</strong>, <strong>Budget</strong>, <strong>Difference</strong> (actual less budget) and <strong>% of budget</strong> (how much of the budget was reached). Accounts are grouped under INCOME, COST OF GOODS SOLD, EXPENSES, OTHER INCOME and OTHER EXPENSES, each with a total, and a <strong>NET INCOME</strong> line closes the report: income and other income, less cost of goods sold, expenses and other expenses. It matches the net income of the <a href="#pg-rpt-income_statement">Income Statement</a> for the same months. The note names the budget and the months shown.</p>
 <p><strong>How to read it:</strong> for income, a positive difference is good news; for an expense, a positive difference means you spent more than planned. Click an account to see its entries in the General Ledger.</p>
-<p>When no budget exists, the report says "No budget has been set up yet. Financial Set-up &amp; Reports &gt; Set Up Budgets makes one."</p>
+<p>When no budget exists, the report says "No budget has been set up yet. Financial &gt; Set Up Budgets makes one."</p>
 <h3 id="pg-rpt-budget_balance">Balance Sheet vs Budget<a class="man-hash" href="#pg-rpt-budget_balance" aria-label="Link to this section"><i class="bi bi-link-45deg"></i></a></h3>
 <p>Puts the actual balances of the asset, liability and equity accounts beside a balance sheet budget.</p>
-<p><strong>Where to find it:</strong> Financial Set-up &amp; Reports &gt; Reports &gt; Balance Sheet vs Budget, or <strong>Compare with actual</strong> on a balance sheet budget.</p>
+<p><strong>Where to find it:</strong> Financial &gt; Reports &gt; Balance Sheet vs Budget, or <strong>Compare with actual</strong> on a balance sheet budget.</p>
 <figure class="man-fig"><a class="man-zoom" href="assets/manual/img/rpt_budget_balance__report.jpg" title="Click to enlarge"><img src="assets/manual/img/rpt_budget_balance__report.jpg" alt="Balance Sheet vs Budget before any balance sheet budget is set up" width="1094" height="475" loading="lazy" decoding="async"></a><figcaption>Balance Sheet vs Budget before any balance sheet budget is set up</figcaption></figure>
 <p><strong>Filters:</strong> <strong>Budget</strong>; <strong>Show</strong> (<strong>As at the latest month</strong>, <strong>The whole fiscal year</strong> or <strong>One month at a time</strong>); <strong>Month</strong>; <strong>Class</strong> (shown, but the figures follow the class of the budget).</p>
 <p><strong>The columns:</strong> <strong>Account</strong>, <strong>Actual</strong>, <strong>Budget</strong>, <strong>Difference</strong> and <strong>% of budget</strong>, grouped under ASSETS, LIABILITIES and EQUITY with totals.</p>
 <p><strong>How to read it:</strong> a balance is a figure at a point in time, so the report compares the balances at the end of the last month shown, not a sum of months. With <strong>As at the latest month</strong>, that is the month the fiscal year has reached today. The equity accounts show only what was posted to them; the profit of the current year is not added to them on this report.</p>
 <h3 id="pg-rpt-income_statement">Income Statement<a class="man-hash" href="#pg-rpt-income_statement" aria-label="Link to this section"><i class="bi bi-link-45deg"></i></a></h3>
 <p>The Income Statement (profit and loss) shows the income, costs and expenses of a period and the resulting net income.</p>
-<p><strong>Where to find it:</strong> Financial Set-up &amp; Reports &gt; Reports &gt; Income Statement</p>
+<p><strong>Where to find it:</strong> Financial &gt; Reports &gt; Income Statement</p>
 <figure class="man-fig"><a class="man-zoom" href="assets/manual/img/rpt_income_statement__report.jpg" title="Click to enlarge"><img src="assets/manual/img/rpt_income_statement__report.jpg" alt="The Income Statement for the fiscal year to date" width="1094" height="1100" loading="lazy" decoding="async"></a><figcaption>The Income Statement for the fiscal year to date</figcaption></figure>
 <p><strong>Filters:</strong> <strong>Dates</strong> (starts at <strong>Fiscal year to date</strong>), <strong>From</strong>, <strong>To</strong>, <strong>Class</strong>, and <strong>Columns</strong>: <strong>Total only</strong>, or one column per <strong>Month</strong>, <strong>Quarter</strong> or <strong>Year</strong> followed by a <strong>Total</strong> column.</p>
 <p><strong>How to read it:</strong> the report runs <strong>Income</strong>, <strong>Cost of Goods Sold</strong>, <strong>GROSS PROFIT</strong>, <strong>Expenses</strong>, <strong>NET OPERATING INCOME</strong>, <strong>Other Income</strong>, <strong>Other Expenses</strong> and <strong>NET INCOME</strong>. Contra-income accounts such as 4050 Sales Returns and Allowances and 4060 Sales Discounts show as negative figures inside Income. Click an account to see its entries.</p>
 <div class="man-callout man-tip"><div class="man-callout-t"><i class="bi bi-lightbulb"></i>Tip</div><p>Choose <strong>Columns: Month</strong> with <strong>Dates: This fiscal year</strong> to see the months side by side and spot an expense that jumped.</p></div>
 <h3 id="pg-rpt-income_statement_class">Income Statement by Class<a class="man-hash" href="#pg-rpt-income_statement_class" aria-label="Link to this section"><i class="bi bi-link-45deg"></i></a></h3>
 <p>The Income Statement with one column per class, an <strong>Unclassified</strong> column and a <strong>Total</strong> column. Use it to compare the profit of your branches, departments or projects.</p>
-<p><strong>Where to find it:</strong> Financial Set-up &amp; Reports &gt; Reports &gt; Income Statement by Class, or the <strong>Income Statement by Class</strong> button on the <a href="#pg-coa-classes">Class List</a>.</p>
+<p><strong>Where to find it:</strong> Financial &gt; Reports &gt; Income Statement by Class, or the <strong>Income Statement by Class</strong> button on the <a href="#pg-coa-classes">Class List</a>.</p>
 <figure class="man-fig"><a class="man-zoom" href="assets/manual/img/rpt_income_statement_class__report.jpg" title="Click to enlarge"><img src="assets/manual/img/rpt_income_statement_class__report.jpg" alt="The Income Statement by Class for the fiscal year to date" width="1094" height="1100" loading="lazy" decoding="async"></a><figcaption>The Income Statement by Class for the fiscal year to date</figcaption></figure>
 <p><strong>Filters:</strong> <strong>Dates</strong>, <strong>From</strong> and <strong>To</strong>.</p>
 <p><strong>How to read it:</strong> the lines are the same as on the Income Statement. Click an amount in a class column to see the entries of that account for that class. In the picture, Makati Store had sales of 56,773.50 and a gross profit of 13,930.17 in the fiscal year to date. Large Unclassified figures mean transactions were saved without a class.</p>
 <h3 id="pg-rpt-cmp_is_month">Comparative Income Statement by Month<a class="man-hash" href="#pg-rpt-cmp_is_month" aria-label="Link to this section"><i class="bi bi-link-45deg"></i></a></h3>
 <p>The Income Statement with one column per month, side by side, a <strong>Total</strong> column and the change from the month before. Use it to follow sales, costs and profit month after month.</p>
-<p><strong>Where to find it:</strong> Financial Set-up &amp; Reports &gt; Reports &gt; Comparative Income Statement by Month. Also in the <strong>Financial Reports</strong> card of the <a href="manual.php?c=home-and-reports#pg-home-reports">Report Center</a>. It is given to the roles that may open the Income Statement.</p>
+<p><strong>Where to find it:</strong> Financial &gt; Reports &gt; Comparative Income Statement by Month. Also in the <strong>Financial Reports</strong> card of the <a href="manual.php?c=home-and-reports#pg-home-reports">Report Center</a>. It is given to the roles that may open the Income Statement.</p>
 <figure class="man-fig"><a class="man-zoom" href="assets/manual/img/rpt_cmp_is_month__report.jpg" title="Click to enlarge"><img src="assets/manual/img/rpt_cmp_is_month__report.jpg" alt="Comparative Income Statement by Month for the fiscal year to date" width="1094" height="1500" loading="lazy" decoding="async"></a><figcaption>Comparative Income Statement by Month for the fiscal year to date</figcaption></figure>
 <p><strong>Filters:</strong> <strong>Dates</strong> (starts at <strong>Fiscal year to date</strong>), <strong>From</strong>, <strong>To</strong> and <strong>Class</strong>. Every calendar month the range touches has a column; the first and the last are cut at the <strong>From</strong> and <strong>To</strong> dates, so a range ending on October 22 shows October 1 to 22.</p>
 <p><strong>How to read it:</strong> the lines are those of the <a href="#pg-rpt-income_statement">Income Statement</a>: Income, Cost of Goods Sold, <strong>GROSS PROFIT</strong>, Expenses, <strong>NET OPERATING INCOME</strong>, Other Income, Other Expenses and <strong>NET INCOME</strong>. Each month's column equals the Income Statement run for that month, and <strong>Total</strong> equals the Income Statement for the whole range.</p>
 <p>The last two columns compare the last period with the one before it: <strong>Change</strong> (for example "Change (Oct 2026 vs Sep 2026)") is the last less the one before, and <strong>% change</strong> is that change over the one before (blank when the one before is zero). Click an account's figure to open the General Ledger of that account for that column's period; the account name opens it for the whole range.</p>
 <h3 id="pg-rpt-cmp_is_quarter">Comparative Income Statement by Quarter<a class="man-hash" href="#pg-rpt-cmp_is_quarter" aria-label="Link to this section"><i class="bi bi-link-45deg"></i></a></h3>
 <p>The same comparison by calendar quarter (Q1 January to March, Q2 April to June, Q3 July to September, Q4 October to December), with a <strong>Total</strong> column and the change from the quarter before.</p>
-<p><strong>Where to find it:</strong> Financial Set-up &amp; Reports &gt; Reports &gt; Comparative Income Statement by Quarter. Also in the <strong>Financial Reports</strong> card of the <a href="manual.php?c=home-and-reports#pg-home-reports">Report Center</a>. It is given to the roles that may open the Income Statement.</p>
+<p><strong>Where to find it:</strong> Financial &gt; Reports &gt; Comparative Income Statement by Quarter. Also in the <strong>Financial Reports</strong> card of the <a href="manual.php?c=home-and-reports#pg-home-reports">Report Center</a>. It is given to the roles that may open the Income Statement.</p>
 <figure class="man-fig"><a class="man-zoom" href="assets/manual/img/rpt_cmp_is_quarter__report.jpg" title="Click to enlarge"><img src="assets/manual/img/rpt_cmp_is_quarter__report.jpg" alt="Comparative Income Statement by Quarter" width="1094" height="1500" loading="lazy" decoding="async"></a><figcaption>Comparative Income Statement by Quarter</figcaption></figure>
 <p><strong>Filters:</strong> <strong>Dates</strong> (starts at <strong>Fiscal year to date</strong>), <strong>From</strong>, <strong>To</strong> and <strong>Class</strong>. A quarter that has only begun shows the part of it inside the range.</p>
 <p>The last two columns compare the last period with the one before it: <strong>Change</strong> (for example "Change (Oct 2026 vs Sep 2026)") is the last less the one before, and <strong>% change</strong> is that change over the one before (blank when the one before is zero). Click an account's figure to open the General Ledger of that account for that column's period; the account name opens it for the whole range.</p>
 <h3 id="pg-rpt-cmp_is_year">Comparative Income Statement by Year<a class="man-hash" href="#pg-rpt-cmp_is_year" aria-label="Link to this section"><i class="bi bi-link-45deg"></i></a></h3>
 <p>The Income Statement of each fiscal year side by side, with a <strong>Total</strong> column and the change from the year before. Fiscal years start in the month set in <a href="manual.php?c=administration#pg-admin-settings">Company, Security &amp; Closing Date</a> (<strong>Fiscal year starts</strong>); a year that starts in January is headed with its number ("2026"), another one with both years ("FY 2026-27").</p>
-<p><strong>Where to find it:</strong> Financial Set-up &amp; Reports &gt; Reports &gt; Comparative Income Statement by Year. Also in the <strong>Financial Reports</strong> card of the <a href="manual.php?c=home-and-reports#pg-home-reports">Report Center</a>. It is given to the roles that may open the Income Statement.</p>
+<p><strong>Where to find it:</strong> Financial &gt; Reports &gt; Comparative Income Statement by Year. Also in the <strong>Financial Reports</strong> card of the <a href="manual.php?c=home-and-reports#pg-home-reports">Report Center</a>. It is given to the roles that may open the Income Statement.</p>
 <figure class="man-fig"><a class="man-zoom" href="assets/manual/img/rpt_cmp_is_year__report.jpg" title="Click to enlarge"><img src="assets/manual/img/rpt_cmp_is_year__report.jpg" alt="Comparative Income Statement by Year for the last three fiscal years" width="1094" height="1500" loading="lazy" decoding="async"></a><figcaption>Comparative Income Statement by Year for the last three fiscal years</figcaption></figure>
 <p><strong>Filters:</strong> <strong>Dates</strong> (starts at <strong>Custom</strong>: the last three fiscal years up to today), <strong>From</strong>, <strong>To</strong> and <strong>Class</strong>. The current year shows the fiscal year to date, so compare it with care against full years.</p>
 <p>The last two columns compare the last period with the one before it: <strong>Change</strong> (for example "Change (Oct 2026 vs Sep 2026)") is the last less the one before, and <strong>% change</strong> is that change over the one before (blank when the one before is zero). Click an account's figure to open the General Ledger of that account for that column's period; the account name opens it for the whole range.</p>
 <h3 id="pg-rpt-cmp_is_custom">Comparative Income Statement by Custom Range<a class="man-hash" href="#pg-rpt-cmp_is_custom" aria-label="Link to this section"><i class="bi bi-link-45deg"></i></a></h3>
 <p>Up to four date ranges of your own, side by side, with the change between the first two: this month against the same month last year, a promotion week against the week before, two seasons, and so on.</p>
-<p><strong>Where to find it:</strong> Financial Set-up &amp; Reports &gt; Reports &gt; Comparative Income Statement by Custom Range. Also in the <strong>Financial Reports</strong> card of the <a href="manual.php?c=home-and-reports#pg-home-reports">Report Center</a>. It is given to the roles that may open the Income Statement.</p>
+<p><strong>Where to find it:</strong> Financial &gt; Reports &gt; Comparative Income Statement by Custom Range. Also in the <strong>Financial Reports</strong> card of the <a href="manual.php?c=home-and-reports#pg-home-reports">Report Center</a>. It is given to the roles that may open the Income Statement.</p>
 <figure class="man-fig"><a class="man-zoom" href="assets/manual/img/rpt_cmp_is_custom__report.jpg" title="Click to enlarge"><img src="assets/manual/img/rpt_cmp_is_custom__report.jpg" alt="Comparative Income Statement by Custom Range: this month and the same month last year" width="1094" height="1192" loading="lazy" decoding="async"></a><figcaption>Comparative Income Statement by Custom Range: this month and the same month last year</figcaption></figure>
 <p><strong>Filters:</strong> <strong>Range 1 from</strong> and <strong>Range 1 to</strong> up to <strong>Range 4 from</strong> and <strong>Range 4 to</strong>, and <strong>Class</strong>. The report opens with this month in range 1 and the same month a year earlier in range 2; ranges 3 and 4 are empty. Type the dates and click <strong>Refresh</strong>. A range with a missing date, or with <strong>From</strong> after <strong>To</strong>, is left out and named in the note.</p>
 <p><strong>How to read it:</strong> one column per range, in the order typed, headed "Range 1: 10/01/2026 - 10/31/2026". The ranges may overlap, so there is no total column. <strong>Change (range 1 less range 2)</strong> and <strong>% change</strong> compare the first two. Click an account's figure for its General Ledger in that range.</p>
 <h3 id="pg-rpt-cmp_bs_month">Comparative Balance Sheet by Month<a class="man-hash" href="#pg-rpt-cmp_bs_month" aria-label="Link to this section"><i class="bi bi-link-45deg"></i></a></h3>
 <p>The Balance Sheet at the end of each month side by side, with the change from the month before. Use it to see how cash, receivables, inventory, payables and equity moved through the year.</p>
-<p><strong>Where to find it:</strong> Financial Set-up &amp; Reports &gt; Reports &gt; Comparative Balance Sheet by Month. Also in the <strong>Financial Reports</strong> card of the <a href="manual.php?c=home-and-reports#pg-home-reports">Report Center</a>. It is given to the roles that may open the Balance Sheet.</p>
+<p><strong>Where to find it:</strong> Financial &gt; Reports &gt; Comparative Balance Sheet by Month. Also in the <strong>Financial Reports</strong> card of the <a href="manual.php?c=home-and-reports#pg-home-reports">Report Center</a>. It is given to the roles that may open the Balance Sheet.</p>
 <figure class="man-fig"><a class="man-zoom" href="assets/manual/img/rpt_cmp_bs_month__report.jpg" title="Click to enlarge"><img src="assets/manual/img/rpt_cmp_bs_month__report.jpg" alt="Comparative Balance Sheet by Month for the fiscal year to date" width="1094" height="1500" loading="lazy" decoding="async"></a><figcaption>Comparative Balance Sheet by Month for the fiscal year to date</figcaption></figure>
 <p><strong>Filters:</strong> <strong>Dates</strong> (starts at <strong>Fiscal year to date</strong>), <strong>From</strong>, <strong>To</strong> and <strong>Class</strong>. There is a column for the end of each month of the range, headed with the month and the date ("Sep 2026 (09/30/2026)"); the last one is as of the <strong>To</strong> date.</p>
 <p><strong>How to read it:</strong> the lines are those of the <a href="#pg-rpt-balance_sheet">Balance Sheet</a>: <strong>ASSETS</strong>, <strong>LIABILITIES</strong> and <strong>EQUITY</strong> with their groups, Retained Earnings with the earlier years' profit, and <strong>Net Income (fiscal year to date)</strong> of each column's own fiscal year. Each column equals the Balance Sheet as of its date.</p>
 <p>The last two columns compare the last column with the one before it: <strong>Change</strong> and <strong>% change</strong>. Click an account's figure to open its General Ledger up to that column's date. The note under the title says whether assets equal liabilities and equity in every column.</p>
 <h3 id="pg-rpt-cmp_bs_quarter">Comparative Balance Sheet by Quarter<a class="man-hash" href="#pg-rpt-cmp_bs_quarter" aria-label="Link to this section"><i class="bi bi-link-45deg"></i></a></h3>
 <p>The Balance Sheet at the end of each calendar quarter (March 31, June 30, September 30, December 31) side by side, with the change from the quarter before.</p>
-<p><strong>Where to find it:</strong> Financial Set-up &amp; Reports &gt; Reports &gt; Comparative Balance Sheet by Quarter. Also in the <strong>Financial Reports</strong> card of the <a href="manual.php?c=home-and-reports#pg-home-reports">Report Center</a>. It is given to the roles that may open the Balance Sheet.</p>
+<p><strong>Where to find it:</strong> Financial &gt; Reports &gt; Comparative Balance Sheet by Quarter. Also in the <strong>Financial Reports</strong> card of the <a href="manual.php?c=home-and-reports#pg-home-reports">Report Center</a>. It is given to the roles that may open the Balance Sheet.</p>
 <figure class="man-fig"><a class="man-zoom" href="assets/manual/img/rpt_cmp_bs_quarter__report.jpg" title="Click to enlarge"><img src="assets/manual/img/rpt_cmp_bs_quarter__report.jpg" alt="Comparative Balance Sheet by Quarter" width="1094" height="1500" loading="lazy" decoding="async"></a><figcaption>Comparative Balance Sheet by Quarter</figcaption></figure>
 <p><strong>Filters:</strong> <strong>Dates</strong> (starts at <strong>Fiscal year to date</strong>), <strong>From</strong>, <strong>To</strong> and <strong>Class</strong>. The quarter in progress is shown as of the <strong>To</strong> date.</p>
 <p>The last two columns compare the last column with the one before it: <strong>Change</strong> and <strong>% change</strong>. Click an account's figure to open its General Ledger up to that column's date. The note under the title says whether assets equal liabilities and equity in every column.</p>
 <h3 id="pg-rpt-cmp_bs_year">Comparative Balance Sheet by Year<a class="man-hash" href="#pg-rpt-cmp_bs_year" aria-label="Link to this section"><i class="bi bi-link-45deg"></i></a></h3>
 <p>The Balance Sheet at the end of each fiscal year side by side, with the change from the year before.</p>
-<p><strong>Where to find it:</strong> Financial Set-up &amp; Reports &gt; Reports &gt; Comparative Balance Sheet by Year. Also in the <strong>Financial Reports</strong> card of the <a href="manual.php?c=home-and-reports#pg-home-reports">Report Center</a>. It is given to the roles that may open the Balance Sheet.</p>
+<p><strong>Where to find it:</strong> Financial &gt; Reports &gt; Comparative Balance Sheet by Year. Also in the <strong>Financial Reports</strong> card of the <a href="manual.php?c=home-and-reports#pg-home-reports">Report Center</a>. It is given to the roles that may open the Balance Sheet.</p>
 <figure class="man-fig"><a class="man-zoom" href="assets/manual/img/rpt_cmp_bs_year__report.jpg" title="Click to enlarge"><img src="assets/manual/img/rpt_cmp_bs_year__report.jpg" alt="Comparative Balance Sheet by Year for the last three fiscal years" width="1094" height="1500" loading="lazy" decoding="async"></a><figcaption>Comparative Balance Sheet by Year for the last three fiscal years</figcaption></figure>
 <p><strong>Filters:</strong> <strong>Dates</strong> (starts at <strong>Custom</strong>: the last three fiscal years up to today), <strong>From</strong>, <strong>To</strong> and <strong>Class</strong>. The current year is shown as of today.</p>
 <p>The last two columns compare the last column with the one before it: <strong>Change</strong> and <strong>% change</strong>. Click an account's figure to open its General Ledger up to that column's date. The note under the title says whether assets equal liabilities and equity in every column.</p>
 <h3 id="pg-rpt-cmp_bs_custom">Comparative Balance Sheet by Custom Date<a class="man-hash" href="#pg-rpt-cmp_bs_custom" aria-label="Link to this section"><i class="bi bi-link-45deg"></i></a></h3>
 <p>The Balance Sheet as of up to four dates of your own, side by side, with the change between the first two: today against the end of last year, the end of two months, the day before and after a big purchase, and so on.</p>
-<p><strong>Where to find it:</strong> Financial Set-up &amp; Reports &gt; Reports &gt; Comparative Balance Sheet by Custom Date. Also in the <strong>Financial Reports</strong> card of the <a href="manual.php?c=home-and-reports#pg-home-reports">Report Center</a>. It is given to the roles that may open the Balance Sheet.</p>
+<p><strong>Where to find it:</strong> Financial &gt; Reports &gt; Comparative Balance Sheet by Custom Date. Also in the <strong>Financial Reports</strong> card of the <a href="manual.php?c=home-and-reports#pg-home-reports">Report Center</a>. It is given to the roles that may open the Balance Sheet.</p>
 <figure class="man-fig"><a class="man-zoom" href="assets/manual/img/rpt_cmp_bs_custom__report.jpg" title="Click to enlarge"><img src="assets/manual/img/rpt_cmp_bs_custom__report.jpg" alt="Comparative Balance Sheet by Custom Date: today and the end of the last fiscal year" width="1094" height="1500" loading="lazy" decoding="async"></a><figcaption>Comparative Balance Sheet by Custom Date: today and the end of the last fiscal year</figcaption></figure>
 <p><strong>Filters:</strong> <strong>Date 1</strong> to <strong>Date 4</strong>, and <strong>Class</strong>. The report opens with today in date 1 and the last day of the previous fiscal year in date 2; dates 3 and 4 are empty. Type the dates and click <strong>Refresh</strong>.</p>
 <p><strong>How to read it:</strong> one column per date, in the order typed, headed "Date 1: 10/22/2026". <strong>Change (date 1 less date 2)</strong> and <strong>% change</strong> compare the first two. Click an account's figure for its General Ledger up to that date.</p>
@@ -1358,7 +1358,7 @@
 </div>
 <h3 id="pg-rpt-cash_flow">Statement of Cash Flows<a class="man-hash" href="#pg-rpt-cash_flow" aria-label="Link to this section"><i class="bi bi-link-45deg"></i></a></h3>
 <p>The Statement of Cash Flows explains how the cash went up or down in a period, by the indirect method.</p>
-<p><strong>Where to find it:</strong> Financial Set-up &amp; Reports &gt; Reports &gt; Statement of Cash Flows</p>
+<p><strong>Where to find it:</strong> Financial &gt; Reports &gt; Statement of Cash Flows</p>
 <figure class="man-fig"><a class="man-zoom" href="assets/manual/img/rpt_cash_flow__report.jpg" title="Click to enlarge"><img src="assets/manual/img/rpt_cash_flow__report.jpg" alt="The Statement of Cash Flows for the fiscal year to date" width="1094" height="1100" loading="lazy" decoding="async"></a><figcaption>The Statement of Cash Flows for the fiscal year to date</figcaption></figure>
 <p><strong>Filters:</strong> <strong>Dates</strong> (starts at <strong>Fiscal year to date</strong>), <strong>From</strong>, <strong>To</strong> and <strong>Class</strong>.</p>
 <p><strong>How to read it:</strong></p>
@@ -1372,14 +1372,14 @@
 <p>If the ending cash does not agree with the bank balances, the note says "Does not tie to the bank balances" in red with the balance it expected.</p>
 <h3 id="pg-rpt-general_ledger">General Ledger<a class="man-hash" href="#pg-rpt-general_ledger" aria-label="Link to this section"><i class="bi bi-link-45deg"></i></a></h3>
 <p>The General Ledger lists every entry posted to each account, with a running balance. It is where you land when you click an account on any other report.</p>
-<p><strong>Where to find it:</strong> Financial Set-up &amp; Reports &gt; Reports &gt; General Ledger, or click an account name on the <a href="#pg-coa-accounts">Chart of Accounts</a> or on a financial report.</p>
+<p><strong>Where to find it:</strong> Financial &gt; Reports &gt; General Ledger, or click an account name on the <a href="#pg-coa-accounts">Chart of Accounts</a> or on a financial report.</p>
 <figure class="man-fig"><a class="man-zoom" href="assets/manual/img/rpt_general_ledger__report.jpg" title="Click to enlarge"><img src="assets/manual/img/rpt_general_ledger__report.jpg" alt="The General Ledger for September 2026" width="1094" height="1100" loading="lazy" decoding="async"></a><figcaption>The General Ledger for September 2026</figcaption></figure>
 <p><strong>Filters:</strong> <strong>Dates</strong> (starts at <strong>This month</strong>), <strong>From</strong>, <strong>To</strong>, <strong>Account</strong> (blank for all accounts), <strong>Class</strong> and <strong>Search</strong> (a word in the memo, the number or the name).</p>
 <p><strong>The columns:</strong> <strong>Date</strong>, <strong>Type</strong>, <strong>Num</strong> (click it to open the transaction), <strong>Name</strong>, <strong>Memo</strong>, <strong>Class</strong>, <strong>Debit</strong>, <strong>Credit</strong> and <strong>Balance (debit +)</strong>.</p>
 <p><strong>How to read it:</strong> each account starts with its <strong>Beginning balance</strong> at the From date and ends with a <strong>Total</strong> line showing the total debits, total credits and the ending balance. The balance is always shown debit-positive, so an account with a credit balance, such as 2000 Accounts Payable, shows a negative balance. For income and expense accounts, the beginning balance counts only from the start of the fiscal year. Accounts with no entries and no beginning balance are left out.</p>
 <h3 id="pg-rpt-subsidiary_ledger">Subsidiary Ledger<a class="man-hash" href="#pg-rpt-subsidiary_ledger" aria-label="Link to this section"><i class="bi bi-link-45deg"></i></a></h3>
 <p>The Subsidiary Ledger lists the entries of one name (or of every name) on the accounts that keep a subsidiary ledger: a customer, a supplier, an employee or an other name, with a running balance per account.</p>
-<p><strong>Where to find it:</strong> Financial Set-up &amp; Reports &gt; Reports &gt; Subsidiary Ledger, or click a name on the <a href="#pg-rpt-schedule_of_accounts">Schedule of Accounts</a>.</p>
+<p><strong>Where to find it:</strong> Financial &gt; Reports &gt; Subsidiary Ledger, or click a name on the <a href="#pg-rpt-schedule_of_accounts">Schedule of Accounts</a>.</p>
 <figure class="man-fig"><a class="man-zoom" href="assets/manual/img/rpt_subsidiary_ledger__report.jpg" title="Click to enlarge"><img src="assets/manual/img/rpt_subsidiary_ledger__report.jpg" alt="The Subsidiary Ledger for the fiscal year, starting with ABC Trading Corp." width="1094" height="1100" loading="lazy" decoding="async"></a><figcaption>The Subsidiary Ledger for the fiscal year, starting with ABC Trading Corp.</figcaption></figure>
 <p><strong>Filters:</strong></p>
 <ul>
@@ -1394,7 +1394,7 @@
 <div class="man-callout man-example"><div class="man-callout-t"><i class="bi bi-journal-text"></i>Example</div><p>To see what an employee still owes on cash advances, choose the advances account in <strong>Account</strong>, the employee in <strong>Subsidiary ledger (name)</strong> and <strong>To: every entry up to the To date</strong>.</p></div>
 <h3 id="pg-rpt-schedule_of_accounts">Schedule of Accounts<a class="man-hash" href="#pg-rpt-schedule_of_accounts" aria-label="Link to this section"><i class="bi bi-link-45deg"></i></a></h3>
 <p>The Schedule of Accounts lists, for each account, the names that transacted it and the amount each one stands at. Use it to support an account balance with its list of names, for example a schedule of accounts receivable or of employee advances.</p>
-<p><strong>Where to find it:</strong> Financial Set-up &amp; Reports &gt; Reports &gt; Schedule of Accounts</p>
+<p><strong>Where to find it:</strong> Financial &gt; Reports &gt; Schedule of Accounts</p>
 <figure class="man-fig"><a class="man-zoom" href="assets/manual/img/rpt_schedule_of_accounts__report.jpg" title="Click to enlarge"><img src="assets/manual/img/rpt_schedule_of_accounts__report.jpg" alt="The Schedule of Accounts for the fiscal year" width="1094" height="1100" loading="lazy" decoding="async"></a><figcaption>The Schedule of Accounts for the fiscal year</figcaption></figure>
 <p><strong>Filters:</strong> <strong>Dates</strong>, <strong>From</strong>, <strong>To</strong>, <strong>Account</strong> (blank for every account marked With SL), <strong>Class</strong> (blank includes every class and the entries without one) and <strong>Which entries</strong> (as on the Subsidiary Ledger).</p>
 <p><strong>The columns:</strong></p>
@@ -1427,7 +1427,7 @@
 <p><strong>How to read it:</strong> each account is a group with a <strong>Total</strong> line; names that net to zero are left out. The amounts follow the account's normal balance, so on 1100 Accounts Receivable a positive amount is what the customer owes. For a true balance rather than a period's movement, choose <strong>To: every entry up to the To date</strong>. While no account is marked With SL and no account is chosen, the note asks you to choose an account or tick With SL on the accounts you want a schedule of.</p>
 <h3 id="pg-rpt-journal">Journal<a class="man-hash" href="#pg-rpt-journal" aria-label="Link to this section"><i class="bi bi-link-45deg"></i></a></h3>
 <p>The Journal lists every posted transaction with all its ledger lines, in date order: the book of original entry.</p>
-<p><strong>Where to find it:</strong> Financial Set-up &amp; Reports &gt; Reports &gt; Journal</p>
+<p><strong>Where to find it:</strong> Financial &gt; Reports &gt; Journal</p>
 <figure class="man-fig"><a class="man-zoom" href="assets/manual/img/rpt_journal__report.jpg" title="Click to enlarge"><img src="assets/manual/img/rpt_journal__report.jpg" alt="The Journal for September 2026" width="1094" height="1100" loading="lazy" decoding="async"></a><figcaption>The Journal for September 2026</figcaption></figure>
 <p><strong>Filters:</strong> <strong>Dates</strong> (starts at <strong>This month</strong>), <strong>From</strong>, <strong>To</strong>, <strong>Class</strong> and <strong>Type</strong> (one kind of transaction, for example Check or Deposit).</p>
 <p><strong>The columns:</strong> <strong>Date</strong>, <strong>Type</strong> and <strong>Num</strong> (on the first line of each transaction; click the number to open it), <strong>Account</strong>, <strong>Memo</strong>, <strong>Class</strong>, <strong>Debit</strong> and <strong>Credit</strong>. The <strong>TOTAL</strong> row adds the debits and the credits.</p>

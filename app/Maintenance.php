@@ -124,7 +124,7 @@ final class Maintenance
             }
         }
         $add('Module default accounts are set', !$missing, $missing ? implode(', ', $missing) : 'All set',
-            'Set them under Financial Set-up & Reports > Module Default Accounts.');
+            'Set them under Financial > Module Default Accounts.');
 
         return $out;
     }

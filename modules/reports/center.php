@@ -6,7 +6,7 @@ declare(strict_types=1);
  * memorized reports (their own and the ones shared with them).
  *
  * v29: a module's card can carry a name of its own (registry 'report_center_names'): the reports of the
- * Financial Set-up & Reports menu are listed under "Financial Reports". A search box narrows the list as you type.
+ * Financial menu (called Financial Set-up & Reports in v29 to v31) are listed under "Financial Reports". A search box narrows the list as you type.
  */
 
 $pageKey = 'home.reports';

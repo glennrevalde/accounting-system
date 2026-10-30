@@ -833,6 +833,22 @@ CREATE TABLE item_group_sales (
   CONSTRAINT fk_igs_group FOREIGN KEY (group_item_id) REFERENCES items(id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- Card and e-wallet receipts ticked to settle on Make Deposits (v32, Details > Settle)
+DROP TABLE IF EXISTS clearing_settlements;
+CREATE TABLE clearing_settlements (
+  id              BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  deposit_txn_id  BIGINT UNSIGNED NOT NULL,                -- the deposit that holds the settlement
+  account_id      INT UNSIGNED    NOT NULL,                -- the card / e-wallet clearing account
+  receipt_txn_id  BIGINT UNSIGNED NOT NULL,                -- the POS sale, payment or sales receipt settled
+  amount          DECIMAL(15,2)   NOT NULL DEFAULT 0,      -- what of it was settled
+  created_at      TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  KEY ix_cs_deposit (deposit_txn_id),
+  KEY ix_cs_receipt (account_id, receipt_txn_id),
+  KEY ix_cs_receipt_txn (receipt_txn_id),
+  CONSTRAINT fk_cs_deposit FOREIGN KEY (deposit_txn_id) REFERENCES transactions(id) ON DELETE CASCADE,
+  CONSTRAINT fk_cs_receipt FOREIGN KEY (receipt_txn_id) REFERENCES transactions(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 -- General ledger (generated automatically by the posting engine)
 DROP TABLE IF EXISTS journal_lines;
 CREATE TABLE journal_lines (

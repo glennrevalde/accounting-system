@@ -9,7 +9,7 @@ return [
     'modules' => [
         // code => [name, icon, sort]
         'home'  => ['Home', 'house', 1],
-        'coa'   => ['Financial Set-up & Reports', 'journal-bookmark', 2],   // was "Chart of Accounts" (v29)
+        'coa'   => ['Financial', 'journal-bookmark', 2],   // was "Chart of Accounts", then "Financial Set-up & Reports" (v29 to v31)
         'fa'    => ['Fixed Assets', 'building', 3],
         'cust'  => ['Customers', 'people', 4],
         'vend'  => ['Vendors', 'truck', 5],
@@ -257,7 +257,7 @@ return [
     ],
 
     // A module's card on the Report Center may carry a name of its own (v29): the reports of the
-    // Financial Set-up & Reports menu are the "Financial Reports"
+    // Financial menu are the "Financial Reports"
     'report_center_names' => [
         'coa' => 'Financial Reports',
     ],

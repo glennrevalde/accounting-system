@@ -49,7 +49,7 @@ final class Accts
         }
         $id = self::$map[$key] ?? null;
         if (!$id) {
-            fail('The default account "' . (self::KEYS[$key][0] ?? $key) . '" is not set. Set it under Financial Set-up & Reports > Module Default Accounts.');
+            fail('The default account "' . (self::KEYS[$key][0] ?? $key) . '" is not set. Set it under Financial > Module Default Accounts.');
         }
         return (int)$id;
     }

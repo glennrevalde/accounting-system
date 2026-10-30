@@ -200,7 +200,7 @@ Report::define('budget_income', [
         $b = budget_rpt_pick($f, 'pl');
         if (!$b) {
             return ['columns' => [['key' => 'account', 'label' => 'Account']], 'rows' => [],
-                'notes' => 'No budget has been set up yet. Financial Set-up &amp; Reports &gt; Set Up Budgets makes one.'];
+                'notes' => 'No budget has been set up yet. Financial &gt; Set Up Budgets makes one.'];
         }
         return budget_rpt_build($b, $f, [
             'Income' => ['Income'], 'Cost of Goods Sold' => ['Cost of Goods Sold'],
@@ -223,7 +223,7 @@ Report::define('budget_balance', [
         $b = budget_rpt_pick($f, 'bs');
         if (!$b) {
             return ['columns' => [['key' => 'account', 'label' => 'Account']], 'rows' => [],
-                'notes' => 'No balance sheet budget has been set up yet. Financial Set-up &amp; Reports &gt; Set Up Budgets makes one.'];
+                'notes' => 'No balance sheet budget has been set up yet. Financial &gt; Set Up Budgets makes one.'];
         }
         return budget_rpt_build($b, $f, [
             'Assets' => ['Bank', 'Accounts Receivable', 'Other Current Asset', 'Fixed Asset', 'Other Asset'],

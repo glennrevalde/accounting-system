@@ -711,7 +711,7 @@
 </tr>
 <tr>
 <td>Gross settled</td>
-<td>The sales amount the provider is settling. It cannot be more than <strong>Unsettled</strong> on the deposit date.</td>
+<td>The sales amount the provider is settling. It cannot be more than <strong>Unsettled</strong> on the deposit date. Type it, or tick <strong>Settle</strong> on the receipts the provider paid in <strong>Details</strong>: their total goes into this box, which then shows "2 receipts ticked" under it and cannot be typed over. <strong>Clear</strong> takes the ticks off so the amount can be typed again.</td>
 </tr>
 <tr>
 <td>Fee deducted</td>
@@ -748,15 +748,21 @@
 </tr>
 <tr>
 <td>Receipts not yet settled</td>
-<td>The sales the provider still owes. Settlements are taken against the oldest receipts first, so the list holds the latest receipts that make up the balance, newest first: <strong>Date</strong>, <strong>Document</strong> (click to open it), <strong>Customer / terminal</strong>, <strong>Method</strong>, <strong>Reference</strong> (the approval or reference number typed at the counter), <strong>Amount</strong> and <strong>Unsettled</strong>. The oldest one may be partly settled. The total equals the balance.</td>
+<td>The sales the provider still owes. A settlement whose receipts were ticked settles those receipts; a settlement entered as an amount only is taken against the oldest receipts first. So the list holds the latest receipts that make up the balance, newest first: <strong>Date</strong>, <strong>Document</strong> (click to open it), <strong>Customer / terminal</strong>, <strong>Method</strong>, <strong>Reference</strong> (the approval or reference number typed at the counter), <strong>Amount</strong> and <strong>Unsettled</strong>, and, in the window opened from Make Deposits, <strong>Settle</strong> (see below). The oldest one may be partly settled. The total equals the balance.</td>
 </tr>
 <tr>
 <td>Latest settlements and other credits</td>
-<td>The last 25 deposits and other entries that took money out of the account, with their description (the provider's reference). The General Ledger has all of them.</td>
+<td>The last 25 deposits and other entries that took money out of the account, with their description (the provider's reference and, for a settlement whose receipts were ticked, how many). The General Ledger has all of them.</td>
 </tr>
 </tbody>
 </table></div>
 <div class="man-callout man-example"><div class="man-callout-t"><i class="bi bi-journal-text"></i>Example</div><p>E-wallet Clearing holds ₱16,113.44: a GCash sale of ₱1,564.64 and a Maya sale of ₱14,548.80. GCash and Maya settle ₱10,000.00. The balance becomes ₱6,113.44, and <strong>Receipts not yet settled</strong> shows the Maya sale of ₱14,548.80 with ₱6,113.44 unsettled: the ₱10,000.00 paid for the GCash sale and ₱8,435.36 of the Maya sale. The Trial Balance shows ₱6,113.44 on 1065 E-wallet Clearing too.</p></div>
+<h4 id="sec-clearing-settle">Ticking the receipts a settlement pays<a class="man-hash" href="#sec-clearing-settle" aria-label="Link to this section"><i class="bi bi-link-45deg"></i></a></h4>
+<p>The provider's settlement report lists the sales it pays. As the cash of the closed POS shifts is ticked for a deposit, those sales can be ticked: in the window opened by <strong>Details</strong> on Make Deposits, <strong>Receipts not yet settled</strong> has a <strong>Settle</strong> column with a tick box on every receipt and one in the heading that ticks them all. A click anywhere on the row ticks it too (not on its document link). The bar at the bottom of the window shows the <strong>Gross settled</strong> so far and how many receipts are ticked, and the same amount goes into <strong>Gross settled</strong> on the deposit at once. <strong>Done</strong> closes the window; opening <strong>Details</strong> again shows the ticks as they were.</p>
+<figure class="man-fig"><a class="man-zoom" href="assets/manual/img/bank_deposits__settle.jpg" title="Click to enlarge"><img src="assets/manual/img/bank_deposits__settle.jpg" alt="Details of 1060 Card Clearing with three receipts ticked under Settle and Gross settled 6,983.00 in the bar at the bottom" width="1094" height="809" loading="lazy" decoding="async"></a><figcaption>Details of 1060 Card Clearing with three receipts ticked under Settle and Gross settled 6,983.00 in the bar at the bottom</figcaption></figure>
+<figure class="man-fig"><a class="man-zoom" href="assets/manual/img/bank_deposits__settle_gross.jpg" title="Click to enlarge"><img src="assets/manual/img/bank_deposits__settle_gross.jpg" alt="Back on Make Deposits: Gross settled 6,983.00 with 3 receipts ticked and Clear under it" width="1046" height="305" loading="lazy" decoding="async"></a><figcaption>Back on Make Deposits: Gross settled 6,983.00 with 3 receipts ticked and Clear under it</figcaption></figure>
+<p>When the deposit is saved, the ticked receipts are settled: they leave <strong>Receipts not yet settled</strong>, and the settlement line of the deposit says how many receipts were ticked ("Provider settlement BDO-77 (2 receipts ticked)"). The receipts that were not ticked stay on the list, whatever their date. Voiding or deleting the deposit makes its receipts unsettled again; editing it keeps them settled as long as the deposit still holds the settlement amount on that clearing account. Changing the deposit <strong>Date</strong> takes the ticks off, because what is unsettled depends on the date: tick them again. The <strong>Open as a page</strong> view has no tick boxes.</p>
+<div class="man-callout man-example"><div class="man-callout-t"><i class="bi bi-journal-text"></i>Example</div><p>The bank's card settlement report pays POS Sale MK1-00000012 (₱3,996.00), MK1-00000010 (₱1,998.00) and MK1-00000009 (₱989.00 still unsettled of ₱999.00). Tick the three under <strong>Settle</strong>: <strong>Gross settled</strong> becomes ₱6,983.00. Type the fee, save, and MK1-00000011 (₱2,997.00) is the only card sale left unsettled.</p></div>
 <p><strong>Other receipts (loan proceeds, owner contributions, interest…):</strong> three rows for money that did not come through a customer payment.</p>
 <div class="table-responsive man-table"><table class="table table-sm">
 <thead>
@@ -820,6 +826,13 @@
 <li>Find the clearing account under <strong>Card and e-wallet settlements</strong>.</li>
 <li>Type the <strong>Gross settled</strong>, the <strong>Fee deducted</strong> and the provider's <strong>Reference</strong>.</li>
 <li>Save. The bank receives the gross less the fee.</li>
+</ol>
+<p><strong>To settle the receipts on the provider's report:</strong></p>
+<ol>
+<li>Click <strong>Details</strong> beside the clearing account.</li>
+<li>Under <strong>Receipts not yet settled</strong>, tick <strong>Settle</strong> on each receipt the provider paid.</li>
+<li>Check the <strong>Gross settled</strong> at the bottom against the provider's report, and click <strong>Done</strong>.</li>
+<li>Type the <strong>Fee deducted</strong> and the <strong>Reference</strong>, and save.</li>
 </ol>
 <p><strong>To see what an unsettled balance is made of:</strong> click <strong>Details</strong> beside it. Compare <strong>Receipts not yet settled</strong> with the provider's statement to find the sales still to be paid out.</p>
 <div class="man-callout man-example"><div class="man-callout-t"><i class="bi bi-journal-text"></i>Example</div><p>GCash settles ₱16,113.44 of e-wallet sales and deducts a fee of ₱322.27. Type 16,113.44 in <strong>Gross settled</strong> and 322.27 in <strong>Fee deducted</strong> on 1065 E-wallet Clearing; the deposit total is ₱15,791.17.</p></div>
@@ -903,6 +916,8 @@
 <li>"A selected POS shift was already deposited."</li>
 <li>"Settlement for 1060 - Card Clearing (50,000.00) is more than its unsettled balance on 10/21/2026 (43,556.24)." The settlement is checked against the balance on the deposit date; click <strong>Details</strong> to see it.</li>
 <li>"The fee deducted for Card Clearing is more than the gross settled."</li>
+<li>"Gross settled for Card Clearing (6,984.00) is not the total of the 3 receipt(s) ticked to settle (6,983.00). Open Details to change the ticks, or clear them to type the amount."</li>
+<li>"POS Sale MK1-00000012 is not unsettled on 10/30/2026 any more. Open Details again and tick the receipts once more." Another deposit settled it while you had the page open.</li>
 <li>"Enter the gross amount settled for E-wallet Clearing with its fee." A fee was typed without the gross amount.</li>
 <li>"Other receipts need both an account and an amount."</li>
 <li>A payment that is in a deposit cannot be voided or deleted: "It is included in deposit DEP-00001. Remove it from the deposit first." Take it off the deposit with <strong>Edit</strong>, or void the deposit.</li>
