@@ -82,6 +82,9 @@ if ($a === 'new' || $a === 'edit') {
             Audit::log('create', 'cust', 'customer', $id, $data['name'], ['snapshot' => $data, 'page_key' => $pageKey]);
         }
         flash('success', 'Customer saved.');
+        if (!$c) {
+            QuickAdd::finish('customer', $id);   // v37: added from a drop-down's "Add new": back to the transaction
+        }
         redirect_after_save(url($pageKey, ['a' => 'new']), url($pageKey, ['id' => $id]));
     });
     layout_start($c ? 'Edit customer: ' . $c['name'] : 'New customer or job', ['actions' => btn_link(url($pageKey, $c ? ['id' => $c['id']] : []), 'Cancel')]);
@@ -90,7 +93,7 @@ if ($a === 'new' || $a === 'edit') {
     <form method="post" class="card"><div class="card-body">
       <?= csrf_field() ?>
       <div class="row g-2">
-        <?= input_field('name', 'Customer / job name', fv('name', $c), ['required' => true]) ?>
+        <?= input_field('name', 'Customer / job name', fv('name', $c, QuickAdd::prefill()), ['required' => true, 'extra' => QuickAdd::popup() ? 'autofocus' : '']) ?>
         <?= select_field('parent_id', 'Job of (leave blank for a customer)', $parents, fv('parent_id', $c, g('parent')), ['blank' => '']) ?>
         <?= input_field('company_name', 'Company name', fv('company_name', $c)) ?>
         <?= input_field('contact_person', 'Contact person', fv('contact_person', $c)) ?>

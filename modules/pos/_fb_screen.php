@@ -79,7 +79,7 @@ $canMenu = Access::page('pos.fb_menu');
       <div class="fb-order-body">
         <?php if ($recallId): ?><div class="alert alert-info py-1 small mb-2">Recalled suspended order #<?= (int)$recallId ?></div><?php endif; ?>
         <label class="form-label" for="posCustomer">Customer</label>
-        <select class="form-select form-select-sm" name="customer_id" id="posCustomer"><?= options(Lookup::customers(false), $initialCustomer ?? p('customer_id'), 'Walk-in customer') ?></select>
+        <select class="form-select form-select-sm" name="customer_id" id="posCustomer"<?= QuickAdd::attr('customer') ?>><?= options(Lookup::customers(false), $initialCustomer ?? p('customer_id'), 'Walk-in customer') ?></select>
         <div class="small text-muted mt-1" id="posLevel"></div>
         <div id="walkinBox" class="mt-2"><input class="form-control form-control-sm" name="walkin_name" maxlength="120" value="<?= h(is_post() ? p('walkin_name') : ($initialWalkin ?? '')) ?>" placeholder="Name on the order (optional)" aria-label="Name on the order"></div>
         <?php if (Classes::ready()): ?>

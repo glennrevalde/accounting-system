@@ -8,6 +8,7 @@
   // ------------------------------------------------------------------ line grids
   function initGrid(table) {
     const items = JSON.parse(table.dataset.items || '{}');
+    table._gridItems = items;   // v37: an item added with "Add new item" is put in here (QuickAdd)
     const taxes = JSON.parse(table.dataset.taxes || '{}');
     const unitsByItem = JSON.parse(table.dataset.units || '{}'); // item id -> [{id, code, factor, base, sd, pd}]
     const mode = table.dataset.mode || 'sales'; // sales | purchase | expense | journal
@@ -300,6 +301,174 @@
     });
   });
 
+  // ------------------------------------------------------------------ "Add new" from a drop-down (v37)
+  // A box marked data-add (customer, vendor, name, account, item) ends its list with "Add new ..." for the users who
+  // may create that kind of record (the page says which in <body data-quick-add>). Choosing it opens the list's own
+  // form in a window over the transaction; once saved there the new record is put in the box, and in every other box
+  // of the same kind on the page, without leaving the transaction. See app/QuickAdd.php.
+  window.AppQuickAdd = (function () {
+    let cfg = null;
+    try { cfg = JSON.parse(document.body.dataset.quickAdd || 'null'); } catch (e) { cfg = null; }
+    const NOUN = { customer: 'customer', vendor: 'supplier', account: 'account', item: 'item' };
+    const TITLE = { customer: 'New customer or job', vendor: 'New supplier', account: 'New account', item: 'New item' };
+    let modalEl = null, modal = null, frame = null, origin = null, originKind = null, added = false, ready = false;
+
+    function entries(sel) {
+      if (!cfg || !sel || !sel.dataset.add || sel.disabled) return [];
+      const form = sel.form || sel.closest('form');
+      if (form && (form.getAttribute('method') || 'get').toLowerCase() !== 'post') return [];
+      const kinds = sel.dataset.add === 'name' ? ['customer', 'vendor'] : [sel.dataset.add];
+      return kinds.filter((k) => cfg.kinds[k]).map((k) => ({ kind: k, noun: NOUN[k] }));
+    }
+
+    function build() {
+      modalEl = document.createElement('div');
+      modalEl.className = 'modal fade qa-modal';
+      modalEl.tabIndex = -1;
+      modalEl.setAttribute('aria-labelledby', 'qaTitle');
+      modalEl.innerHTML = '<div class="modal-dialog modal-xl modal-dialog-centered modal-fullscreen-md-down"><div class="modal-content">'
+        + '<div class="modal-header"><span class="qa-ico"><i class="bi bi-plus-lg"></i></span><h5 class="modal-title" id="qaTitle"></h5>'
+        + '<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div>'
+        + '<div class="modal-body p-0"><div class="qa-types"></div><div class="qa-frame-wrap"><div class="qa-loading"><span class="spinner-border spinner-border-sm"></span> Opening the form</div><iframe class="qa-frame" title="New record"></iframe></div></div>'
+        + '</div></div>';
+      document.body.appendChild(modalEl);
+      frame = modalEl.querySelector('iframe');
+      frame.addEventListener('load', () => { modalEl.classList.remove('is-loading'); });
+      modal = new bootstrap.Modal(modalEl);
+      modalEl.addEventListener('shown.bs.modal', () => { ready = true; });
+      modalEl.addEventListener('hidden.bs.modal', () => {
+        frame.src = 'about:blank';
+        // closed without adding: back to the box it was opened from
+        const back = !added && origin && origin.parentNode && origin.parentNode.querySelector('.combo-input');
+        if (back) back.focus();
+      });
+    }
+
+    function load(url) {
+      modalEl.classList.remove('is-picking');
+      modalEl.classList.add('is-loading');
+      frame.src = url;
+    }
+
+    function open(sel, kind, typed) {
+      if (!cfg || !cfg.kinds[kind] || !window.bootstrap) return;
+      if (!modalEl) build();
+      origin = sel;
+      originKind = kind;
+      added = false;
+      const q = '&from=' + encodeURIComponent(cfg.from || '') + (typed ? '&prefill=' + encodeURIComponent(typed) : '');
+      ready = false;
+      modalEl.querySelector('.modal-title').textContent = TITLE[kind];
+      const types = modalEl.querySelector('.qa-types');
+      types.innerHTML = '';
+      if (kind === 'item') {
+        // first the type of item, as on the Item List's "New item" menu
+        const allowed = (sel.dataset.addTypes || '').split(',').filter(Boolean);
+        const list = Object.keys(cfg.types).filter((t) => !allowed.length || allowed.indexOf(t) >= 0);
+        types.innerHTML = '<p class="qa-types-q">What kind of item?</p><div class="qa-type-list">' + list.map((t) => '<button type="button" class="qa-type" data-type="' + t + '"><i class="bi bi-'
+          + ({ service: 'tools', inventory: 'box-seam', non_inventory: 'bag', assembly: 'diagram-3', other_charge: 'receipt', subtotal: 'calculator', group: 'collection', discount: 'percent', payment: 'cash-coin' }[t] || 'box')
+          + '"></i><span>' + cfg.types[t] + '</span></button>').join('') + '</div>';
+        types.querySelectorAll('.qa-type').forEach((b) => b.addEventListener('click', () => {
+          modalEl.querySelector('.modal-title').textContent = 'New ' + cfg.types[b.dataset.type].toLowerCase();
+          load(cfg.kinds.item + '&type=' + encodeURIComponent(b.dataset.type) + q);
+        }));
+        modalEl.classList.add('is-picking');
+        modalEl.classList.remove('is-loading');
+        frame.src = 'about:blank';
+      } else {
+        const t = kind === 'account' && sel.dataset.addTypes ? '&types=' + encodeURIComponent(sel.dataset.addTypes) : '';
+        load(cfg.kinds[kind] + t + q);
+      }
+      modal.show();
+    }
+
+    // the text of the new choice, written the way the box writes its others
+    function nameText(sel, name, word) {
+      const colon = Array.prototype.some.call(sel.options, (o) => /^(Customer|Supplier|Employee|Other): /.test(o.text));
+      return colon ? word + ': ' + name : name + ' (' + word + ')';
+    }
+    function accountText(sel, r) {
+      const opts = Array.prototype.filter.call(sel.options, (o) => o.value !== '');
+      if (opts.some((o) => /^\S+ - /.test(o.text))) return r.code + ' - ' + r.name;
+      if (opts.some((o) => /\([^()]*\)$/.test(o.text))) return r.name + ' (' + r.code + ')';
+      return r.code + ' - ' + r.name;
+    }
+    function addOption(sel, value, text) {
+      if (Array.prototype.some.call(sel.options, (o) => o.value === String(value))) return;
+      const o = document.createElement('option');
+      o.value = String(value);
+      o.textContent = text;
+      const key = text.toLocaleLowerCase();
+      const before = Array.prototype.find.call(sel.options, (x) => x.value !== '' && x.text.toLocaleLowerCase() > key);
+      sel.insertBefore(o, before || null);
+    }
+    function boxes() {
+      const out = Array.prototype.slice.call(document.querySelectorAll('select[data-add]'));
+      document.querySelectorAll('template').forEach((t) => t.content.querySelectorAll('select[data-add]').forEach((s) => out.push(s)));
+      return out;
+    }
+
+    function apply(r) {
+      added = true;
+      const typesOf = (s) => (s.dataset.addTypes || '').split(',').filter(Boolean);
+      boxes().forEach((s) => {
+        const k = s.dataset.add;
+        if (r.kind === 'customer' || r.kind === 'vendor') {
+          if (k === r.kind) addOption(s, r.id, r.label);
+          else if (k === 'name') addOption(s, (r.kind === 'customer' ? 'c' : 'v') + r.id, nameText(s, r.label, r.kind === 'customer' ? 'Customer' : 'Supplier'));
+        } else if (r.kind === 'account' && k === 'account') {
+          const ts = typesOf(s);
+          if (!ts.length || ts.indexOf(r.type) >= 0 || s === origin) addOption(s, r.id, accountText(s, r));
+        } else if (r.kind === 'item' && k === 'item') {
+          const ts = typesOf(s);
+          if (!ts.length || ts.indexOf(r.type) >= 0 || s === origin) addOption(s, r.id, r.label);
+        }
+      });
+      if (r.kind === 'item' && r.grid) {
+        document.querySelectorAll('table.line-grid').forEach((t) => { if (t._gridItems) t._gridItems[r.id] = r.grid[t.dataset.mode === 'purchase' ? 'purchase' : 'sales']; });
+      }
+      if (origin) {
+        const v = origin.dataset.add === 'name' ? (r.kind === 'customer' ? 'c' : 'v') + r.id : String(r.id);
+        if (Array.prototype.some.call(origin.options, (o) => o.value === v)) {
+          origin.value = v;
+          if (origin.comboSync) origin.comboSync();
+          origin.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+      }
+      toast((r.kind === 'vendor' ? 'Supplier' : r.kind.charAt(0).toUpperCase() + r.kind.slice(1)) + ' added: ' + r.label);
+    }
+
+    function toast(text) {
+      const t = document.createElement('div');
+      t.className = 'qa-toast';
+      t.setAttribute('role', 'status');
+      t.innerHTML = '<i class="bi bi-check-circle-fill"></i><span></span>';
+      t.querySelector('span').textContent = text;
+      document.body.appendChild(t);
+      requestAnimationFrame(() => t.classList.add('is-on'));
+      setTimeout(() => { t.classList.remove('is-on'); setTimeout(() => t.remove(), 400); }, 3200);
+    }
+
+    window.addEventListener('message', (e) => {
+      if (e.origin !== window.location.origin || !frame || e.source !== frame.contentWindow) return;
+      const d = e.data && e.data.gsQuickAdd;
+      if (!d) return;
+      // a window still opening (a very quick save) is closed as soon as it has opened
+      const close = () => { if (ready) modal.hide(); else modalEl.addEventListener('shown.bs.modal', () => modal.hide(), { once: true }); };
+      if (d.close) { close(); return; }
+      if (d.kind && d.id) { try { apply(d); } finally { close(); } }
+    });
+
+    // inside the window: Cancel (and Escape) close it
+    if (document.body.classList.contains('is-popup') && window.parent !== window) {
+      const close = () => window.parent.postMessage({ gsQuickAdd: { close: true } }, window.location.origin);
+      document.querySelectorAll('[data-popup-close]').forEach((b) => b.addEventListener('click', close));
+      document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !document.querySelector('.combo-list[style*="block"]')) close(); });
+    }
+
+    return { entries, open, apply };
+  })();
+
   // ------------------------------------------------------------------ searchable drop-downs
   // <select data-combo> becomes a box you type in: the list narrows with every letter (incremental search) and
   // matches any part of the text, so an account is found by its description and a name by any word of it.
@@ -375,8 +544,15 @@
           + (tail ? '<span class="combo-tail">' + mark(tail) + '</span>' : '') + '</div>';
       });
       if (!c.items.length) html += '<div class="combo-none">Nothing matches "' + esc(c.input.value.trim()) + '"</div>';
+      // v37: "Add new customer / supplier / account / item" at the foot of the list (QuickAdd)
+      c.adds = window.AppQuickAdd ? window.AppQuickAdd.entries(c.sel) : [];
+      if (c.adds.length) {
+        const typed = c.typed ? c.input.value.trim() : '';
+        html += '<div class="combo-adds">' + c.adds.map((a, j) => '<div class="combo-opt combo-add" role="option" data-i="' + (c.items.length + j) + '"><i class="bi bi-plus-circle"></i><span>'
+          + (typed ? 'Add "' + esc(typed) + '" as a new ' + esc(a.noun) : 'Add new ' + esc(a.noun)) + '</span></div>').join('') + '</div>';
+      }
       list.innerHTML = html;
-      c.hi = c.items.length ? 0 : -1;
+      c.hi = c.items.length ? 0 : (c.adds.length && c.typed && c.input.value.trim() ? 0 : -1);
       if (!words.length) { const cur = c.items.findIndex((o) => o.value === c.sel.value); if (cur >= 0) c.hi = cur; }
       paintHi(c, true);
     }
@@ -408,6 +584,14 @@
     }
 
     function choose(c, i) {
+      // an "Add new" line: the form of that list opens over the page, with what was typed as the name
+      if (i >= c.items.length && c.adds && c.adds[i - c.items.length]) {
+        const add = c.adds[i - c.items.length];
+        const typed = c.typed ? c.input.value.trim() : '';
+        hide(true);
+        window.AppQuickAdd.open(c.sel, add.kind, typed);
+        return;
+      }
       const val = i < 0 ? '' : (c.items[i] ? c.items[i].value : null);
       if (val === null) return;
       const changed = c.sel.value !== val;
@@ -464,15 +648,15 @@
         if (open !== c) return;
         // leaving with text typed: take the highlighted match; leaving it empty clears the choice
         if (c.typed && input.value.trim() === '' && c.blank) choose(c, -1);
-        else if (c.typed && c.hi >= 0) choose(c, c.hi);
+        else if (c.typed && c.hi >= 0 && c.hi < c.items.length) choose(c, c.hi);
         else hide(true);
       });
       input.addEventListener('keydown', (e) => {
         if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
           e.preventDefault();
           if (open !== c) { show(c); return; }
-          const n = c.items.length; if (!n) return;
-          c.hi = e.key === 'ArrowDown' ? Math.min(n - 1, c.hi + 1) : Math.max(c.blank ? -1 : 0, c.hi - 1);
+          const n = c.items.length; if (!n && !(c.adds && c.adds.length)) return;
+          c.hi = e.key === 'ArrowDown' ? Math.min(n + (c.adds ? c.adds.length : 0) - 1, c.hi + 1) : Math.max(c.blank ? -1 : 0, c.hi - 1);
           paintHi(c, true);
         } else if (e.key === 'Enter') {
           if (open === c) { e.preventDefault(); if (c.typed && input.value.trim() === '' && c.blank) choose(c, -1); else if (c.hi >= -1) choose(c, c.hi); }
@@ -492,6 +676,8 @@
     function auto(sel) {
       if (sel.multiple || sel.hasAttribute('data-no-combo') || sel.closest('[data-no-combo]')) return false;
       if (sel.hasAttribute('data-combo')) return true;
+      // a box with "Add new" lines is always a searchable box, however short its list (QuickAdd)
+      if (sel.dataset.add && window.AppQuickAdd && window.AppQuickAdd.entries(sel).length) return true;
       let n = 0;
       for (let i = 0; i < sel.options.length; i++) { if (sel.options[i].value !== '') n++; if (n > AUTO_MIN) return true; }
       return false;

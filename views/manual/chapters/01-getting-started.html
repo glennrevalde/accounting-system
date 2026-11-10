@@ -286,6 +286,45 @@
 <li>Short lists, such as a status or a yes-or-no choice, stay ordinary drop-downs.</li>
 </ul>
 <div class="man-callout man-example"><div class="man-callout-t"><i class="bi bi-journal-text"></i>Example</div><p>On the invoice, click <strong>Customer:Job</strong> and type <code>abc</code>. The list shrinks to ABC Trading Corp. and its jobs, such as ABC Trading Corp.:Office Renovation Project. Press Enter to take the first one.</p></div>
+<h3 id="sec-quick-add">Adding a new customer, supplier, account or item from a drop-down<a class="man-hash" href="#sec-quick-add" aria-label="Link to this section"><i class="bi bi-link-45deg"></i></a></h3>
+<p>When the name you need is not on the list yet, you do not have to leave the transaction. At the foot of the list of a <strong>Customer</strong>, <strong>Vendor</strong> (supplier), <strong>Pay to the order of</strong>, <strong>Paid to</strong>, <strong>Name</strong> or <strong>SL</strong>, <strong>Customer / Supplier</strong>, <strong>Account</strong> or <strong>Item</strong> box there is an <strong>Add new</strong> line. With a name typed in the box it reads, for example, <strong>Add "Northwind Packaging" as a new supplier</strong>.</p>
+<figure class="man-fig"><a class="man-zoom" href="assets/manual/img/quick_add__list.jpg" title="Click to enlarge"><img src="assets/manual/img/quick_add__list.jpg" alt="The Vendor box of Enter Bills with a name that is not on the list: Add "Northwind Packaging" as a new supplier" width="1094" height="360" loading="lazy" decoding="async"></a><figcaption>The Vendor box of Enter Bills with a name that is not on the list: Add "Northwind Packaging" as a new supplier</figcaption></figure>
+<p>Click it (or press the arrow keys to it and press Enter). The form of that list opens in a window over the transaction, with the name you typed already in it. Fill in what you need and click <strong>Save</strong>. The window closes, the new name is chosen in the box, and it is added to the other boxes of the same kind on the page, so the next lines can use it too. A green message at the corner says what was added. <strong>Cancel</strong> or the × closes the window and nothing is added.</p>
+<figure class="man-fig"><a class="man-zoom" href="assets/manual/img/quick_add__window.jpg" title="Click to enlarge"><img src="assets/manual/img/quick_add__window.jpg" alt="The New supplier window over Enter Bills, with the name already typed" width="1094" height="704" loading="lazy" decoding="async"></a><figcaption>The New supplier window over Enter Bills, with the name already typed</figcaption></figure>
+<div class="table-responsive man-table"><table class="table table-sm">
+<thead>
+<tr>
+<th>Box</th>
+<th>What it offers</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Customer or Customer:Job (invoices, estimates, sales orders, sales receipts, statement charges, credit memos, receive payments, the lines of purchases, the POS)</td>
+<td><strong>Add new customer</strong>: the Customer Center form, where a job can also be made (Job of).</td>
+</tr>
+<tr>
+<td>Vendor (purchase orders, item receipts, bills, supplier debit memos, receive items and enter bills, advances to suppliers)</td>
+<td><strong>Add new supplier</strong>: the Vendor Center form.</td>
+</tr>
+<tr>
+<td>Pay to the order of (checks), Paid to (cash vouchers), Name or SL (journal entries, cash vouchers), Customer / Supplier (the Expenses tab)</td>
+<td><strong>Add new customer</strong> and <strong>Add new supplier</strong>.</td>
+</tr>
+<tr>
+<td>Account (the Expenses tab, journal entries, cash vouchers, deposits, the bank account of a check, deposit to, processing costs)</td>
+<td><strong>Add new account</strong>: the Chart of Accounts form. A box that holds only some kinds of account (Bank and Credit Card for the account of a check) offers only those kinds.</td>
+</tr>
+<tr>
+<td>Item (the Items tab of purchase orders, item receipts, bills and checks; the lines of invoices, estimates, sales orders, sales receipts and credit memos; the outputs of Disassemble / Process Items)</td>
+<td><strong>Add new item</strong>: first the kind of item (Service, Inventory part, Non-inventory part, Inventory assembly, Other charge, and on sales also Subtotal, Group, Discount and Payment), then the Item List form of that kind. A purchase line offers only what can be bought; a processing output only inventory parts and assemblies.</td>
+</tr>
+</tbody>
+</table></div>
+<figure class="man-fig"><a class="man-zoom" href="assets/manual/img/quick_add__types.jpg" title="Click to enlarge"><img src="assets/manual/img/quick_add__types.jpg" alt="Add new item on a bill: the kinds of item that can be bought" width="1094" height="244" loading="lazy" decoding="async"></a><figcaption>Add new item on a bill: the kinds of item that can be bought</figcaption></figure>
+<figure class="man-fig"><a class="man-zoom" href="assets/manual/img/quick_add__payee.jpg" title="Click to enlarge"><img src="assets/manual/img/quick_add__payee.jpg" alt="Pay to the order of on a check: the new name can be a customer or a supplier" width="1094" height="380" loading="lazy" decoding="async"></a><figcaption>Pay to the order of on a check: the new name can be a customer or a supplier</figcaption></figure>
+<p>The new item's description, price or cost and tax code fill in on the line as soon as it is chosen, as for any other item.</p>
+<div class="man-callout man-note"><div class="man-callout-t"><i class="bi bi-info-circle"></i>Note</div><p>Only users who may create that kind of record see its <strong>Add new</strong> line: the Create permission on the Customer Center for customers, on the Vendor Center for suppliers, on the Chart of Accounts (with the special permission to change the Chart of Accounts) for accounts, and on the Item List for items. The form in the window checks the same permission again when it is saved, and the new record is in the audit trail as if it had been made on its own page.</p></div>
 <h3 id="s-the-lines-of-a-transaction">The lines of a transaction<a class="man-hash" href="#s-the-lines-of-a-transaction" aria-label="Link to this section"><i class="bi bi-link-45deg"></i></a></h3>
 <p>The middle of most forms is a grid of lines, one for each item, service or account.</p>
 <ul>

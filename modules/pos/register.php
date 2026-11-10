@@ -515,7 +515,7 @@ if ($fbMode) {
       <div class="card-body">
         <?php if ($recallId): ?><div class="alert alert-info py-1 small">Recalled suspended sale #<?= (int)$recallId ?></div><?php endif; ?>
         <label class="form-label">Customer</label>
-        <select class="form-select form-select-sm" name="customer_id" id="posCustomer"><?= options(Lookup::customers(false), $initialCustomer ?? p('customer_id'), 'Walk-in customer') ?></select>
+        <select class="form-select form-select-sm" name="customer_id" id="posCustomer"<?= QuickAdd::attr('customer') ?>><?= options(Lookup::customers(false), $initialCustomer ?? p('customer_id'), 'Walk-in customer') ?></select>
         <div class="small text-muted mt-1 mb-2" id="posLevel"></div>
         <div id="walkinBox" class="mb-2"><input class="form-control form-control-sm" name="walkin_name" maxlength="120" value="<?= h(is_post() ? p('walkin_name') : ($initialWalkin ?? '')) ?>" placeholder="Customer name on the receipt (optional)"></div>
         <?php if (Classes::ready()): ?>

@@ -1748,3 +1748,43 @@ table tr.avg-jump td a { color: inherit; text-decoration-color: rgba(180, 35, 24
 .item-pic-box { width: 132px; aspect-ratio: 4 / 3; border-radius: var(--radius-sm); overflow: hidden; border: 1px solid var(--line); background: linear-gradient(145deg, #eef3fb, #dde6f3);
   display: flex; align-items: center; justify-content: center; font-weight: 750; font-size: 1.4rem; color: #5b6b82; box-shadow: var(--raise-1); }
 .item-pic-box img { width: 100%; height: 100%; object-fit: cover; }
+
+/* ------------------------------------------------------------------ v37: "Add new" from a drop-down (QuickAdd) */
+.combo-adds { position: sticky; bottom: -.25rem; margin: .25rem -.25rem -.25rem; padding: .3rem .25rem; background: linear-gradient(180deg, #f7f9fc, #eef2f8);
+  border-top: 1px solid var(--line); border-radius: 0 0 9px 9px; }
+.combo-opt.combo-add { justify-content: flex-start; align-items: center; gap: .5rem; color: var(--blue-deep); font-weight: 600; }
+.combo-opt.combo-add i { font-size: 1rem; }
+.combo-opt.combo-add.is-hi { background: var(--blue-tint); }
+.qa-modal .modal-content { border: 1px solid var(--line); border-radius: 14px; overflow: hidden; box-shadow: 0 24px 60px -20px rgba(15, 23, 42, .45); }
+.qa-modal .modal-header { gap: .65rem; background: linear-gradient(180deg, #fff, var(--surface-2)); }
+.qa-ico { width: 34px; height: 34px; flex: 0 0 34px; border-radius: 9px; display: inline-grid; place-items: center; color: var(--blue-deep);
+  background: linear-gradient(180deg, #f1f6ff, #dde9fd); border: 1px solid #c5d8fa; box-shadow: 0 1px 0 #fff inset, 0 1px 2px rgba(13, 110, 253, .18); }
+.qa-frame-wrap { position: relative; background: var(--page); }
+.qa-frame { display: block; width: 100%; height: min(78vh, 860px); border: 0; background: var(--page); }
+.qa-loading { position: absolute; inset: 0; display: none; align-items: center; justify-content: center; gap: .5rem; color: var(--muted); background: var(--page); }
+.qa-modal.is-loading .qa-loading { display: flex; }
+.qa-types { display: none; padding: 1.1rem 1.25rem 1.25rem; }
+.qa-modal.is-picking .qa-types { display: block; }
+.qa-modal.is-picking .qa-frame-wrap { display: none; }
+.qa-types-q { font-weight: 600; margin-bottom: .75rem; color: var(--ink); }
+.qa-type-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: .6rem; }
+.qa-type { display: flex; align-items: center; gap: .65rem; padding: .7rem .85rem; text-align: left; border: 1px solid var(--line); border-radius: var(--radius);
+  background: linear-gradient(180deg, #fff, var(--surface-2)); color: var(--ink); font-weight: 600; box-shadow: var(--raise-1); transition: transform .12s, box-shadow .12s, border-color .12s; }
+.qa-type i { width: 32px; height: 32px; flex: 0 0 32px; display: inline-grid; place-items: center; border-radius: 8px; background: var(--blue-tint); color: var(--blue-deep); font-size: 1rem; }
+.qa-type:hover, .qa-type:focus-visible { border-color: #b9cff7; box-shadow: var(--raise-2); transform: translateY(-1px); outline: none; }
+.qa-toast { position: fixed; z-index: 1100; right: 1rem; bottom: 1rem; display: flex; align-items: center; gap: .5rem; max-width: calc(100vw - 2rem); padding: .65rem .9rem;
+  border-radius: var(--radius); background: #fff; border: 1px solid #b7e1c6; color: #146c43; font-weight: 600; box-shadow: var(--raise-2);
+  opacity: 0; transform: translateY(8px); transition: opacity .25s, transform .25s; pointer-events: none; }
+.qa-toast.is-on { opacity: 1; transform: none; }
+.qa-toast i { font-size: 1.1rem; }
+/* the form inside the window */
+body.is-popup { background: var(--page); }
+body.is-popup main.p-3 { padding: 1rem 1.1rem 1.25rem !important; }
+body.is-popup .page-bar { display: none; }
+@media (max-width: 767.98px) {
+  .qa-frame { height: calc(100vh - 62px); height: calc(100dvh - 62px); }
+  .qa-type-list { grid-template-columns: 1fr 1fr; }
+  .qa-toast { left: 1rem; right: 1rem; top: .75rem; bottom: auto; transform: translateY(-8px); }
+  .qa-modal .modal-content { border-radius: 0; border: 0; }
+  .qa-modal .modal-dialog { margin: 0; width: 100vw; max-width: none; height: 100%; }
+}

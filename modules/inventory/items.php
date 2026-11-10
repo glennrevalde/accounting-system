@@ -5,10 +5,7 @@ require_once APP_ROOT . '/modules/txn/_common.php';
 
 $pageKey = 'inv.items';
 $a = g('a');
-$typeLabels = [
-    'service' => 'Service', 'inventory' => 'Inventory part', 'non_inventory' => 'Non-inventory part', 'assembly' => 'Inventory assembly',
-    'other_charge' => 'Other charge', 'subtotal' => 'Subtotal', 'group' => 'Group', 'discount' => 'Discount', 'payment' => 'Payment',
-];
+$typeLabels = QuickAdd::ITEM_TYPES;
 $viewCosts = Access::viewCosts();
 
 if ($a === 'new' || $a === 'edit') {
@@ -27,6 +24,7 @@ if ($a === 'new' || $a === 'edit') {
     $components = $it ? DB::all('SELECT ic.*, i.code, i.name, i.cost, i.avg_cost, i.item_type FROM item_components ic JOIN items i ON i.id = ic.component_item_id WHERE ic.parent_item_id = :p', ['p' => $it['id']]) : [];
 
     handle_post(function () use ($it, $type, $tracked, $pageKey, $canEdit) {
+        $isNew = $it === null;
         if (!$canEdit) {
             Access::denyPage($pageKey, 'edit');
         }
@@ -185,6 +183,9 @@ if ($a === 'new' || $a === 'edit') {
             }
         }
         flash('success', 'Item saved.');
+        if ($isNew) {
+            QuickAdd::finish('item', (int)$it['id']);   // v37: added from a drop-down's "Add new": back to the transaction
+        }
         redirect_after_save(url($pageKey, ['a' => 'new', 'type' => $type]), url($pageKey, ['a' => 'edit', 'id' => $it['id']]));
     });
 
@@ -198,8 +199,8 @@ if ($a === 'new' || $a === 'edit') {
     <form method="post" enctype="multipart/form-data"><?= csrf_field() ?>
     <fieldset <?= $canEdit ? '' : 'disabled' ?>>
     <div class="card mb-3"><div class="card-header"><?= h($typeLabels[$type]) ?></div><div class="card-body row g-2">
-      <?= input_field('code', 'Item name / code', fv('code', $it), ['required' => true, 'class' => 'col-md-3']) ?>
-      <?= input_field('name', 'Display name', fv('name', $it), ['required' => true, 'class' => 'col-md-5']) ?>
+      <?= input_field('code', 'Item name / code', fv('code', $it, QuickAdd::prefill()), ['required' => true, 'class' => 'col-md-3', 'extra' => QuickAdd::popup() ? 'autofocus' : '']) ?>
+      <?= input_field('name', 'Display name', fv('name', $it, QuickAdd::prefill()), ['required' => true, 'class' => 'col-md-5']) ?>
       <?php if (in_array($type, ['inventory', 'assembly', 'non_inventory'], true)): ?><?= input_field('barcode', 'Barcode', fv('barcode', $it), ['class' => 'col-md-2']) ?><?php endif; ?>
       <?php
       $uomSets = Uom::sets(true, $it && $it['uom_set_id'] ? (int)$it['uom_set_id'] : null);

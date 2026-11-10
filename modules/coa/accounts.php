@@ -53,9 +53,11 @@ if ($a === 'new' || $a === 'edit') {
     if (!$canChange) {
         Access::denyPage($pageKey, 'change the Chart of Accounts');
     }
-    handle_post(function () use ($acc, $catOf, $pageKey) {
+    // v37: opened from a bank account box (or another narrowed one), the window offers only the types that box holds
+    $types = $acc ? $types : QuickAdd::accountTypesWanted($types);
+    handle_post(function () use ($acc, $catOf, $pageKey, $types) {
         $type = (string)p('account_type');
-        if (!isset($catOf[$type])) {
+        if (!isset($catOf[$type]) || !in_array($type, $types, true)) {
             fail('Choose the account type.');
         }
         $d = [
@@ -99,15 +101,18 @@ if ($a === 'new' || $a === 'edit') {
         }
         Accts::reset();
         flash('success', 'Account saved.');
+        if (!$acc) {
+            QuickAdd::finish('account', $id);   // v37: added from a drop-down's "Add new": back to the transaction
+        }
         redirect_after_save(url($pageKey, ['a' => 'new']), url($pageKey));
     });
     layout_start($acc ? 'Edit account ' . $acc['code'] : 'New account', ['actions' => btn_link(url($pageKey), 'Cancel')]);
     ?>
     <form method="post" class="card" style="max-width:860px"><div class="card-body row g-2">
       <?= csrf_field() ?>
-      <?= select_field('account_type', 'Account type', array_combine($types, $types), fv('account_type', $acc, 'Expense'), ['class' => 'col-md-4']) ?>
-      <?= input_field('code', 'Code', fv('code', $acc), ['class' => 'col-md-2', 'required' => true]) ?>
-      <?= input_field('name', 'Name', fv('name', $acc), ['class' => 'col-md-6', 'required' => true]) ?>
+      <?= select_field('account_type', 'Account type', array_combine($types, $types), fv('account_type', $acc, in_array('Expense', $types, true) ? 'Expense' : $types[0]), ['class' => 'col-md-4']) ?>
+      <?= input_field('code', 'Code', fv('code', $acc), ['class' => 'col-md-2', 'required' => true, 'extra' => QuickAdd::popup() ? 'autofocus' : '']) ?>
+      <?= input_field('name', 'Name', fv('name', $acc, QuickAdd::prefill()), ['class' => 'col-md-6', 'required' => true]) ?>
       <?= select_field('parent_id', 'Sub-account of', DB::pairs("SELECT id, CONCAT(code, ' - ', name) FROM accounts WHERE parent_id IS NULL AND id <> :id ORDER BY code", ['id' => $acc['id'] ?? 0]), fv('parent_id', $acc), ['blank' => '', 'class' => 'col-md-6']) ?>
       <?= select_field('normal_balance', 'Normal balance', ['Debit' => 'Debit', 'Credit' => 'Credit'], fv('normal_balance', $acc, ''), ['blank' => 'From type', 'class' => 'col-md-3']) ?>
       <?= check_field('is_active', 'Active', fv('is_active', $acc, 1), 'col-md-3') ?>

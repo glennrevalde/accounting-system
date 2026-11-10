@@ -93,7 +93,7 @@ layout_start('Enter Bill for Received Items');
 <ul class="nav nav-tabs"><li class="nav-item"><button type="button" class="nav-link active" data-bs-toggle="tab" data-bs-target="#bi">Items (update billed costs)</button></li>
   <li class="nav-item"><button type="button" class="nav-link" data-bs-toggle="tab" data-bs-target="#be">Other charges (freight, etc.)</button></li></ul>
 <div class="tab-content card card-body mb-3 border-top-0">
-  <div class="tab-pane fade show active" id="bi"><?= item_grid(is_post() ? grid_rows('lines') : $lines, ['mode' => 'purchase', 'show_site' => false, 'show_job' => true, 'min_rows' => 0]) ?>
+  <div class="tab-pane fade show active" id="bi"><?= item_grid(is_post() ? grid_rows('lines') : $lines, ['quick_add' => false, 'mode' => 'purchase', 'show_site' => false, 'show_job' => true, 'min_rows' => 0]) ?>
     <p class="small text-muted mb-0">Quantities are fixed to what was received. Change the cost if the vendor billed a different price; the inventory value is adjusted.</p></div>
   <div class="tab-pane fade" id="be"><?= expense_grid(is_post() ? grid_rows('expenses') : [], ['min_rows' => 1]) ?></div>
 </div>
