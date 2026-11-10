@@ -910,3 +910,19 @@
     });
   });
 })();
+
+// v36 Expenses tab: the Customer / Supplier box. Only a cost for a customer can be billed, so Billable is
+// cleared and switched off while a supplier is chosen on the line.
+(function () {
+  document.addEventListener('change', (e) => {
+    const sel = e.target;
+    if (!sel.matches || !sel.matches('select[data-f="exp_name"]')) return;
+    const tr = sel.closest('tr');
+    const bill = tr && tr.querySelector('input[data-f="exp_billable"]');
+    if (!bill) return;
+    const supplier = sel.value.charAt(0) === 'v';
+    if (supplier) bill.checked = false;
+    bill.disabled = supplier;
+    bill.title = supplier ? 'Only a cost for a customer can be billed' : '';
+  });
+})();

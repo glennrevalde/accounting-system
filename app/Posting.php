@@ -262,6 +262,8 @@ final class Posting
             'item_id'     => $l['item_id'],
             'site_id'     => $l['site_id'] ?: $this->t['site_id'],
             'customer_id' => $l['customer_id'] ?: $this->t['customer_id'],
+            // an expense line put on a supplier (Customer / Supplier box) carries that supplier, for its subsidiary ledger
+            'vendor_id'   => ($l['line_kind'] === 'expense' && !empty($l['vendor_id'])) ? (int)$l['vendor_id'] : $this->t['vendor_id'],
             // a check made out to an employee or other name carries that name onto its lines,
             // so the subsidiary ledger of the account can list it
             'other_name_id' => ($l['other_name_id'] ?? null) ?: ($this->t['other_name_id'] ?? null),

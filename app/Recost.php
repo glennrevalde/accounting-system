@@ -14,8 +14,12 @@ declare(strict_types=1);
  *
  * It runs once the saving transaction is committed, in a transaction of its own: if it cannot finish, nothing of it is
  * kept and a message asks for Rebuild Data. It is skipped, with a message, when more than "auto_recost_limit"
- * transactions would be posted again (System Administration > Company, Security & Closing Date > Inventory and POS),
- * and it can be switched off there ("auto_recost").
+ * transactions would be posted again (System Administration > Company, Security & Closing Date > Inventory and POS).
+ *
+ * v36: which transactions start it is a setting ("auto_recost_scope"): Disassemble / Process Items only (the
+ * standard), every inventory transaction, or never. With the standard, bills, item receipts, checks, sales,
+ * adjustments and transfers save as before and start nothing; only a back-dated, edited, voided or deleted
+ * processing order costs the later transactions again. Rebuild Data still works out everything in date order.
  *
  * A new transaction dated today (a POS sale, a bill) has nothing after it and starts nothing. On one date, a receipt
  * entered after the day's sales is settled by Stock::move (the shortfall at the cost received); an edit, void or delete
@@ -25,6 +29,20 @@ final class Recost
 {
     /** The earliest date waiting to be costed again once the current transaction is committed */
     private static ?string $from = null;
+
+    /** What starts a re-costing, label for the settings page */
+    public const SCOPES = [
+        'process' => 'Disassemble / Process Items only',
+        'all'     => 'Every inventory transaction (bills, item receipts, checks, sales, adjustments, transfers, processing)',
+        'off'     => 'Never (run Rebuild Data instead)',
+    ];
+
+    /** The setting: process (the standard), all or off */
+    public static function scope(): string
+    {
+        $s = Settings::get('auto_recost_scope', 'process');
+        return isset(self::SCOPES[$s]) ? $s : 'process';
+    }
 
     /** The items of a transaction's movements, and the date of them: [date or null, item ids] */
     public static function footprint(int $txnId): array
@@ -41,7 +59,15 @@ final class Recost
      */
     public static function note(int $txnId, array $before, array $after): void
     {
-        if (Posting::$replaying || Settings::get('auto_recost', '1') !== '1') {
+        if (Posting::$replaying) {
+            return;
+        }
+        $scope = self::scope();
+        if ($scope === 'off') {
+            return;
+        }
+        // the standard: only a processing order (Disassemble / Process Items) starts it
+        if ($scope === 'process' && (string)DB::value('SELECT txn_type FROM transactions WHERE id = :id', ['id' => $txnId]) !== Processing::TXN_TYPE) {
             return;
         }
         $dates = array_filter([$before[0], $after[0]]);
@@ -79,7 +105,7 @@ final class Recost
             if ($r['skipped']) {
                 if ($web) {
                     flash('warning', 'The costs of the ' . number_format($r['count']) . ' inventory transactions dated from ' . fdate($date)
-                        . ' were not worked out again: more than ' . number_format($r['limit']) . ' at once. Run System Administration > Utilities: Verify &amp; Rebuild Data > Rebuild data so their costs follow the dates.');
+                        . ' were not worked out again: more than ' . number_format($r['limit']) . ' at once. Run System Administration > Utilities: Verify & Rebuild Data > Rebuild data so their costs follow the dates.');
                 }
             } elseif ($r['count'] > 0 && $web) {
                 flash('info', 'The costs of ' . number_format($r['count']) . ' inventory transaction' . ($r['count'] === 1 ? '' : 's') . ' dated from ' . fdate($date)
@@ -89,7 +115,7 @@ final class Recost
             error_log('Recost from ' . $date . ': ' . $e->getMessage());
             if ($web) {
                 flash('warning', 'The transaction was saved, but the costs of the later transactions could not be worked out again ('
-                    . h($e->getMessage()) . '). Run System Administration > Utilities: Verify &amp; Rebuild Data > Rebuild data.');
+                    . $e->getMessage() . '). Run System Administration > Utilities: Verify & Rebuild Data > Rebuild data.');
             }
         }
     }

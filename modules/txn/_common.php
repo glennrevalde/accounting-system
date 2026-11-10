@@ -212,6 +212,21 @@ function parse_item_lines(array $rows, string $mode, array $ctx = []): array
     return $out;
 }
 
+/** The name code of an expense line: from the form ("name"), else from its saved customer or supplier */
+function expense_name_code(array $l): string
+{
+    if (isset($l['name']) && is_string($l['name']) && preg_match('/^[cv]\d+$/', $l['name'])) {
+        return $l['name'];
+    }
+    if (!empty($l['customer_id'])) {
+        return 'c' . (int)$l['customer_id'];
+    }
+    if (!empty($l['vendor_id'])) {
+        return 'v' . (int)$l['vendor_id'];
+    }
+    return '';
+}
+
 /** Expense-tab lines (bills, checks, vendor credits) */
 function parse_expense_lines(array $rows): array
 {
@@ -233,9 +248,21 @@ function parse_expense_lines(array $rows): array
             'amount'      => $amount,
             'tax_code_id' => $taxId,
             'tax_amount'  => r2($amount * tax_rate($taxId) / 100),
-            'customer_id' => !empty($r['customer_id']) ? (int)$r['customer_id'] : null,
-            'is_billable' => !empty($r['is_billable']) && !empty($r['customer_id']) ? 1 : 0,
+            'customer_id' => null,
+            'vendor_id'   => null,
+            'is_billable' => 0,
         ];
+        // the Customer / Supplier box: a customer (job costing, billable) or a supplier (its subsidiary ledger)
+        $code = expense_name_code($r);
+        if ($code !== '') {
+            $id = (int)substr($code, 1);
+            $table = $code[0] === 'c' ? 'customers' : 'vendors';
+            if (!DB::value("SELECT 1 FROM $table WHERE id = :id", ['id' => $id])) {
+                fail('Choose the customer or supplier of every expense line from the list.');
+            }
+            $line[$code[0] === 'c' ? 'customer_id' : 'vendor_id'] = $id;
+            $line['is_billable'] = $code[0] === 'c' && !empty($r['is_billable']) ? 1 : 0;
+        }
         if (!empty($r['id']) && ctype_digit((string)$r['id'])) {
             $line['id'] = (int)$r['id'];
         }
@@ -647,7 +674,7 @@ function render_txn_view(array $t, string $pageKey): void
               <th>Item / Account</th><th>Description</th><th class="num">Qty</th><th class="num">Rate</th><th class="num">Disc</th><th class="num">Amount</th><th>Tax</th>
               <?php if (in_array($type, ['sales_order', 'purchase_order'], true)): ?><th class="num"><?= $type === 'sales_order' ? 'Invoiced' : 'Received' ?></th><?php endif; ?>
               <?php if ($showCosts && $isSales && $posting): ?><th class="num">Cost</th><?php endif; ?>
-              <?php if (in_array($type, PURCHASE_TYPES, true)): ?><th>Customer:Job</th><?php endif; ?>
+              <?php if (in_array($type, PURCHASE_TYPES, true)): ?><th>Customer / Supplier</th><?php endif; ?>
             <?php endif; ?>
           </tr></thead>
           <tbody>
@@ -672,7 +699,7 @@ function render_txn_view(array $t, string $pageKey): void
                 <td class="small"><?= $l['tax_code_id'] ? h(Lookup::taxCodes()[$l['tax_code_id']] ?? '') . ' ' . money($l['tax_amount'], true) : '' ?></td>
                 <?php if (in_array($type, ['sales_order', 'purchase_order'], true)): ?><td class="num"><?= qty($l['qty_fulfilled']) ?><?= (int)$l['is_closed'] ? ' <span class="badge text-bg-secondary">closed</span>' : '' ?></td><?php endif; ?>
                 <?php if ($showCosts && $isSales && $posting): ?><td class="num"><?= money($l['cost_amount'], true) ?></td><?php endif; ?>
-                <?php if (in_array($type, PURCHASE_TYPES, true)): ?><td><?= h($l['customer_name']) ?></td><?php endif; ?>
+                <?php if (in_array($type, PURCHASE_TYPES, true)): ?><td><?= h($l['customer_name'] ?: ($l['line_kind'] === 'expense' ? ($l['vendor_name'] ?? '') : '')) ?></td><?php endif; ?>
               </tr>
             <?php endif; ?>
           <?php endforeach; ?>

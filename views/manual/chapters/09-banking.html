@@ -134,15 +134,16 @@
 <td>The description of the line.</td>
 </tr>
 <tr>
-<td>Customer:Job</td>
-<td>The customer or job the cost is for, if any.</td>
+<td>Customer / Supplier</td>
+<td>The customer or job the cost is for, or a supplier, if any. A supplier puts the line on that supplier's subsidiary ledger, even when the check is made out to someone else. The expense line of the general ledger then carries that supplier, so the Subsidiary Ledger and Expenses by Vendor list it under the supplier. Type part of the name; the list shows "Customer" or "Supplier" after each name.</td>
 </tr>
 <tr>
 <td>Billable</td>
-<td>Tick, with a Customer:Job, to bill the cost to that customer later.</td>
+<td>Tick, with a customer or job, to bill the cost to that customer later. It is switched off while a supplier is chosen.</td>
 </tr>
 </tbody>
 </table></div>
+<figure class="man-fig"><a class="man-zoom" href="assets/manual/img/bank_write_checks__supplier.jpg" title="Click to enlarge"><img src="assets/manual/img/bank_write_checks__supplier.jpg" alt="The Customer / Supplier box of an expense line: typing co lists the customers and the suppliers whose names contain it" width="1094" height="320" loading="lazy" decoding="async"></a><figcaption>The Customer / Supplier box of an expense line: typing co lists the customers and the suppliers whose names contain it</figcaption></figure>
 <p><strong>Items</strong> tab:</p>
 <div class="table-responsive man-table"><table class="table table-sm">
 <thead>
@@ -182,7 +183,7 @@
 </tr>
 <tr>
 <td>Customer:Job and Billable</td>
-<td>As on the Expenses tab.</td>
+<td>As on the Expenses tab, for customers only.</td>
 </tr>
 </tbody>
 </table></div>

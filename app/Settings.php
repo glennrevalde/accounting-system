@@ -37,7 +37,7 @@ final class Settings
         // v35: the outputs of a processing order must cost what its inputs cost, within this percentage
         'processing_cost_tolerance' => '2',
         // v35: a back-dated, edited, voided or deleted inventory transaction has the later ones costed again in date order
-        'auto_recost'             => '1',
+        'auto_recost_scope'       => 'process',
         'auto_recost_limit'       => '2000',
         'large_discount_pct'      => '10',
         // wording printed on POS receipts (System Administration > Company, Security & Closing Date)

@@ -29,8 +29,8 @@ $groups = [
         'allow_negative_stock' => ['Allow selling or moving stock below zero (with warning)', 'bool'],
         'block_zero_cost_sales' => ['Block sales of items with no unit cost (inventory parts and the items of item groups)', 'bool'],
         'block_zero_cost_processing' => ['Block posting processing orders with no unit cost (inputs, co-products and by-products)', 'bool'],
-        'processing_cost_tolerance' => ['Processing orders: largest difference allowed between the cost of the outputs and the cost of the inputs and labor (%)', 'num'],
-        'auto_recost' => ['Cost again the later transactions of the items when an inventory transaction is back-dated, edited, voided or deleted', 'bool'],
+        'processing_cost_tolerance' => ['Disassemble / Process Items only: largest difference allowed between the cost of the outputs and the cost of the inputs and labor (%)', 'num'],
+        'auto_recost_scope' => ['Cost the later inventory transactions again, in date order, when one of these is back-dated, edited, voided or deleted', 'select'],
         'auto_recost_limit' => ['Cost again at most this many later transactions at once (more: run Rebuild Data)', 'int'],
     ],
     'POS receipt wording' => [
@@ -52,7 +52,7 @@ $groups = [
 ];
 
 // choices of the 'select' settings
-$choices = ['bt_printer_width' => Receipt::WIDTHS];
+$choices = ['bt_printer_width' => Receipt::WIDTHS, 'auto_recost_scope' => Recost::SCOPES];
 
 handle_post(function () use ($groups, $pageKey, $choices) {
     Access::require($pageKey, 'edit');

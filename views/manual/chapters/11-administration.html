@@ -780,12 +780,12 @@
 <td>Ticked (the standard): <strong>Save and post</strong> and <strong>Complete and post</strong> on <a href="manual.php?c=inventory#pg-inv-process">Disassemble / Process Items</a> are refused when an input has no unit cost or average unit cost, or a co-product or by-product would be received at no cost (scrap may be). <strong>Save as pending</strong> is still allowed. Cleared: such orders are posted as before.</td>
 </tr>
 <tr>
-<td><strong>Processing orders: largest difference allowed between the cost of the outputs and the cost of the inputs and labor (%)</strong></td>
-<td>2 to begin with. A processing order whose outputs are costed more than this percentage above or below its inputs plus labor and other costs is not saved (see <a href="manual.php?c=inventory#sec-process-reconcile">The outputs must cost what the inputs cost</a>). From 0 to 100.</td>
+<td><strong>Disassemble / Process Items only: largest difference allowed between the cost of the outputs and the cost of the inputs and labor (%)</strong></td>
+<td>2 to begin with. Only processing orders are checked; bills, checks and the other transactions are not. A processing order whose outputs are costed more than this percentage above or below its inputs plus labor and other costs is not saved (see <a href="manual.php?c=inventory#sec-process-reconcile">The outputs must cost what the inputs cost</a>). From 0 to 100.</td>
 </tr>
 <tr>
-<td><strong>Cost again the later transactions of the items when an inventory transaction is back-dated, edited, voided or deleted</strong></td>
-<td>Ticked (the standard): the inventory transactions dated from the date of the change are posted again in date order, so the average costs and the cost of sales follow the dates (see <a href="manual.php?c=inventory#sec-recost">Costing again after a back-dated or edited transaction</a>). Cleared: they keep their costs until you run Rebuild data.</td>
+<td><strong>Cost the later inventory transactions again, in date order, when one of these is back-dated, edited, voided or deleted</strong></td>
+<td><strong>Disassemble / Process Items only</strong> (the standard): a processing order saved with an earlier date, edited, voided or deleted posts the later inventory transactions again in date order. <strong>Every inventory transaction</strong>: bills, item receipts, checks, sales, adjustments and transfers do so too. <strong>Never</strong>: nothing is costed again until you run Rebuild data. See <a href="manual.php?c=inventory#sec-recost">Costing again after a back-dated or edited transaction</a>.</td>
 </tr>
 <tr>
 <td><strong>Cost again at most this many later transactions at once</strong></td>
