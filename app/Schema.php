@@ -8,7 +8,7 @@ declare(strict_types=1);
  */
 final class Schema
 {
-    private const FLAG = 'schema_ok_2026_12_03';
+    private const FLAG = 'schema_ok_2026_12_24';
 
     /**
      * file => one cheap probe.
@@ -103,6 +103,14 @@ final class Schema
         // v32: the table of the receipts ticked to settle (the query fails without it), and the Financial menu
         'database/migrations/2026_12_03_settle_receipts_financial_menu.sql' =>
             ['SELECT (SELECT COUNT(*) FROM clearing_settlements WHERE 1 = 0) + (SELECT COUNT(*) FROM modules WHERE code = \'coa\' AND name = \'Financial\')', 1],
+        // v33: the Trial Balance by Class and the Statement of Cash Flows by Class
+        'database/migrations/2026_12_10_class_reports.sql' =>
+            ['SELECT COUNT(*) FROM pages WHERE page_key IN (\'rpt.trial_balance_class\', \'rpt.cash_flow_class\')', 2],
+        // v35: the FB POS: the item columns and the groups table (the query fails without them), and its two pages
+        'database/migrations/2026_12_24_fb_pos.sql' =>
+            ['SELECT (SELECT COUNT(*) FROM pages WHERE page_key IN (\'pos.fb\', \'pos.fb_menu\'))
+                   + (SELECT COUNT(fb_pos) + COUNT(fb_group_id) + COUNT(fb_sort) + COUNT(image_file) FROM items WHERE 1 = 0)
+                   + (SELECT COUNT(*) FROM fb_pos_groups WHERE 1 = 0)', 2],
     ];
 
     private static ?array $pending = null;

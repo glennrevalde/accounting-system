@@ -394,6 +394,76 @@
 <li>The date of a sale is the day it is completed, not the business date of the shift.</li>
 <li>The stock shown in the item list and cart is the site's stock when the page was opened.</li>
 </ul>
+<h2 id="pg-pos-fb">FB POS<a class="man-hash" href="#pg-pos-fb" aria-label="Link to this section"><i class="bi bi-link-45deg"></i></a></h2>
+<p>The FB POS is a second selling screen, made for a food and beverage counter such as a burger shop. The items are shown as pictures with their name and price, under menu groups (Burgers, Fries &amp; Sides, Drinks, Combo Meals) that you name and put in order yourself. The cashier taps a picture to put the item on the order.</p>
+<p>Only the screen is different. The FB POS sells exactly as the <a href="#pg-pos-register">POS Register</a> does: the same terminals, shifts, cash drops and readings, payment methods, approval codes, receipts, returns and voids, and the same Point of Sale reports. A sale made on the FB POS is a POS sale like any other, with its receipt number from the terminal.</p>
+<p><strong>Where to find it:</strong> Point of Sale &gt; FB POS. Also the <strong>Open the FB POS</strong> button of <a href="#pg-pos-fb_menu">FB POS Menu &amp; Groups</a>.</p>
+<figure class="man-fig"><a class="man-zoom" href="assets/manual/img/pos_fb__order.jpg" title="Click to enlarge"><img src="assets/manual/img/pos_fb__order.jpg" alt="The FB POS of Sample Burger House: the menu groups as tabs, the items as pictures with their price, and the order on the right" width="1094" height="800" loading="lazy" decoding="async"></a><figcaption>The FB POS of Sample Burger House: the menu groups as tabs, the items as pictures with their price, and the order on the right</figcaption></figure>
+<p>The roles that may open the POS Register may open the FB POS, with the same rights (the upgrade copies them). Change them in System Administration &gt; Roles &amp; Page Access if a counter should use only one of the two.</p>
+<h4 id="s-fb-the-menu">The menu<a class="man-hash" href="#s-fb-the-menu" aria-label="Link to this section"><i class="bi bi-link-45deg"></i></a></h4>
+<ul>
+<li><strong>Find an item</strong>: type part of the name or code to narrow the pictures. Scanning a barcode, or typing a code and pressing Enter, puts that item on the order at once.</li>
+<li><strong>The tabs</strong>: <strong>All</strong>, then one tab for each menu group that has items, in the order set on the Menu &amp; Groups page, then <strong>Other</strong> for items with no group.</li>
+<li><strong>The pictures</strong>: tap one to add one of the item. The price shown is the price for the customer on the order (it follows the customer's price level). Under it is the stock at the site, for inventory parts and assemblies. A number in the corner shows how many of the item are already on the order. An item without a picture shows the first letters of its name.</li>
+</ul>
+<figure class="man-fig"><a class="man-zoom" href="assets/manual/img/pos_fb__tab.jpg" title="Click to enlarge"><img src="assets/manual/img/pos_fb__tab.jpg" alt="The Burgers tab, with one Bacon Cheese Burger and two Cheese Burgers on the order" width="1094" height="800" loading="lazy" decoding="async"></a><figcaption>The Burgers tab, with one Bacon Cheese Burger and two Cheese Burgers on the order</figcaption></figure>
+<h4 id="s-fb-the-order">The order<a class="man-hash" href="#s-fb-the-order" aria-label="Link to this section"><i class="bi bi-link-45deg"></i></a></h4>
+<div class="table-responsive man-table"><table class="table table-sm">
+<thead>
+<tr>
+<th>Part</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Customer</strong></td>
+<td>Blank is a walk-in. Choose a customer to use the customer's price level, or to charge the sale to an approved account.</td>
+</tr>
+<tr>
+<td><strong>Name on the order</strong></td>
+<td>Optional: a name or table number for a walk-in customer. It is printed on the receipt.</td>
+</tr>
+<tr>
+<td><strong>Class</strong></td>
+<td>The class of the sale, as on the POS Register.</td>
+</tr>
+<tr>
+<td><strong>The lines</strong></td>
+<td>Each item with its price each, the <strong>−</strong> and <strong>+</strong> buttons and the quantity box, the amount, and the <strong>×</strong> that takes it off the order.</td>
+</tr>
+<tr>
+<td><strong>Subtotal, VAT, Total</strong></td>
+<td>Worked out as on the POS Register.</td>
+</tr>
+<tr>
+<td><strong>Payment boxes</strong></td>
+<td>One box for each payment method of the terminal, with the reference or approval number for cards, banks and e-wallets. <strong>Change</strong> and <strong>Balance due</strong> follow what you type.</td>
+</tr>
+<tr>
+<td><strong>Complete sale</strong></td>
+<td>Saves and posts the sale and opens the receipt. Its <strong>New sale</strong> button returns to the FB POS.</td>
+</tr>
+<tr>
+<td><strong>Suspend</strong>, <strong>Charge</strong>, <strong>Clear</strong></td>
+<td>Suspend keeps the order to finish later (it is listed under <strong>Suspended orders</strong> with a <strong>Recall</strong> button); Charge puts the sale on the account of an approved customer; Clear empties the order.</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Customer paying an account balance</strong>, under the order, takes a payment on a customer's account, as on the POS Register.</p>
+<p>The FB POS sells at the price shown; there is no discount or price box on it (use the POS Register for a sale that needs one). A sale that takes an item below zero asks the same question, and the same supervisor approval when one is needed, as on the POS Register.</p>
+<h4 id="s-fb-on-a-phone">On a phone or tablet<a class="man-hash" href="#s-fb-on-a-phone" aria-label="Link to this section"><i class="bi bi-link-45deg"></i></a></h4>
+<p>On a narrow screen the order moves under the menu. A bar at the bottom of the screen shows how many items are on the order and the total; tap <strong>Order</strong> on it to go to the order and pay.</p>
+<figure class="man-fig man-fig-narrow"><a class="man-zoom" href="assets/manual/img/pos_fb__phone.jpg" title="Click to enlarge"><img src="assets/manual/img/pos_fb__phone.jpg" alt="The FB POS on a phone, with the order bar at the bottom" width="390" height="844" loading="lazy" decoding="async"></a><figcaption>The FB POS on a phone, with the order bar at the bottom</figcaption></figure>
+<h4 id="s-fb-step-by-step">Step by step: sell on the FB POS<a class="man-hash" href="#s-fb-step-by-step" aria-label="Link to this section"><i class="bi bi-link-45deg"></i></a></h4>
+<ol>
+<li>Open a shift on the terminal (Point of Sale &gt; Shifts, Cash Drops &amp; Readings), if none is open.</li>
+<li>Open Point of Sale &gt; FB POS.</li>
+<li>Tap a tab, then tap the pictures of the items the customer orders. Use <strong>+</strong> and <strong>−</strong> to change a quantity.</li>
+<li>Type the cash received, or the amount and reference of another payment method.</li>
+<li>Click <strong>Complete sale</strong>. The receipt opens; print it, then click <strong>New sale</strong>.</li>
+</ol>
+<div class="man-callout man-note"><div class="man-callout-t"><i class="bi bi-info-circle"></i>Note</div><p>No item is on the FB POS until it is ticked <strong>Show on the FB POS</strong>, on the item form or on <a href="#pg-pos-fb_menu">FB POS Menu &amp; Groups</a>. The FB POS sells inventory parts, assemblies, non-inventory parts, services, other charges and item groups. An item group is sold at its group price, and its items leave the stock, as on the POS Register.</p></div>
 <h2 id="pg-pos-shifts">Shifts, Cash Drops &amp; Readings<a class="man-hash" href="#pg-pos-shifts" aria-label="Link to this section"><i class="bi bi-link-45deg"></i></a></h2>
 <p>This page opens and closes the cashier's shift on the current terminal, records cash taken out of the drawer, and prints the X- and Z-readings.</p>
 <p><strong>Where to find it:</strong> Point of Sale &gt; Shifts, Cash Drops &amp; Readings. Also the <strong>Shift &amp; readings</strong> button of the register, and the Home dashboard <strong>Quick actions</strong>. The Home dashboard also lists the shifts that are open.</p>
@@ -872,6 +942,27 @@
 <li>A user limited to some sites (see <a href="manual.php?c=administration#pg-admin-users">User Accounts</a>) sees only the terminals at those sites.</li>
 <li>Terminals cannot be deleted; untick <strong>Active</strong> instead.</li>
 </ul>
+<h2 id="pg-pos-fb_menu">FB POS Menu &amp; Groups<a class="man-hash" href="#pg-pos-fb_menu" aria-label="Link to this section"><i class="bi bi-link-45deg"></i></a></h2>
+<p>Here you set up what the <a href="#pg-pos-fb">FB POS</a> shows: the menu groups (its tabs) and which items appear, under which group and in which order.</p>
+<p><strong>Where to find it:</strong> Point of Sale &gt; FB POS Menu &amp; Groups (under Setup). Also the <strong>Menu &amp; groups</strong> button of the FB POS and of the FB POS part of the item form. The roles that may open POS Terminals may open it, with the same rights.</p>
+<figure class="man-fig"><a class="man-zoom" href="assets/manual/img/pos_fb_menu__main.jpg" title="Click to enlarge"><img src="assets/manual/img/pos_fb_menu__main.jpg" alt="FB POS Menu &amp; Groups: the four menu groups on the left, and the items with their picture, On FB POS tick, group and order" width="1094" height="950" loading="lazy" decoding="async"></a><figcaption>FB POS Menu &amp; Groups: the four menu groups on the left, and the items with their picture, On FB POS tick, group and order</figcaption></figure>
+<h4 id="s-fbm-groups">Menu groups<a class="man-hash" href="#s-fbm-groups" aria-label="Link to this section"><i class="bi bi-link-45deg"></i></a></h4>
+<p>Type the <strong>Name</strong> (for example Burgers) and its <strong>Order</strong> (lower numbers come first), keep <strong>Shown on the FB POS</strong> ticked and click <strong>Add group</strong>. <strong>Edit</strong> changes a group; clearing <strong>Shown on the FB POS</strong> hides its tab without changing its items. <strong>Delete</strong> removes the group; its items stay on the FB POS under <strong>Other</strong>. A name can be used by one group only. The <strong>Items</strong> number opens the list of the group's items.</p>
+<h4 id="s-fbm-items">The items<a class="man-hash" href="#s-fbm-items" aria-label="Link to this section"><i class="bi bi-link-45deg"></i></a></h4>
+<p>Use <strong>Find</strong>, <strong>Show</strong> (the items on the FB POS, or all the items that can be) and <strong>Group</strong> to narrow the list, then click <strong>Show</strong>. For each item:</p>
+<ul>
+<li><strong>On FB POS</strong>: ticked, the item is on the FB POS.</li>
+<li><strong>Group</strong>: the tab it is shown under; <strong>Other (no group)</strong> puts it under Other.</li>
+<li><strong>Order</strong>: its place within its group; lower numbers come first, then the name.</li>
+</ul>
+<p>Click <strong>Save the menu</strong>. The change is recorded in the audit trail. The picture of an item is uploaded on the item itself (Inventory &gt; Item List &gt; the item &gt; <strong>FB POS</strong>, see <a href="manual.php?c=inventory#sec-item-fb-pos">The FB POS part of the item form</a>); click the item's name to open it.</p>
+<h4 id="s-fbm-step-by-step">Step by step: set up the FB POS<a class="man-hash" href="#s-fbm-step-by-step" aria-label="Link to this section"><i class="bi bi-link-45deg"></i></a></h4>
+<ol>
+<li>Add the menu groups, for example Combo Meals (0), Burgers (1), Fries &amp; Sides (2) and Drinks (3).</li>
+<li>Choose <strong>Show: All items that can be</strong>, tick <strong>On FB POS</strong> for the items to sell, choose their group and order, and click <strong>Save the menu</strong>.</li>
+<li>Open each item and upload its picture under <strong>FB POS</strong>.</li>
+<li>Click <strong>Open the FB POS</strong> to check the screen.</li>
+</ol>
 <h2 id="s-point-of-sale-reports">Point of Sale reports<a class="man-hash" href="#s-point-of-sale-reports" aria-label="Link to this section"><i class="bi bi-link-45deg"></i></a></h2>
 <p>The POS reports are under <strong>Point of Sale &gt; Reports</strong>. They use the common report tools (<strong>Refresh</strong>, <strong>Columns</strong>, <strong>Print / PDF</strong>, <strong>Export to spreadsheet</strong>, <strong>Email link</strong>, <strong>Modify Report</strong>, <strong>Memorize</strong>, and clicking a figure to see its detail), explained in <a href="manual.php?c=home-and-reports#sec-reports">Working with reports</a>. Most of them can be narrowed to a <strong>Site</strong>, <strong>Terminal</strong> and <strong>Cashier</strong>. Unless a report says otherwise, voided and suspended sales are left out and returns are deducted. Cost and margin columns are shown only to users who may view costs.</p>
 <h3 id="pg-rpt-pos_sales_txn">POS Sales by Transaction No. (detail)<a class="man-hash" href="#pg-rpt-pos_sales_txn" aria-label="Link to this section"><i class="bi bi-link-45deg"></i></a></h3>
@@ -899,8 +990,8 @@
 <h3 id="pg-rpt-pos_sales_hour">POS Sales by Hour<a class="man-hash" href="#pg-rpt-pos_sales_hour" aria-label="Link to this section"><i class="bi bi-link-45deg"></i></a></h3>
 <p>Net sales for each hour of the day, with a bar chart. Use it to plan staff for the busy hours.</p>
 <p><strong>Where to find it:</strong> Point of Sale &gt; Reports &gt; POS Sales by Hour.</p>
-<figure class="man-fig"><a class="man-zoom" href="assets/manual/img/rpt_pos_sales_hour__report.jpg" title="Click to enlarge"><img src="assets/manual/img/rpt_pos_sales_hour__report.jpg" alt="POS Sales by Hour for September 2026" width="1094" height="605" loading="lazy" decoding="async"></a><figcaption>POS Sales by Hour for September 2026</figcaption></figure>
-<p>Filters: <strong>Dates</strong> (default <strong>This month</strong>), <strong>Site</strong>, <strong>Terminal</strong> and <strong>Cashier</strong>. Columns: <strong>Hour</strong> (for example 14:00–14:59), <strong>Transactions</strong>, <strong>Net sales</strong> (net of VAT, returns deducted) and <strong>Average sale</strong>.</p>
+<figure class="man-fig"><a class="man-zoom" href="assets/manual/img/rpt_pos_sales_hour__report.jpg" title="Click to enlarge"><img src="assets/manual/img/rpt_pos_sales_hour__report.jpg" alt="POS Sales by Hour, with the TOTAL of the Transactions, Net sales and Average sale columns" width="1094" height="883" loading="lazy" decoding="async"></a><figcaption>POS Sales by Hour, with the TOTAL of the Transactions, Net sales and Average sale columns</figcaption></figure>
+<p>Filters: <strong>Dates</strong> (default <strong>This month</strong>), <strong>Site</strong>, <strong>Terminal</strong> and <strong>Cashier</strong>. Columns: <strong>Hour</strong> (for example 14:00–14:59), <strong>Transactions</strong>, <strong>Net sales</strong> (net of VAT, returns deducted) and <strong>Average sale</strong>. The <strong>TOTAL</strong> row adds up the <strong>Transactions</strong> and the <strong>Net sales</strong>, and its <strong>Average sale</strong> is the total net sales divided by all the transactions.</p>
 <h3 id="pg-rpt-pos_daily_summary">POS Daily Sales Summary<a class="man-hash" href="#pg-rpt-pos_daily_summary" aria-label="Link to this section"><i class="bi bi-link-45deg"></i></a></h3>
 <p>One line per day and terminal.</p>
 <p><strong>Where to find it:</strong> Point of Sale &gt; Reports &gt; POS Daily Sales Summary.</p>

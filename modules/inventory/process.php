@@ -342,6 +342,10 @@ $runForm = function (bool $auto) use (&$st, &$preview, $t, $sites, $pageKey, $tx
         return;
     }
     $pending = $do === 'pending';
+    // v35: the outputs must cost what the inputs and labor cost, within the tolerance (2%); otherwise the order is not
+    // saved and the user revises the output costs (the allocation stays on the form to work from)
+    $preview = [$est, $alloc];
+    Processing::assertReconciled((float)$est['pool'], (float)$alloc['allocated'], (float)$est['materials'], (float)$est['extra']);
     $short = Processing::shortInputs($in, $siteId, $t && (int)$t['is_pending'] === 0 ? (int)$t['id'] : null, $st['txn_date']);
     if ($short && !$pending) {
         fail('Not enough stock at the processing site: ' . implode(', ', $short) . '. Save the order as pending, or transfer or receive the items first.');
@@ -551,10 +555,11 @@ $methodHelp = array_map(fn($x) => $x[1], Processing::METHODS);
         <td colspan="<?= $showCosts ? 5 : 3 ?>"></td>
       </tr>
       <?php if ($showCosts): ?>
-      <tr class="small text-muted" id="outAllocCompare" <?= $alloc ? '' : 'hidden' ?> data-pool="<?= h($alloc ? number_format((float)$alloc['pool'], 2, '.', '') : '') ?>">
+      <tr class="small text-muted" id="outAllocCompare" <?= $alloc ? '' : 'hidden' ?> data-pool="<?= h($alloc ? number_format((float)$alloc['pool'], 2, '.', '') : '') ?>" data-tol="<?= h((string)Processing::tolerance()) ?>">
         <td colspan="7" class="text-end">Total cost to allocate <strong id="outPool"><?= $alloc ? money($alloc['pool']) : '' ?></strong>, difference from the allocated total</td>
-        <td class="num fw-semibold" id="outAllocDiff"></td><td colspan="2"></td>
+        <td class="num fw-semibold" id="outAllocDiff"></td><td colspan="2" class="small" id="outAllocPct"></td>
       </tr>
+      <tr id="outAllocWarn" hidden><td colspan="10" class="proc-recon-warn"><div class="proc-recon-msg">The outputs differ from the cost of the inputs and labor by more than <?= h(rtrim(rtrim(number_format(Processing::tolerance(), 2), '0'), '.')) ?>%: the order cannot be saved. Revise the Allocated cost or Unit cost of the outputs so they add up to the input cost.</div></td></tr>
       <?php endif; ?>
     </tfoot>
   </table></div>
@@ -743,6 +748,12 @@ $methodHelp = array_map(fn($x) => $x[1], Processing::METHODS);
         cellDiff.classList.toggle('text-danger', Math.abs(diff) >= 0.005);
         cellDiff.classList.toggle('text-success', Math.abs(diff) < 0.005);
       }
+      // v35: the difference as a percentage of the input cost, and a warning beyond the tolerance (2%)
+      const pool = num(cmp.dataset.pool), tol = num(cmp.dataset.tol || '2');
+      const pctCell = document.getElementById('outAllocPct'), warn = document.getElementById('outAllocWarn');
+      const pctv = pool > 0 ? (total - pool) / pool * 100 : 0;
+      if (pctCell) { pctCell.textContent = Math.abs(diff) >= 0.005 && pool > 0 ? (pctv > 0 ? '+' : '') + pctv.toFixed(2) + '%' : ''; }
+      if (warn) { warn.hidden = !(pool > 0 && Math.abs(pctv) > tol + 0.000001); }
     }
   }
 

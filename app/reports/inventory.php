@@ -461,8 +461,11 @@ Report::define('stock_status_site', [
 
 Report::define('physical_worksheet', [
     'filters' => array_merge(['asof', 'site'], INV_ITEM_FILTERS, ['blind']),
+    // v33: items with no quantity on hand (at the site, as of the date) can be left off the sheet
+    'checks' => ['exclude_zero' => 'Exclude zero qty'],
     'run' => function (array $f): array {
         $blind = $f['blind'] === '1';
+        $noZero = ($f['exclude_zero'] ?? '') === '1';
         $asof = $f['asof'];
         $siteId = $f['site_id'] ? (int)$f['site_id'] : null;
         // the system quantity: on hand now for today (or later), or every movement up to and including an earlier day
@@ -472,6 +475,9 @@ Report::define('physical_worksheet', [
         foreach (inv_items(null, $f) as $i) {
             $id = (int)$i['id'];
             $sys = $past ? (float)($pos[$id]['qty'] ?? 0) : Stock::onHand($id, $siteId);
+            if ($noZero && abs($sys) < 0.00005) {
+                continue;
+            }
             $rows[] = ['item' => $i['code'], 'desc' => $i['name'], 'vendor' => $i['vendor'], 'unit' => $i['unit'],
                 'onhand' => $blind ? '' : $sys, 'count' => '', '_html' => ['count' => '<span style="display:inline-block;width:90px;border-bottom:1px solid #333">&nbsp;</span>'],
                 '_ref' => ['item' => $id]];
@@ -482,6 +488,7 @@ Report::define('physical_worksheet', [
             'rows' => $rows,
             'notes' => ($siteId ? 'Site: ' . h(DB::value('SELECT name FROM sites WHERE id = :id', ['id' => $siteId])) . '. ' : 'All sites. ')
                 . ($blind ? 'Blind count: system quantities are hidden.' : 'System quantities as of ' . h(fdate($asof)) . ($past ? ' (every movement up to the end of that day).' : '.'))
+                . ($noZero ? ' Items with no quantity on hand' . ($siteId ? ' at this site' : '') . ' are left out.' : '')
                 . ' Counted by: ____________ Date: ____________',
             'footer' => Access::can('inv.physical_count', 'create') ? '<a class="btn btn-sm btn-primary no-print" href="' . h(url('inv.physical_count', ['site_id' => $siteId])) . '">Enter counts</a>' : '',
         ];

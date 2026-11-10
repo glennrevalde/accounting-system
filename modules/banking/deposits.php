@@ -16,6 +16,11 @@ declare(strict_types=1);
  * v32: in the Details window of a card or e-wallet clearing account, the receipts not yet settled can be ticked (Settle),
  * as the cash of the closed POS shifts is ticked: their total goes into Gross settled, and once the deposit is saved
  * those receipts are settled (app/Clearing.php, table clearing_settlements) and are no longer listed as unsettled.
+ *
+ * v34: journal entries (and opening balance entries) that post to Undeposited Funds are listed with the payments
+ * waiting to be deposited: they adjust what the POS or the collections bring to the bank. A debit to Undeposited Funds
+ * adds to the deposit, a credit deducts from it. Ticked, the entry becomes a deposit line on Undeposited Funds for its
+ * net amount (negative for a credit), linked to the entry (ref_txn_id) like a payment, so it is deposited once.
  */
 
 require_once APP_ROOT . '/modules/txn/_common.php';
@@ -89,6 +94,37 @@ $pending = DB::all(
       ORDER BY t.txn_date, t.id",
     ['uf' => $uf, 'dep' => $depId]
 );
+// v34: journal entries to Undeposited Funds, with their net (debit less credit) on the account, not yet in a deposit
+$jrnl = DB::all(
+    "SELECT t.*, x.net, x.descr,
+            COALESCE(c.name, v.name, o.name, t.payee_name) AS party
+       FROM (SELECT j.txn_id, SUM(j.debit - j.credit) AS net,
+                    (SELECT GROUP_CONCAT(DISTINCT l.description SEPARATOR '; ') FROM transaction_lines l
+                      WHERE l.txn_id = j.txn_id AND l.account_id = :uf2 AND l.description IS NOT NULL AND l.description <> '') AS descr
+               FROM journal_lines j JOIN transactions jt ON jt.id = j.txn_id
+              WHERE j.account_id = :uf AND jt.txn_type IN ('journal', 'opening_balance') AND jt.is_voided = 0
+              GROUP BY j.txn_id) x
+       JOIN transactions t ON t.id = x.txn_id
+       LEFT JOIN customers c ON c.id = t.customer_id
+       LEFT JOIN vendors v ON v.id = t.vendor_id
+       LEFT JOIN other_names o ON o.id = t.other_name_id
+      WHERE (ABS(x.net) >= 0.005 OR t.id IN (SELECT l2.ref_txn_id FROM transaction_lines l2 WHERE l2.txn_id = :dep2 AND l2.ref_txn_id IS NOT NULL))
+        AND NOT EXISTS (SELECT 1 FROM transaction_lines l JOIN transactions d ON d.id = l.txn_id AND d.is_voided = 0 AND d.id <> :dep WHERE l.ref_txn_id = t.id)
+      ORDER BY t.txn_date, t.id",
+    ['uf' => $uf, 'uf2' => $uf, 'dep' => $depId, 'dep2' => $depId]
+);
+foreach ($jrnl as $j) {
+    $net = r2((float)$j['net']);
+    // the entry's net on Undeposited Funds replaces its own total (both sides of the entry)
+    $pending[] = array_merge($j, [
+        'is_jrnl' => true, 'total' => $net,
+        'method' => $net >= 0 ? 'Debit, adds' : 'Credit, deducts',
+        'party' => $j['party'] ?: ($j['descr'] ?: $j['memo']),
+    ]);
+}
+// payments and journal entries together, by date
+usort($pending, fn($a, $b) => [$a['txn_date'], (int)$a['id']] <=> [$b['txn_date'], (int)$b['id']]);
+
 $shifts = DB::all(
     "SELECT s.*, t.name AS terminal, t.cash_account_id, cu.full_name AS corrected_name,
             (SELECT COALESCE(SUM(amount),0) FROM pos_cash_drops d WHERE d.shift_id = s.id) AS drops
@@ -121,6 +157,15 @@ handle_post(function () use ($pageKey, $pending, $shifts, $uf, $dep, $depId, $in
         $t = $pendingById[(int)$pid] ?? null;
         if (!$t) {
             fail('A selected payment was already deposited or changed. Refresh and try again.');
+        }
+        if (!empty($t['is_jrnl'])) {
+            // v34: a journal entry to Undeposited Funds, at its net as it is now (a credit deducts from the deposit)
+            if (abs((float)$t['total']) < 0.005) {
+                fail(Txn::ref($t) . ' no longer posts anything to Undeposited Funds. Take it off the deposit.');
+            }
+            $lines[] = ['line_kind' => 'deposit', 'account_id' => $uf, 'amount' => (float)$t['total'], 'ref_txn_id' => $t['id'], 'customer_id' => null,
+                'description' => trim(Txn::ref($t) . ' ' . ((float)$t['total'] >= 0 ? 'adds' : 'deducts') . ' ' . (string)($t['descr'] ?: $t['memo']))];
+            continue;
         }
         $lines[] = ['line_kind' => 'deposit', 'account_id' => $uf, 'amount' => (float)$t['total'], 'ref_txn_id' => $t['id'],
             'customer_id' => $t['customer_id'], 'description' => Txn::ref($t) . ($t['ref_no'] ? ' #' . $t['ref_no'] : '') . ' ' . ($t['method'] ?? '')];
@@ -199,6 +244,10 @@ handle_post(function () use ($pageKey, $pending, $shifts, $uf, $dep, $depId, $in
         fail('The cash back cannot be less than zero.');
     }
     $sum = r2(array_sum(array_column($lines, 'amount')));
+    if ($sum < 0) {
+        // v34: a journal entry crediting Undeposited Funds deducts from a deposit, but cannot make it negative
+        fail('The items ticked add up to less than zero (' . money($sum) . '): a journal entry that credits Undeposited Funds deducts from the payments or POS cash it adjusts. Tick them on the same deposit.');
+    }
     if ($cashBack > 0 && $cashBack > $sum + 0.004) {
         fail('The cash back (' . money($cashBack) . ') is more than the items deposited (' . money($sum) . ').');
     }
@@ -267,13 +316,18 @@ layout_start($title, ['actions' => $dep ? btn_link(Txn::url($dep), 'Back to the 
   <?= Classes::field(fv('class_id', $dep), 'col-md-2') ?>
 </div></div>
 <div id="depSum" data-sum-into="#depTotal" data-sum-selector="input[data-sum]:not([disabled])">
-<div class="card mb-3"><div class="card-header fw-semibold">Payments waiting to be deposited (Undeposited Funds)</div>
+<div class="card mb-3"><div class="card-header dep-head"><span class="fw-semibold">Payments waiting to be deposited (Undeposited Funds)</span>
+  <span class="small text-muted">Journal entries to Undeposited Funds are listed too: a debit adds to the deposit, a credit deducts from it.</span></div>
   <div class="table-responsive"><table class="table table-sm mb-0 dep-table"><thead><tr><th><input type="checkbox" class="form-check-input" data-check-all=".dep-cb-pay" aria-label="Tick every payment"></th><th>Date</th><th>Type</th><th>No.</th><th>Received from</th><th>Method</th><th>Ref.</th><th class="num">Amount</th></tr></thead>
   <tbody>
-  <?php foreach ($pending as $t): $chk = in_array((string)$t['id'], $payOn, true); ?>
-    <tr class="<?= isset($inPay[(int)$t['id']]) ? 'dep-in' : '' ?>"><td><input type="checkbox" class="form-check-input dep-cb dep-cb-pay" name="pay[]" value="<?= (int)$t['id'] ?>" <?= $chk ? 'checked' : '' ?> aria-label="Deposit <?= h(Txn::ref($t)) ?>"></td>
-      <td><?= h(fdate($t['txn_date'])) ?></td><td><?= h(Txn::label($t['txn_type'])) ?></td><td><?= Txn::link($t) ?><?= isset($inPay[(int)$t['id']]) ? '<div class="small text-muted">On this deposit</div>' : '' ?></td><td><?= h($t['party']) ?></td><td><?= h($t['method']) ?></td><td><?= h($t['ref_no']) ?></td>
-      <td class="num"><?= money($t['total']) ?><input type="hidden" data-sum value="<?= h($t['total']) ?>" <?= $chk ? '' : 'disabled' ?>></td></tr>
+  <?php foreach ($pending as $t): $chk = in_array((string)$t['id'], $payOn, true); $isJ = !empty($t['is_jrnl']); $was = $inPay[(int)$t['id']] ?? null; ?>
+    <tr class="<?= trim(($was ? 'dep-in' : '') . ($isJ ? ' dep-jrnl' : '') . ($isJ && (float)$t['total'] < 0 ? ' dep-less' : '')) ?>"><td><input type="checkbox" class="form-check-input dep-cb dep-cb-pay" name="pay[]" value="<?= (int)$t['id'] ?>" <?= $chk ? 'checked' : '' ?> aria-label="Deposit <?= h(Txn::ref($t)) ?>"></td>
+      <td><?= h(fdate($t['txn_date'])) ?></td><td><?= h(Txn::label($t['txn_type'])) ?></td><td><?= Txn::link($t) ?><?= $was ? '<div class="small text-muted">On this deposit</div>' : '' ?></td>
+      <td><?= h($t['party']) ?><?php if ($isJ && $t['party'] !== ($t['descr'] ?: $t['memo']) && ($t['descr'] ?: $t['memo'])): ?><div class="small text-muted"><?= h($t['descr'] ?: $t['memo']) ?></div><?php endif; ?></td>
+      <td><?= h($t['method']) ?></td><td><?= h($t['ref_no']) ?></td>
+      <td class="num"><?= money($t['total']) ?>
+        <?php if ($isJ && $was && abs((float)$was['amount'] - (float)$t['total']) > 0.004): ?><div class="small text-muted">was <?= money($was['amount']) ?></div><?php endif; ?>
+        <input type="hidden" data-sum value="<?= h($t['total']) ?>" <?= $chk ? '' : 'disabled' ?>></td></tr>
   <?php endforeach; ?>
   <?php if (!$pending): ?><tr><td colspan="8" class="text-muted text-center">No payments waiting.</td></tr><?php endif; ?>
   </tbody></table></div>

@@ -521,10 +521,15 @@ CREATE TABLE items (
   max_stock            DECIMAL(15,4) NOT NULL DEFAULT 0,
   build_point          DECIMAL(15,4) NOT NULL DEFAULT 0,
   is_active            TINYINT(1)   NOT NULL DEFAULT 1,
+  fb_pos               TINYINT(1)   NOT NULL DEFAULT 0,    -- v35: shown on the FB POS
+  fb_group_id          INT UNSIGNED NULL,                  -- v35: its FB POS menu group (fb_pos_groups)
+  fb_sort              INT          NOT NULL DEFAULT 0,    -- v35: its order in the group
+  image_file           VARCHAR(120) NULL,                  -- v35: its picture (storage/items)
   created_at           TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at           DATETIME     NULL,                  -- set by the application (DB::update)
   UNIQUE KEY uq_items_code (code),
   KEY ix_items_barcode (barcode),
+  KEY ix_items_fb (fb_pos, fb_group_id),
   CONSTRAINT fk_items_cat    FOREIGN KEY (category_id) REFERENCES item_categories(id),
   CONSTRAINT fk_items_inc    FOREIGN KEY (income_account_id) REFERENCES accounts(id),
   CONSTRAINT fk_items_cogs   FOREIGN KEY (cogs_account_id) REFERENCES accounts(id),
@@ -870,6 +875,17 @@ CREATE TABLE clearing_settlements (
   KEY ix_cs_receipt_txn (receipt_txn_id),
   CONSTRAINT fk_cs_deposit FOREIGN KEY (deposit_txn_id) REFERENCES transactions(id) ON DELETE CASCADE,
   CONSTRAINT fk_cs_receipt FOREIGN KEY (receipt_txn_id) REFERENCES transactions(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- FB POS menu groups (v35, Point of Sale > FB POS Menu & Groups)
+DROP TABLE IF EXISTS fb_pos_groups;
+CREATE TABLE fb_pos_groups (
+  id          INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  name        VARCHAR(60)  NOT NULL,
+  sort_order  INT          NOT NULL DEFAULT 0,
+  is_active   TINYINT(1)   NOT NULL DEFAULT 1,
+  created_at  TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE KEY uq_fb_group_name (name)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- General ledger (generated automatically by the posting engine)
@@ -3747,6 +3763,60 @@ SELECT src.role_id, dst.id, 1, 0, 0, 0, src.can_print, 0
   FROM role_page_access src
   JOIN pages sp  ON sp.id = src.page_id AND sp.page_key = 'rpt.inv_valuation_detail'
   JOIN pages dst ON dst.page_key = 'rpt.avg_cost_changes'
+ WHERE src.allowed = 1;
+
+
+-- ---------------------------------------------------------------------
+--  v33: Trial Balance by Class, Statement of Cash Flows by Class (as database/migrations/2026_12_10_class_reports.sql)
+-- ---------------------------------------------------------------------
+
+SET @cr_coa   = (SELECT id FROM modules WHERE code = 'coa' LIMIT 1);
+SET @cr_tb    = (SELECT COALESCE(MAX(sort_order), 160) FROM pages WHERE page_key = 'rpt.trial_balance');
+SET @cr_cf    = (SELECT COALESCE(MAX(sort_order), 260) FROM pages WHERE page_key = 'rpt.cash_flow');
+
+INSERT IGNORE INTO pages (page_key, module_id, name, page_type, menu_group, sort_order, show_in_menu) VALUES
+  ('rpt.trial_balance_class', @cr_coa, 'Trial Balance by Class',          'report', 'Reports', @cr_tb + 5, 1),
+  ('rpt.cash_flow_class',     @cr_coa, 'Statement of Cash Flows by Class', 'report', 'Reports', @cr_cf + 5, 1);
+
+INSERT IGNORE INTO role_page_access (role_id, page_id, allowed, can_create, can_edit, can_delete, can_print, can_approve)
+SELECT src.role_id, dst.id, 1, 0, 0, 0, src.can_print, 0
+  FROM role_page_access src
+  JOIN pages sp  ON sp.id = src.page_id AND sp.page_key = 'rpt.trial_balance'
+  JOIN pages dst ON dst.page_key = 'rpt.trial_balance_class'
+ WHERE src.allowed = 1;
+
+INSERT IGNORE INTO role_page_access (role_id, page_id, allowed, can_create, can_edit, can_delete, can_print, can_approve)
+SELECT src.role_id, dst.id, 1, 0, 0, 0, src.can_print, 0
+  FROM role_page_access src
+  JOIN pages sp  ON sp.id = src.page_id AND sp.page_key = 'rpt.cash_flow'
+  JOIN pages dst ON dst.page_key = 'rpt.cash_flow_class'
+ WHERE src.allowed = 1;
+
+
+-- ---------------------------------------------------------------------
+--  v35: FB POS pages (as database/migrations/2026_12_24_fb_pos.sql)
+-- ---------------------------------------------------------------------
+
+SET @fb_pos  = (SELECT id FROM modules WHERE code = 'pos' LIMIT 1);
+SET @fb_reg  = (SELECT COALESCE(MAX(sort_order), 1400) FROM pages WHERE page_key = 'pos.register');
+SET @fb_term = (SELECT COALESCE(MAX(sort_order), 1440) FROM pages WHERE page_key = 'pos.terminals');
+
+INSERT IGNORE INTO pages (page_key, module_id, name, page_type, menu_group, sort_order, show_in_menu) VALUES
+  ('pos.fb',      @fb_pos, 'FB POS',               'transaction', 'Transactions', @fb_reg + 5,  1),
+  ('pos.fb_menu', @fb_pos, 'FB POS Menu & Groups', 'setup',       'Setup',        @fb_term + 5, 1);
+
+INSERT IGNORE INTO role_page_access (role_id, page_id, allowed, can_create, can_edit, can_delete, can_print, can_approve)
+SELECT src.role_id, dst.id, src.allowed, src.can_create, src.can_edit, src.can_delete, src.can_print, src.can_approve
+  FROM role_page_access src
+  JOIN pages sp  ON sp.id = src.page_id AND sp.page_key = 'pos.register'
+  JOIN pages dst ON dst.page_key = 'pos.fb'
+ WHERE src.allowed = 1;
+
+INSERT IGNORE INTO role_page_access (role_id, page_id, allowed, can_create, can_edit, can_delete, can_print, can_approve)
+SELECT src.role_id, dst.id, src.allowed, src.can_create, src.can_edit, src.can_delete, src.can_print, src.can_approve
+  FROM role_page_access src
+  JOIN pages sp  ON sp.id = src.page_id AND sp.page_key = 'pos.terminals'
+  JOIN pages dst ON dst.page_key = 'pos.fb_menu'
  WHERE src.allowed = 1;
 
 SET FOREIGN_KEY_CHECKS = 1;

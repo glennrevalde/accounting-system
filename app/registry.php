@@ -42,6 +42,7 @@ return [
         'coa.default_accounts' => ['coa', 'Module Default Accounts', 'setup', 'Setup', 'coa/default_accounts.php', [], 1],
         'coa.lists'            => ['coa', 'Terms, Tax Codes & Other Lists', 'setup', 'Setup', 'coa/lists.php', [], 1],
         'rpt.trial_balance'    => ['coa', 'Trial Balance', 'report', 'Reports', 'reports/run.php', ['report' => 'trial_balance'], 1],
+        'rpt.trial_balance_class' => ['coa', 'Trial Balance by Class', 'report', 'Reports', 'reports/run.php', ['report' => 'trial_balance_class'], 1],
         'rpt.balance_sheet'    => ['coa', 'Balance Sheet', 'report', 'Reports', 'reports/run.php', ['report' => 'balance_sheet'], 1],
         'rpt.balance_sheet_class' => ['coa', 'Balance Sheet by Class', 'report', 'Reports', 'reports/run.php', ['report' => 'balance_sheet_class'], 1],
         'rpt.trial_balance_range'  => ['coa', 'Trial Balance by Date Range', 'report', 'Reports', 'reports/run.php', ['report' => 'trial_balance_range'], 1],
@@ -60,6 +61,7 @@ return [
         'rpt.cmp_bs_year'      => ['coa', 'Comparative Balance Sheet by Year', 'report', 'Reports', 'reports/run.php', ['report' => 'cmp_bs_year'], 1],
         'rpt.cmp_bs_custom'    => ['coa', 'Comparative Balance Sheet by Custom Date', 'report', 'Reports', 'reports/run.php', ['report' => 'cmp_bs_custom'], 1],
         'rpt.cash_flow'        => ['coa', 'Statement of Cash Flows', 'report', 'Reports', 'reports/run.php', ['report' => 'cash_flow'], 1],
+        'rpt.cash_flow_class'  => ['coa', 'Statement of Cash Flows by Class', 'report', 'Reports', 'reports/run.php', ['report' => 'cash_flow_class'], 1],
         'rpt.general_ledger'   => ['coa', 'General Ledger', 'report', 'Reports', 'reports/run.php', ['report' => 'general_ledger'], 1],
         'rpt.subsidiary_ledger'    => ['coa', 'Subsidiary Ledger', 'report', 'Reports', 'reports/run.php', ['report' => 'subsidiary_ledger'], 1],
         'rpt.schedule_of_accounts' => ['coa', 'Schedule of Accounts', 'report', 'Reports', 'reports/run.php', ['report' => 'schedule_of_accounts'], 1],
@@ -185,10 +187,12 @@ return [
 
         // ---------------- Point of Sale
         'pos.register'        => ['pos', 'POS Register', 'transaction', 'Transactions', 'pos/register.php', [], 1],
+        'pos.fb'              => ['pos', 'FB POS', 'transaction', 'Transactions', 'pos/fb.php', [], 1],
         'pos.shifts'          => ['pos', 'Shifts, Cash Drops & Readings', 'transaction', 'Transactions', 'pos/shifts.php', [], 1],
         'pos.receipts'        => ['pos', 'POS Receipts, Returns & Voids', 'transaction', 'Transactions', 'pos/receipts.php', [], 1],
         'pos.approval_codes'  => ['pos', 'Approval Codes', 'transaction', 'Transactions', 'pos/approval_codes.php', [], 1],
         'pos.terminals'       => ['pos', 'POS Terminals', 'setup', 'Setup', 'pos/terminals.php', [], 1],
+        'pos.fb_menu'         => ['pos', 'FB POS Menu & Groups', 'setup', 'Setup', 'pos/fb_menu.php', [], 1],
         'rpt.pos_sales_txn'      => ['pos', 'POS Sales by Transaction No. (detail)', 'report', 'Reports', 'reports/run.php', ['report' => 'pos_sales_txn'], 1],
         'rpt.pos_sales_item'     => ['pos', 'POS Sales by Item', 'report', 'Reports', 'reports/run.php', ['report' => 'pos_sales_item'], 1],
         'rpt.pos_sales_item_group' => ['pos', 'POS Sales by Item Group', 'report', 'Reports', 'reports/run.php', ['report' => 'pos_sales_item_group'], 1],
@@ -270,5 +274,6 @@ return [
         'auth.switch_company'  => 'auth/switch_company.php',
         'api.lookup'           => 'api/lookup.php',
         'file.logo'            => 'files/logo.php',
+        'file.item_image'      => 'files/item_image.php',
     ],
 ];

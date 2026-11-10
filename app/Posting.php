@@ -25,6 +25,13 @@ final class Posting
      */
     public static bool $stockCheck = true;
 
+    /**
+     * v35: true while history is posted again (Rebuild Data, or the later transactions of a back-dated or edited one
+     * being costed again, app/Recost.php): the checks meant for a document being saved now are left out, and no
+     * further re-costing is started.
+     */
+    public static bool $replaying = false;
+
     private array $jl = [];
     private array $t;
 
@@ -37,6 +44,8 @@ final class Posting
             }
             $cleared = self::clearedLines($txnId);
             $watch = self::$stockCheck ? self::stockBefore($txnId) : null;
+            // v35: where its inventory movements stood, for re-costing the later transactions (app/Recost.php)
+            $before = self::$replaying ? null : Recost::footprint($txnId);
             Stock::reverseTxn($txnId);
             DB::run('DELETE FROM journal_lines WHERE txn_id = :t', ['t' => $txnId]);
 
@@ -56,6 +65,9 @@ final class Posting
                 }
             }
             self::restoreCleared($t, $cleared);
+            if ($before !== null) {
+                Recost::note($txnId, $before, Recost::footprint($txnId));
+            }
         });
     }
 
@@ -118,10 +130,14 @@ final class Posting
         DB::tx(function () use ($txnId) {
             $t = DB::row('SELECT * FROM transactions WHERE id = :id', ['id' => $txnId]);
             $cleared = self::clearedLines($txnId);
+            $before = self::$replaying ? null : Recost::footprint($txnId);
             Stock::reverseTxn($txnId);
             DB::run('DELETE FROM journal_lines WHERE txn_id = :t', ['t' => $txnId]);
             if ($t) {
                 self::restoreCleared($t, $cleared, 'deleted');
+            }
+            if ($before !== null) {
+                Recost::note($txnId, $before, [null, []]);
             }
         });
     }
@@ -704,6 +720,11 @@ final class Posting
         }
         $pool = r2($materials + $extra);
         $alloc = Processing::allocate($outputs, $pool, (string)($t['alloc_method'] ?: Processing::defaultMethod((string)$t['process_type'])));
+        // v35: the outputs must cost what the inputs and the labor cost, within the tolerance set (2%): a processing order
+        // whose outputs were valued at ten times the inputs put the difference into inventory and threw the averages off
+        if (!self::$replaying) {
+            Processing::assertReconciled($pool, (float)$alloc['allocated'], $materials, $extra);
+        }
         // v29: an input with no unit cost, or a co-product / by-product received at no cost, is not posted
         if (Settings::get('block_zero_cost_processing', '1') === '1') {
             $noCost = [];

@@ -498,10 +498,15 @@ CREATE TABLE items (
   max_stock            DECIMAL(15,4) NOT NULL DEFAULT 0,
   build_point          DECIMAL(15,4) NOT NULL DEFAULT 0,
   is_active            TINYINT(1)   NOT NULL DEFAULT 1,
+  fb_pos               TINYINT(1)   NOT NULL DEFAULT 0,    -- v35: shown on the FB POS
+  fb_group_id          INT UNSIGNED NULL,                  -- v35: its FB POS menu group (fb_pos_groups)
+  fb_sort              INT          NOT NULL DEFAULT 0,    -- v35: its order in the group
+  image_file           VARCHAR(120) NULL,                  -- v35: its picture (storage/items)
   created_at           TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at           DATETIME     NULL,                  -- set by the application (DB::update)
   UNIQUE KEY uq_items_code (code),
   KEY ix_items_barcode (barcode),
+  KEY ix_items_fb (fb_pos, fb_group_id),
   CONSTRAINT fk_items_cat    FOREIGN KEY (category_id) REFERENCES item_categories(id),
   CONSTRAINT fk_items_inc    FOREIGN KEY (income_account_id) REFERENCES accounts(id),
   CONSTRAINT fk_items_cogs   FOREIGN KEY (cogs_account_id) REFERENCES accounts(id),
@@ -847,6 +852,17 @@ CREATE TABLE clearing_settlements (
   KEY ix_cs_receipt_txn (receipt_txn_id),
   CONSTRAINT fk_cs_deposit FOREIGN KEY (deposit_txn_id) REFERENCES transactions(id) ON DELETE CASCADE,
   CONSTRAINT fk_cs_receipt FOREIGN KEY (receipt_txn_id) REFERENCES transactions(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- FB POS menu groups (v35, Point of Sale > FB POS Menu & Groups)
+DROP TABLE IF EXISTS fb_pos_groups;
+CREATE TABLE fb_pos_groups (
+  id          INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  name        VARCHAR(60)  NOT NULL,
+  sort_order  INT          NOT NULL DEFAULT 0,
+  is_active   TINYINT(1)   NOT NULL DEFAULT 1,
+  created_at  TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE KEY uq_fb_group_name (name)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- General ledger (generated automatically by the posting engine)

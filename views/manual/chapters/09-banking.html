@@ -654,7 +654,7 @@
 </tr>
 </tbody>
 </table></div>
-<p><strong>Payments waiting to be deposited (Undeposited Funds):</strong> the customer payments and sales receipts that were put in Undeposited Funds and are not in a deposit yet. Tick the ones on your deposit slip; the box in the heading ticks them all.</p>
+<p><strong>Payments waiting to be deposited (Undeposited Funds):</strong> the customer payments and sales receipts that were put in Undeposited Funds and are not in a deposit yet, and the journal entries that post to Undeposited Funds (see below). Tick the ones on your deposit slip; the box in the heading ticks them all.</p>
 <div class="table-responsive man-table"><table class="table table-sm">
 <thead>
 <tr>
@@ -665,15 +665,15 @@
 <tbody>
 <tr>
 <td>Date, Type, No.</td>
-<td>The payment or sales receipt. Click the number to open it.</td>
+<td>The payment, sales receipt or journal entry. Click the number to open it.</td>
 </tr>
 <tr>
 <td>Received from</td>
-<td>The customer.</td>
+<td>The customer. For a journal entry, its name, or else the description of its Undeposited Funds line (or its memo).</td>
 </tr>
 <tr>
 <td>Method</td>
-<td>The payment method, for example Check.</td>
+<td>The payment method, for example Check. For a journal entry: <strong>Debit, adds</strong> or <strong>Credit, deducts</strong>.</td>
 </tr>
 <tr>
 <td>Ref.</td>
@@ -681,10 +681,15 @@
 </tr>
 <tr>
 <td>Amount</td>
-<td>The amount of the payment.</td>
+<td>The amount of the payment. For a journal entry, its net amount on Undeposited Funds: a credit shows in red in brackets and is taken off the deposit.</td>
 </tr>
 </tbody>
 </table></div>
+<h4 id="sec-deposit-journal">Journal entries to Undeposited Funds<a class="man-hash" href="#sec-deposit-journal" aria-label="Link to this section"><i class="bi bi-link-45deg"></i></a></h4>
+<p>A journal entry that debits or credits Undeposited Funds is usually an adjustment of what the POS or the collections bring to the bank: a cash overage, a shortage, a correction of a payment. Such entries (made on <a href="manual.php?c=chart-of-accounts#pg-coa-journal">Make Journal Entries</a>, opening balance entries included) are listed with the payments, with their net amount on Undeposited Funds. A <strong>debit</strong> to Undeposited Funds adds to the deposit; a <strong>credit</strong> deducts from it. Tick it with the payments or POS cash it adjusts: <strong>Items selected</strong> and <strong>Deposit total</strong> add the debits and take off the credits.</p>
+<figure class="man-fig"><a class="man-zoom" href="assets/manual/img/bank_deposits__journal.jpg" title="Click to enlarge"><img src="assets/manual/img/bank_deposits__journal.jpg" alt="Two journal entries crediting Undeposited Funds (120.00 in red, deducts) and one debiting it (500.00, adds)" width="1094" height="212" loading="lazy" decoding="async"></a><figcaption>Two journal entries crediting Undeposited Funds (120.00 in red, deducts) and one debiting it (500.00, adds)</figcaption></figure>
+<p>Once deposited, the entry leaves the list, as a payment does, and it cannot be voided or deleted until it is taken off the deposit (<strong>Edit</strong> on the deposit) or the deposit is voided. If the entry is changed after it was deposited, editing the deposit shows its new amount with "was" and the old one under it; saving the deposit takes the new amount.</p>
+<div class="man-callout man-example"><div class="man-callout-t"><i class="bi bi-journal-text"></i>Example</div><p>JE-00007 debits Undeposited Funds ₱500.00 for a cash overage, and JE-00006 credits it ₱120.00 for a short collection. Ticked with customer payment PMT-00005 of ₱95,294.00, the deposit is ₱95,674.00: ₱95,294.00 + ₱500.00 − ₱120.00.</p></div>
 <p><strong>POS cash from closed shifts</strong> (shown when there are some): the cash of each closed POS shift not deposited yet. <strong>To deposit</strong> is the <strong>Counted</strong> cash, less the opening float (<strong>Less float</strong>: it stays in the drawer for the next shift), plus the cash drops (<strong>Plus drops</strong>: cash taken out of the drawer during the shift). Tick the shifts you are depositing. The business date opens the shift, and a shift whose closing entries were corrected says so under its terminal; the figures are always the shift's figures as they are now.</p>
 <div class="man-callout man-example"><div class="man-callout-t"><i class="bi bi-journal-text"></i>Example</div><p>The cashier of POB1 Counter 2 opened with a float of ₱3,000.00 and closed the register with ₱9,170.48 counted, against ₱12,170.48 expected: a shortage of ₱3,000.00. The supervisor finds the drawer held ₱12,170.48 (the cashier had left out the float) and corrects <strong>Cash counted</strong> to 12,170.48. The shortage entry is voided, and Make Deposits now shows the shift with <strong>Counted</strong> 12,170.48, <strong>Less float</strong> 3,000.00 and <strong>To deposit</strong> 9,170.48: the cash sales of the day, while the ₱3,000.00 float stays in the drawer. Before the correction the shift showed 6,170.48 to deposit.</p></div>
 <p><strong>Card and e-wallet settlements:</strong> the provider pays out card and e-wallet sales in one amount, less its fee. The table has one row for each clearing account: the account of every card or e-wallet payment method (<a href="manual.php?c=chart-of-accounts#pg-coa-lists">Terms, Tax Codes &amp; Other Lists</a> &gt; Payment Methods, <strong>POS clearing account</strong>) and the module default accounts <strong>Card Clearing</strong> and <strong>E-wallet Clearing</strong>, used by a method that names no account. Each account is listed once, with the payment methods that use it under its name, so E-wallet Clearing shared by GCash and Maya is one row carrying the balance of both.</p>
@@ -920,6 +925,7 @@
 <li>"POS Sale MK1-00000012 is not unsettled on 10/30/2026 any more. Open Details again and tick the receipts once more." Another deposit settled it while you had the page open.</li>
 <li>"Enter the gross amount settled for E-wallet Clearing with its fee." A fee was typed without the gross amount.</li>
 <li>"Other receipts need both an account and an amount."</li>
+<li>"The items ticked add up to less than zero (-120.00): a journal entry that credits Undeposited Funds deducts from the payments or POS cash it adjusts. Tick them on the same deposit."</li>
 <li>A payment that is in a deposit cannot be voided or deleted: "It is included in deposit DEP-00001. Remove it from the deposit first." Take it off the deposit with <strong>Edit</strong>, or void the deposit.</li>
 <li>Payments that were deposited straight to a bank account on <a href="manual.php?c=customers#pg-cust-payments">Receive Payments</a> or <a href="manual.php?c=customers#pg-cust-sales_receipts">Enter Sales Receipts</a> do not pass through Undeposited Funds and do not appear here.</li>
 </ul>

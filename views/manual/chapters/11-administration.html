@@ -779,6 +779,18 @@
 <td><strong>Block posting processing orders with no unit cost (inputs, co-products and by-products)</strong></td>
 <td>Ticked (the standard): <strong>Save and post</strong> and <strong>Complete and post</strong> on <a href="manual.php?c=inventory#pg-inv-process">Disassemble / Process Items</a> are refused when an input has no unit cost or average unit cost, or a co-product or by-product would be received at no cost (scrap may be). <strong>Save as pending</strong> is still allowed. Cleared: such orders are posted as before.</td>
 </tr>
+<tr>
+<td><strong>Processing orders: largest difference allowed between the cost of the outputs and the cost of the inputs and labor (%)</strong></td>
+<td>2 to begin with. A processing order whose outputs are costed more than this percentage above or below its inputs plus labor and other costs is not saved (see <a href="manual.php?c=inventory#sec-process-reconcile">The outputs must cost what the inputs cost</a>). From 0 to 100.</td>
+</tr>
+<tr>
+<td><strong>Cost again the later transactions of the items when an inventory transaction is back-dated, edited, voided or deleted</strong></td>
+<td>Ticked (the standard): the inventory transactions dated from the date of the change are posted again in date order, so the average costs and the cost of sales follow the dates (see <a href="manual.php?c=inventory#sec-recost">Costing again after a back-dated or edited transaction</a>). Cleared: they keep their costs until you run Rebuild data.</td>
+</tr>
+<tr>
+<td><strong>Cost again at most this many later transactions at once</strong></td>
+<td>2,000 to begin with. When more would be costed again, nothing is changed and a message asks you to run Rebuild data.</td>
+</tr>
 </tbody>
 </table></div>
 <figure class="man-fig man-fig-narrow"><a class="man-zoom" href="assets/manual/img/admin_settings__no_cost.jpg" title="Click to enlarge"><img src="assets/manual/img/admin_settings__no_cost.jpg" alt="Inventory and POS: the two unit cost checks" width="527" height="282" loading="lazy" decoding="async"></a><figcaption>Inventory and POS: the two unit cost checks</figcaption></figure>
