@@ -468,3 +468,123 @@ Report::define('pos_sales_txn', [
         ];
     },
 ]);
+
+// ------------------------------------------------------------------ v38: Cash Count Sheet (Point of Sale > Reports)
+
+/** The completed shifts the Shift filter offers, newest first (of the cashier chosen, or of the user alone) */
+function pos_ccs_shifts(?int $only = null): array
+{
+    $cashier = $only ?: (int)g('cashier_id');
+    $sql = "SELECT s.*, t.name AS terminal, t.site_id, si.name AS site, COALESCE(NULLIF(u.full_name, ''), u.username) AS cashier
+              FROM pos_shifts s JOIN pos_terminals t ON t.id = s.terminal_id JOIN sites si ON si.id = t.site_id JOIN users u ON u.id = s.cashier_id
+             WHERE s.status = 'closed'";
+    $p = [];
+    if ($cashier) {
+        $sql .= ' AND s.cashier_id = :c';
+        $p['c'] = $cashier;
+    }
+    [$sf, $sp] = Access::siteFilter('t.site_id', 'ccst');
+    $out = [];
+    foreach (DB::all($sql . $sf . ' ORDER BY s.closed_at DESC LIMIT 300', $p + $sp) as $s) {
+        $out[(int)$s['id']] = $s['cashier'] . ', ' . $s['terminal'] . ', ' . fdatetime($s['opened_at']) . ' to ' . fdatetime($s['closed_at']);
+    }
+    return $out;
+}
+
+Report::define('pos_cash_count', [
+    'filters' => ['range', 'terminal'],
+    'default_dates' => 'today',
+    'sortable' => false,
+    'extra_filters' => [
+        'cashier_id' => ['Cashier', function () {
+            $only = pos_endinv_only();
+            $all = inv_move_cashiers();
+            return $only ? array_intersect_key($all, [$only => 1]) + [$only => (string)(Auth::user()['full_name'] ?? 'Me')] : $all;
+        }],
+        'shift_id' => ['Shift', fn() => pos_ccs_shifts(pos_endinv_only()), 'Every completed shift of the dates', true, true],
+    ],
+    'filter_hook' => function (array $f): array {
+        $only = pos_endinv_only();
+        if ($only) {
+            $f['cashier_id'] = (string)$only;
+            // a cashier opening the report: the sheet of their latest completed shift
+            if ((string)($f['shift_id'] ?? '') === '' && !isset($_GET['from'])) {
+                $f['shift_id'] = (string)(int)DB::value("SELECT id FROM pos_shifts WHERE cashier_id = :c AND status = 'closed' ORDER BY closed_at DESC LIMIT 1", ['c' => $only]);
+            }
+        }
+        if ((int)($f['shift_id'] ?? 0) && !isset(pos_ccs_shifts($only)[(int)$f['shift_id']])) {
+            $f['shift_id'] = '';
+        }
+        return $f;
+    },
+    'basis' => function (array $f): string {
+        return (int)($f['shift_id'] ?? 0) ? 'One completed shift' : 'Completed shifts with business dates ' . fdate($f['from']) . ' to ' . fdate($f['to']);
+    },
+    'run' => function (array $f): array {
+        $sid = (int)($f['shift_id'] ?? 0);
+        $sql = "SELECT s.*, t.name AS terminal, COALESCE(NULLIF(u.full_name, ''), u.username) AS cashier
+                  FROM pos_shifts s JOIN pos_terminals t ON t.id = s.terminal_id JOIN users u ON u.id = s.cashier_id WHERE s.status = 'closed'";
+        $p = [];
+        if ($sid) {
+            $sql .= ' AND s.id = :s';
+            $p['s'] = $sid;
+        } else {
+            $sql .= ' AND s.business_date BETWEEN :f AND :t';
+            $p += ['f' => $f['from'], 't' => $f['to']];
+            if ((int)($f['cashier_id'] ?? 0)) {
+                $sql .= ' AND s.cashier_id = :c';
+                $p['c'] = (int)$f['cashier_id'];
+            }
+            if ($f['terminal_id']) {
+                $sql .= ' AND s.terminal_id = :term';
+                $p['term'] = $f['terminal_id'];
+            }
+        }
+        [$sf, $sp] = Access::siteFilter('t.site_id', 'ccsr');
+        $shifts = DB::all($sql . $sf . ' ORDER BY s.closed_at, s.id', $p + $sp);
+        $rows = [];
+        $grand = 0.0;
+        foreach ($shifts as $s) {
+            $sheet = CashCount::forShift((int)$s['id']);
+            $rows[] = ['what' => 'Date cover: ' . fdatetime($s['opened_at']) . ' to ' . fdatetime($s['closed_at']) . '. Cashier name: ' . $s['cashier'] . '. ' . $s['terminal'],
+                '_class' => 'group-row', '_links' => ['what' => Report::link('pos.shifts', ['a' => 'shift', 'id' => $s['id']])]];
+            $total = 0.0;
+            if ($sheet) {
+                foreach (CashCount::DENOMS as $kind => $denoms) {
+                    $first = true;
+                    foreach ($denoms as $d) {
+                        $q = (int)($sheet[$kind][$d] ?? 0);
+                        if (!$sid && $q === 0) {
+                            continue;
+                        }
+                        $amt = r2($q * (float)$d);
+                        $total += $amt;
+                        $rows[] = ['what' => $first ? CashCount::KINDS[$kind] : '', 'denom' => CashCount::label($d), 'qty' => $q ?: '', 'amount' => $q ? $amt : '', '_class' => 'indent-1'];
+                        $first = false;
+                    }
+                }
+                $total = r2($total);
+                $rows[] = ['what' => 'Total cash', 'amount' => $total, '_class' => 'subtotal-row'];
+                if (abs($total - (float)$s['counted_cash']) >= 0.005) {
+                    // the cash counted was corrected afterwards without counting the sheet again
+                    $rows[] = ['what' => 'Cash counted, as corrected after this count', 'amount' => r2((float)$s['counted_cash']), '_class' => 'indent-1'];
+                }
+            } else {
+                $total = r2((float)$s['counted_cash']);
+                $rows[] = ['what' => 'No Cash Count Sheet was kept for this shift (counted without it). Cash counted', 'amount' => $total, '_class' => 'indent-1'];
+            }
+            $rows[] = ['what' => 'Expected cash in drawer', 'amount' => r2((float)$s['expected_cash']), '_class' => 'indent-1'];
+            $rows[] = ['what' => 'Over / (short)', 'amount' => r2((float)$s['over_short']), '_class' => 'indent-1'];
+            $grand += $total;
+        }
+        return [
+            'grouped' => true,
+            'columns' => [['key' => 'what', 'label' => ''], ['key' => 'denom', 'label' => 'Denomination', 'align' => 'end'],
+                ['key' => 'qty', 'label' => 'Qty.', 'type' => 'qty'], ['key' => 'amount', 'label' => 'Amount', 'type' => 'money']],
+            'rows' => $rows,
+            'totals' => count($shifts) > 1 ? ['what' => 'TOTAL CASH (' . count($shifts) . ' shifts)', 'amount' => r2($grand)] : null,
+            'notes' => 'The bills and coins counted in the drawer when each shift was closed (Shifts, Cash Drops &amp; Readings &gt; Close register, Cash counted in drawer). '
+                . 'Choose a <strong>Shift</strong> for the sheet of one shift with every denomination; without one, every completed shift of the dates is listed with the bills and coins counted. Click a shift to open it.',
+        ];
+    },
+]);

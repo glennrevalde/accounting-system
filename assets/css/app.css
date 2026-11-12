@@ -1788,3 +1788,59 @@ body.is-popup .page-bar { display: none; }
   .qa-modal .modal-content { border-radius: 0; border: 0; }
   .qa-modal .modal-dialog { margin: 0; width: 100vw; max-width: none; height: 100%; }
 }
+
+/* ------------------------------------------------------------------ v38: Cash Count Sheet, POS receipts totals */
+.cc-field .form-control[readonly] { background: #fff; cursor: pointer; }
+.cc-field .form-control[readonly]:focus { box-shadow: 0 0 0 .2rem rgba(13, 110, 253, .18); }
+.cc-modal .modal-dialog { max-width: 460px; }
+.cc-modal .modal-content { border: 1px solid var(--line); border-radius: 14px; overflow: hidden; box-shadow: 0 24px 60px -20px rgba(15, 23, 42, .45); }
+.cc-modal .modal-header { align-items: flex-start; gap: .65rem; background: linear-gradient(180deg, #fff, var(--surface-2)); }
+.cc-ico { width: 34px; height: 34px; flex: 0 0 34px; border-radius: 9px; display: inline-grid; place-items: center; color: #146c43;
+  background: linear-gradient(180deg, #effaf3, #d6f0df); border: 1px solid #b7e1c6; box-shadow: 0 1px 0 #fff inset, 0 1px 2px rgba(20, 108, 67, .18); }
+.cc-head { display: flex; flex-wrap: wrap; gap: .1rem 1rem; font-size: .8rem; color: var(--ink-soft); margin-top: .15rem; }
+.cc-table { font-variant-numeric: tabular-nums; }
+.cc-table th, .cc-table td { padding: .3rem .75rem; vertical-align: middle; }
+.cc-table thead th { position: sticky; top: 0; z-index: 1; background: var(--surface-2); font-size: .78rem; color: var(--ink-soft); border-bottom: 1px solid var(--line); }
+.cc-table .cc-kind th { background: #f3f6fa; font-weight: 700; font-size: .82rem; color: var(--ink); border-top: 1px solid var(--line); }
+.cc-table .cc-den { font-weight: 600; width: 34%; }
+.cc-table .cc-q { width: 28%; }
+.cc-table .cc-q .form-control { max-width: 110px; margin-left: auto; }
+.cc-table .cc-amt { color: var(--muted); }
+.cc-table tr.has-qty .cc-amt { color: var(--ink); font-weight: 600; }
+.cc-modal .modal-footer { justify-content: space-between; gap: .6rem; background: linear-gradient(180deg, #f7f9fc, #eef2f8); }
+.cc-modal .modal-footer > * { margin: 0; }
+.cc-total { display: flex; flex-direction: column; line-height: 1.15; }
+.cc-total span { font-size: .75rem; color: var(--ink-soft); font-weight: 600; }
+.cc-total strong { font-size: 1.35rem; font-variant-numeric: tabular-nums; color: var(--ink); }
+.rcpt-foot td { font-weight: 600; background: var(--surface-2); border-top: 1px solid var(--line); }
+.rcpt-foot .rcpt-total td { font-size: 1rem; font-weight: 700; border-top: 2px solid var(--line); background: linear-gradient(180deg, #f7f9fc, #eef2f8); }
+.rcpt-filters input[type="datetime-local"] { min-width: 205px; }
+@media (max-width: 575.98px) {
+  .cc-modal .modal-content { border-radius: 0; border: 0; }
+  .cc-modal .modal-dialog { margin: 0; max-width: none; }
+  .rcpt-filters input[type="datetime-local"] { min-width: 0; }
+}
+/* the receipts on a phone: one card per receipt, the total at the right */
+@media (max-width: 575.98px) {
+  .rcpt-table thead { display: none; }
+  .rcpt-table, .rcpt-table tbody, .rcpt-table tfoot { display: block; width: 100%; }
+  .rcpt-table tbody tr { display: grid; grid-template-columns: 1fr auto; grid-template-areas: "no tot" "time st" "type term" "cash cust" "act act";
+    gap: .2rem .75rem; padding: .7rem .85rem; border-bottom: 1px solid var(--line-soft); }
+  .rcpt-table tbody td { border: 0; padding: 0 !important; background: transparent; }
+  .rcpt-table .rc-no { grid-area: no; font-weight: 600; }
+  .rcpt-table .rc-tot { grid-area: tot; font-weight: 700; }
+  .rcpt-table .rc-time { grid-area: time; font-size: .82rem; color: var(--ink-soft); }
+  .rcpt-table .rc-st { grid-area: st; text-align: right; font-size: .82rem; }
+  .rcpt-table .rc-type { grid-area: type; font-size: .82rem; color: var(--ink-soft); }
+  .rcpt-table .rc-term { grid-area: term; font-size: .82rem; color: var(--ink-soft); text-align: right; }
+  .rcpt-table .rc-cash { grid-area: cash; font-size: .82rem; }
+  .rcpt-table .rc-cust { grid-area: cust; font-size: .82rem; text-align: right; }
+  .rcpt-table .rc-act { grid-area: act; display: flex; gap: .4rem; padding-top: .35rem; }
+  .rcpt-table .rc-act .btn { flex: 1; }
+  .rcpt-table tbody td[colspan] { grid-column: 1 / -1; }
+  .rcpt-table tfoot tr { display: flex; justify-content: space-between; align-items: baseline; padding: .55rem .85rem; }
+  .rcpt-table tfoot td { border: 0; padding: 0; background: transparent; }
+  .rcpt-table tfoot td:empty { display: none; }
+  .rcpt-foot tr { background: var(--surface-2); border-top: 1px solid var(--line); }
+  .rcpt-foot .rcpt-total { background: linear-gradient(180deg, #f7f9fc, #eef2f8); }
+}

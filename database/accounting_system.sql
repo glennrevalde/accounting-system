@@ -1285,6 +1285,20 @@ CREATE TABLE pos_cash_drops (
   CONSTRAINT fk_cd_shift FOREIGN KEY (shift_id) REFERENCES pos_shifts(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+DROP TABLE IF EXISTS pos_cash_counts;
+CREATE TABLE pos_cash_counts (
+  id            INT UNSIGNED  NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  shift_id      INT UNSIGNED  NOT NULL,
+  kind          VARCHAR(5)    NOT NULL DEFAULT 'bill',   -- bill or coin
+  denomination  DECIMAL(10,2) NOT NULL,
+  qty           INT           NOT NULL DEFAULT 0,
+  amount        DECIMAL(15,2) NOT NULL DEFAULT 0,
+  counted_by    INT UNSIGNED  NULL,
+  created_at    TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  KEY ix_pcc_shift (shift_id),
+  CONSTRAINT fk_pcc_shift FOREIGN KEY (shift_id) REFERENCES pos_shifts(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 DROP TABLE IF EXISTS pos_readings;
 CREATE TABLE pos_readings (
   id             INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
@@ -3818,5 +3832,32 @@ SELECT src.role_id, dst.id, src.allowed, src.can_create, src.can_edit, src.can_d
   JOIN pages sp  ON sp.id = src.page_id AND sp.page_key = 'pos.terminals'
   JOIN pages dst ON dst.page_key = 'pos.fb_menu'
  WHERE src.allowed = 1;
+
+-- ---------------------------------------------------------------------
+--  v38: Cash Count Sheet report (as database/migrations/2027_01_14_cash_count_sheet.sql)
+-- ---------------------------------------------------------------------
+
+SET @ccs_pos  = (SELECT id FROM modules WHERE code = 'pos' LIMIT 1);
+SET @ccs_sort = (SELECT COALESCE(MAX(sort_order), 700) FROM pages WHERE page_key IN ('rpt.pos_readings', 'rpt.pos_ending_inventory'));
+
+INSERT IGNORE INTO pages (page_key, module_id, name, page_type, menu_group, sort_order, show_in_menu) VALUES
+  ('rpt.pos_cash_count', @ccs_pos, 'Cash Count Sheet', 'report', 'Reports', @ccs_sort + 1, 1);
+
+-- the roles of the X- and Z-Reading Summary, with their print right
+INSERT IGNORE INTO role_page_access (role_id, page_id, allowed, can_create, can_edit, can_delete, can_print, can_approve)
+SELECT src.role_id, dst.id, 1, 0, 0, 0, src.can_print, 0
+  FROM role_page_access src
+  JOIN pages sp  ON sp.id = src.page_id AND sp.page_key = 'rpt.pos_readings'
+  JOIN pages dst ON dst.page_key = 'rpt.pos_cash_count'
+ WHERE src.allowed = 1;
+
+-- the cashiers (the roles that may open Shifts, Cash Drops & Readings): open and print their own
+INSERT IGNORE INTO role_page_access (role_id, page_id, allowed, can_create, can_edit, can_delete, can_print, can_approve)
+SELECT src.role_id, dst.id, 1, 0, 0, 0, 1, 0
+  FROM role_page_access src
+  JOIN pages sp  ON sp.id = src.page_id AND sp.page_key = 'pos.shifts'
+  JOIN pages dst ON dst.page_key = 'rpt.pos_cash_count'
+ WHERE src.allowed = 1;
+
 
 SET FOREIGN_KEY_CHECKS = 1;

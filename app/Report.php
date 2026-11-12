@@ -901,8 +901,10 @@ final class Report
             $parts[] = 'Customer type ' . DB::value('SELECT name FROM customer_types WHERE id = :id', ['id' => $f['customer_type_id']]);
         }
         if (!empty($f['user_id'])) {
-            $parts[] = (in_array('cashier', $def['filters'] ?? [], true) ? 'Cashier ' : 'User ')
-                . DB::value('SELECT username FROM users WHERE id = :id', ['id' => $f['user_id']]);
+            // v38: a cashier by name (Cashier Ella Ramos), a user by user name
+            $parts[] = in_array('cashier', $def['filters'] ?? [], true)
+                ? 'Cashier ' . DB::value("SELECT COALESCE(NULLIF(full_name, ''), username) FROM users WHERE id = :id", ['id' => $f['user_id']])
+                : 'User ' . DB::value('SELECT username FROM users WHERE id = :id', ['id' => $f['user_id']]);
         }
         foreach ($def['extra_filters'] ?? [] as $k => $spec) {
             [$label, $opts] = $spec;

@@ -1262,6 +1262,20 @@ CREATE TABLE pos_cash_drops (
   CONSTRAINT fk_cd_shift FOREIGN KEY (shift_id) REFERENCES pos_shifts(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+DROP TABLE IF EXISTS pos_cash_counts;
+CREATE TABLE pos_cash_counts (
+  id            INT UNSIGNED  NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  shift_id      INT UNSIGNED  NOT NULL,
+  kind          VARCHAR(5)    NOT NULL DEFAULT 'bill',   -- bill or coin
+  denomination  DECIMAL(10,2) NOT NULL,
+  qty           INT           NOT NULL DEFAULT 0,
+  amount        DECIMAL(15,2) NOT NULL DEFAULT 0,
+  counted_by    INT UNSIGNED  NULL,
+  created_at    TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  KEY ix_pcc_shift (shift_id),
+  CONSTRAINT fk_pcc_shift FOREIGN KEY (shift_id) REFERENCES pos_shifts(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 DROP TABLE IF EXISTS pos_readings;
 CREATE TABLE pos_readings (
   id             INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,

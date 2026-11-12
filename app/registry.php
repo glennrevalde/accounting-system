@@ -206,6 +206,7 @@ return [
         'rpt.pos_discount_log'   => ['pos', 'POS Discount Log', 'report', 'Reports', 'reports/run.php', ['report' => 'pos_discount_log'], 1],
         'rpt.pos_void_log'       => ['pos', 'POS Void and Refund Log', 'report', 'Reports', 'reports/run.php', ['report' => 'pos_void_log'], 1],
         'rpt.pos_ending_inventory' => ['pos', 'Ending Inventory - POS Cashier', 'report', 'Reports', 'reports/run.php', ['report' => 'pos_ending_inventory'], 1],
+        'rpt.pos_cash_count'     => ['pos', 'Cash Count Sheet', 'report', 'Reports', 'reports/run.php', ['report' => 'pos_cash_count'], 1],
 
         // ---------------- Banking
         'bank.write_checks'   => ['bank', 'Write Checks', 'transaction', 'Transactions', 'txn/page.php', ['type' => 'check'], 1],

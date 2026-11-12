@@ -70,7 +70,10 @@ final class QuickAdd
         if (!$kinds) {
             return '';
         }
-        $cfg = ['kinds' => $kinds, 'types' => self::ITEM_TYPES, 'from' => (string)($GLOBALS['CURRENT_PAGE'] ?? '')];
+        $from = (string)($GLOBALS['CURRENT_PAGE'] ?? '');
+        // v38: the type of page: on a transaction page a box in a form that only chooses (the Vendor of Receive Items
+        // and Enter Bills, which reloads the page for that vendor) gets the "Add new" lines too
+        $cfg = ['kinds' => $kinds, 'types' => self::ITEM_TYPES, 'from' => $from, 'ptype' => (string)(Access::pageDef($from)['type'] ?? '')];
         return ' data-quick-add="' . h(json_encode($cfg, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)) . '"';
     }
 

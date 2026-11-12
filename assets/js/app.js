@@ -316,7 +316,8 @@
     function entries(sel) {
       if (!cfg || !sel || !sel.dataset.add || sel.disabled) return [];
       const form = sel.form || sel.closest('form');
-      if (form && (form.getAttribute('method') || 'get').toLowerCase() !== 'post') return [];
+      // a form that saves; or, on a transaction page, a form that chooses the vendor or customer to work with
+      if (form && (form.getAttribute('method') || 'get').toLowerCase() !== 'post' && cfg.ptype !== 'transaction') return [];
       const kinds = sel.dataset.add === 'name' ? ['customer', 'vendor'] : [sel.dataset.add];
       return kinds.filter((k) => cfg.kinds[k]).map((k) => ({ kind: k, noun: NOUN[k] }));
     }
@@ -1110,5 +1111,61 @@
     if (supplier) bill.checked = false;
     bill.disabled = supplier;
     bill.title = supplier ? 'Only a cost for a customer can be billed' : '';
+  });
+})();
+
+// v38 Cash Count Sheet (Shifts, Cash Drops & Readings): clicking the "Cash counted" box (or its button) opens the
+// sheet of bills and coins; each line's amount and the total cash follow the quantities typed, and "Use this count"
+// puts the total in the box. See app/CashCount.php.
+(function () {
+  const sheets = document.querySelectorAll('.cc-modal');
+  if (!sheets.length || !window.bootstrap) return;
+  const money = (v) => v.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  sheets.forEach((m) => {
+    const target = document.querySelector(m.dataset.ccTarget);
+    const used = m.querySelector('[data-cc-used]');
+    const modal = new bootstrap.Modal(m);
+    const total = () => {
+      let t = 0;
+      m.querySelectorAll('input[data-cc-den]').forEach((i) => {
+        const q = parseInt(String(i.value).replace(/[^0-9]/g, ''), 10) || 0;
+        const amt = Math.round(q * parseFloat(i.dataset.ccDen) * 100) / 100;
+        i.closest('tr').querySelector('[data-cc-amt]').textContent = money(amt);
+        i.closest('tr').classList.toggle('has-qty', q > 0);
+        t += amt;
+      });
+      t = Math.round(t * 100) / 100;
+      m.querySelector('[data-cc-total]').textContent = money(t);
+      return t;
+    };
+    m.addEventListener('input', (e) => { if (e.target.matches('input[data-cc-den]')) { e.target.value = e.target.value.replace(/[^0-9]/g, ''); total(); } });
+    m.addEventListener('keydown', (e) => {
+      // Enter moves down the sheet instead of sending the form
+      if (e.key === 'Enter' && e.target.matches('input[data-cc-den]')) {
+        e.preventDefault();
+        const all = Array.from(m.querySelectorAll('input[data-cc-den]'));
+        const next = all[all.indexOf(e.target) + 1];
+        if (next) next.focus(); else m.querySelector('[data-cc-use]').focus();
+      }
+    });
+    m.querySelector('[data-cc-clear]').addEventListener('click', () => { m.querySelectorAll('input[data-cc-den]').forEach((i) => { i.value = ''; }); total(); });
+    m.querySelector('[data-cc-use]').addEventListener('click', () => {
+      const t = total();
+      if (target) {
+        target.value = t.toFixed(2);
+        target.dispatchEvent(new Event('input', { bubbles: true }));
+        target.dispatchEvent(new Event('change', { bubbles: true }));
+      }
+      if (used) used.value = '1';
+      modal.hide();
+    });
+    m.addEventListener('shown.bs.modal', () => { const first = m.querySelector('input[data-cc-den]'); if (first) first.focus(); });
+    const sel = '#' + m.id;
+    document.querySelectorAll('[data-cash-count="' + sel + '"]').forEach((el) => {
+      const open = (e) => { if (e) e.preventDefault(); total(); modal.show(); };
+      el.addEventListener('click', open);
+      if (el.tagName === 'INPUT' && el.readOnly) el.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') open(e); });
+    });
+    total();
   });
 })();

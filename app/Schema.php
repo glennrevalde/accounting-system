@@ -8,7 +8,7 @@ declare(strict_types=1);
  */
 final class Schema
 {
-    private const FLAG = 'schema_ok_2026_12_24';
+    private const FLAG = 'schema_ok_2027_01_14';
 
     /**
      * file => one cheap probe.
@@ -111,6 +111,9 @@ final class Schema
             ['SELECT (SELECT COUNT(*) FROM pages WHERE page_key IN (\'pos.fb\', \'pos.fb_menu\'))
                    + (SELECT COUNT(fb_pos) + COUNT(fb_group_id) + COUNT(fb_sort) + COUNT(image_file) FROM items WHERE 1 = 0)
                    + (SELECT COUNT(*) FROM fb_pos_groups WHERE 1 = 0)', 2],
+        // v38: the bills and coins counted at closing (the query fails without the table), and the Cash Count Sheet report
+        'database/migrations/2027_01_14_cash_count_sheet.sql' =>
+            ['SELECT (SELECT COUNT(*) FROM pages WHERE page_key = \'rpt.pos_cash_count\') + (SELECT COUNT(*) FROM pos_cash_counts WHERE 1 = 0)', 1],
     ];
 
     private static ?array $pending = null;
