@@ -1555,6 +1555,32 @@ CREATE TABLE backup_log (
   KEY ix_bl_action (action, created_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+DROP TABLE IF EXISTS txn_attachment_chunks;
+DROP TABLE IF EXISTS txn_attachments;
+CREATE TABLE txn_attachments (
+  id              INT UNSIGNED    NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  transaction_id  BIGINT UNSIGNED NULL,                 -- empty while the form is not saved yet
+  stage_key       VARCHAR(40)     NULL,                 -- the form session of a file not saved yet
+  file_name       VARCHAR(255)    NOT NULL,
+  mime_type       VARCHAR(150)    NOT NULL DEFAULT 'application/octet-stream',
+  file_size       BIGINT UNSIGNED NOT NULL DEFAULT 0,
+  sha1            CHAR(40)        NULL,
+  chunks          INT UNSIGNED    NOT NULL DEFAULT 0,
+  uploaded_by     INT UNSIGNED    NULL,
+  uploaded_at     TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  KEY ix_ta_txn (transaction_id),
+  KEY ix_ta_stage (stage_key),
+  CONSTRAINT fk_ta_txn FOREIGN KEY (transaction_id) REFERENCES transactions(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE txn_attachment_chunks (
+  attachment_id  INT UNSIGNED NOT NULL,
+  seq            INT UNSIGNED NOT NULL,
+  data           MEDIUMBLOB   NOT NULL,
+  PRIMARY KEY (attachment_id, seq),
+  CONSTRAINT fk_tac_att FOREIGN KEY (attachment_id) REFERENCES txn_attachments(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 -- ---------------------------------------------------------------------
 --  2. DATA
 -- ---------------------------------------------------------------------

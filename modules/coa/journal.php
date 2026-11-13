@@ -63,7 +63,8 @@ handle_post(function () use ($t, $pageKey) {
         $h['txn_no'] = mb_substr((string)p('txn_no'), 0, 30);
     }
     $id = Txn::save($type, $h, $lines, $t ? (int)$t['id'] : null, ['reason' => p('reason') ?: null]);
-    flash('success', 'Journal entry saved.');
+    $files = Attachments::claim($id, $pageKey);
+    flash('success', 'Journal entry saved.' . ($files !== '' ? ' ' . $files : ''));
     redirect_after_save(url($pageKey, ['a' => 'new']), url($pageKey, ['a' => 'view', 'id' => $id]));
 });
 
@@ -81,7 +82,7 @@ $rec = $t ?: ($mem['header'] ?? null);
 layout_start($t ? 'Edit journal entry ' . $t['txn_no'] : 'Make Journal Entries', ['actions' => $loadButton . ' ' . btn_link(url($pageKey), 'Journal list')]);
 echo memorized_loaded_note($mem);
 ?>
-<form method="post"><?= csrf_field() ?>
+<form method="post"<?= Attachments::enctype('journal') ?>><?= csrf_field() ?>
 <div class="card mb-3"><div class="card-body row g-2">
   <?= input_field('txn_date', 'Date', fv('txn_date', $rec, today()), ['type' => 'date', 'class' => 'col-md-2']) ?>
   <?= input_field('txn_no', 'Entry no.', fv('txn_no', $t, ''), ['class' => 'col-md-2', 'extra' => 'placeholder="' . h($t ? '' : Seq::peek('journal') . ' (auto)') . '"']) ?>
@@ -94,6 +95,7 @@ echo memorized_loaded_note($mem);
 <div class="card card-body mb-3"><?= journal_grid($lines) ?>
   <p class="small text-muted mb-0 mt-2">Routine activity posts automatically from invoices, bills, payments and the POS. Use journal entries for opening balances, accruals, corrections and closing entries.
     <?php if (Classes::ready()): ?>The class at the top applies to every line; choose a class on a line only when that line belongs to a different one.<?php endif; ?></p></div>
+<?= Attachments::formCard('journal', $t) ?>
 <div class="d-flex flex-wrap gap-2 align-items-center">
   <?= save_buttons('Save entry', $t ? url($pageKey, ['a' => 'view', 'id' => $t['id']]) : url($pageKey), Access::can($pageKey, 'create')) ?>
   <?php if ($memButton): ?><div class="ms-auto"><?= $memButton ?></div><?php endif; ?>

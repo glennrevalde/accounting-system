@@ -915,6 +915,132 @@
     if (document.readyState === 'complete') setTimeout(show, 50); else window.addEventListener('load', () => setTimeout(show, 50));
   })();
 
+  // ------------------------------------------------------------------ attachments (v40, app/Attachments.php)
+  // The Attachments box of a form keeps every file chosen (more can be added with the button or by dropping them on
+  // it), lists each with its size and a Remove, and turns away a file the server would not take before anything is
+  // sent. On the page of a saved document the same box attaches the files straight away with its Attach button.
+  (function () {
+    const BLOCK = /\.(exe|msi|msp|bat|cmd|com|scr|pif|cpl|dll|sys|vbs|vbe|jse|wsf|wsh|ps1|psm1|hta|lnk|reg|msc|jar|apk|app|deb|rpm|sh|php|phtml|phar)$/i;
+    const esc = (v) => String(v == null ? '' : v).replace(/[&<>"']/g, (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
+    const size = (b) => (b >= 1048576 ? (b / 1048576).toFixed(1) + ' MB' : (b >= 1024 ? Math.round(b / 1024) + ' KB' : b + ' bytes'));
+    const icon = (n) => {
+      const e = (String(n).split('.').pop() || '').toLowerCase();
+      if (e === 'pdf') return 'file-earmark-pdf';
+      if (/^(jpe?g|png|gif|webp|bmp|tiff?|heic|svg)$/.test(e)) return 'file-earmark-image';
+      if (/^(docx?|rtf|odt)$/.test(e)) return 'file-earmark-word';
+      if (/^(xlsx?|xlsm|csv|ods)$/.test(e)) return 'file-earmark-excel';
+      if (/^(pptx?|odp)$/.test(e)) return 'file-earmark-ppt';
+      if (/^(zip|rar|7z|gz|tar)$/.test(e)) return 'file-earmark-zip';
+      if (/^(html?|css|js|json|xml)$/.test(e)) return 'file-earmark-code';
+      if (/^(txt|eml|msg)$/.test(e)) return 'file-earmark-text';
+      return 'file-earmark';
+    };
+    document.querySelectorAll('[data-att]').forEach((box) => {
+      const input = box.querySelector('[data-att-input]');
+      if (!input) return;
+      const list = box.querySelector('[data-att-list]');
+      const warn = box.querySelector('[data-att-warn]');
+      const drop = box.querySelector('.att-drop');
+      const send = box.querySelector('[data-att-send]');
+      const countLabel = box.querySelector('[data-att-count-label]');
+      const maxFile = +box.dataset.attMax || 0;
+      const maxPost = +box.dataset.attPost || 0;
+      const maxCount = +box.dataset.attCount || 20;
+      let dt = null;
+      try { dt = new DataTransfer(); } catch (e) { dt = null; }
+      const say = (msgs) => { if (!warn) return; warn.hidden = !msgs.length; warn.innerHTML = msgs.map((m) => '<i class="bi bi-exclamation-triangle"></i> ' + esc(m)).join('<br>'); };
+      const queued = () => (dt ? Array.from(dt.files) : Array.from(input.files || []));
+      function counts() {
+        if (!countLabel || !list) return;
+        const n = list.querySelectorAll('.att-item:not(.is-removing)').length;
+        countLabel.textContent = n ? n + (n === 1 ? ' file' : ' files') : 'None yet';
+      }
+      function render() {
+        if (!list) return;
+        list.querySelectorAll('.is-queued').forEach((li) => li.remove());
+        queued().forEach((f, i) => {
+          const li = document.createElement('li');
+          li.className = 'att-item is-new is-queued';
+          li.innerHTML = '<span class="att-ico"><i class="bi bi-' + icon(f.name) + '"></i></span>'
+            + '<span class="att-text"><span class="att-name">' + esc(f.name) + '</span><span class="att-meta">' + size(f.size)
+            + (send ? ', ready to attach' : ', attached when you save') + '</span></span>'
+            + (dt ? '<span class="att-actions"><button type="button" class="btn btn-sm btn-light att-btn" data-i="' + i + '" title="Take it off"><i class="bi bi-x-lg"></i><span> Remove</span></button></span>' : '');
+          list.appendChild(li);
+        });
+        if (send) {
+          const n = queued().length;
+          send.hidden = !n;
+          const lab = send.querySelector('[data-att-n]');
+          if (lab) lab.textContent = n === 1 ? '1 file' : n + ' files';
+        }
+        counts();
+      }
+      function add(files) {
+        const msgs = [];
+        let total = queued().reduce((s, f) => s + f.size, 0);
+        Array.from(files).forEach((f) => {
+          if (BLOCK.test(f.name)) { msgs.push('"' + f.name + '" is a program file; program files cannot be attached.'); return; }
+          if (!f.size) { msgs.push('"' + f.name + '" is empty.'); return; }
+          if (maxFile && f.size > maxFile) { msgs.push('"' + f.name + '" (' + size(f.size) + ') is larger than ' + size(maxFile) + ', the most the server takes for one file.'); return; }
+          if (!dt) return;
+          if (Array.from(dt.files).some((x) => x.name === f.name && x.size === f.size)) return;
+          if (dt.files.length >= maxCount) { msgs.push('Up to ' + maxCount + ' files can go in one save. Save, then add "' + f.name + '" and the rest.'); return; }
+          if (maxPost && total + f.size > maxPost * 0.95) { msgs.push('"' + f.name + '" would take the files of this save over ' + size(maxPost) + '. Save first, then add it.'); return; }
+          dt.items.add(f);
+          total += f.size;
+        });
+        if (dt) input.files = dt.files;
+        say(msgs);
+        render();
+      }
+      input.addEventListener('change', () => {
+        const picked = Array.from(input.files || []);
+        if (!dt) {   // an older browser: the box holds what was picked last
+          const bad = picked.filter((f) => BLOCK.test(f.name) || (maxFile && f.size > maxFile));
+          if (bad.length) { input.value = ''; add(bad); return; }
+          say([]); render(); return;
+        }
+        input.files = dt.files;   // the files chosen before stay; the new ones are added to them
+        add(picked);
+      });
+      if (drop) {
+        ['dragenter', 'dragover'].forEach((ev) => drop.addEventListener(ev, (e) => { e.preventDefault(); drop.classList.add('is-over'); }));
+        ['dragleave', 'dragend'].forEach((ev) => drop.addEventListener(ev, () => drop.classList.remove('is-over')));
+        drop.addEventListener('drop', (e) => {
+          e.preventDefault();
+          drop.classList.remove('is-over');
+          if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length) {
+            if (dt) add(e.dataTransfer.files); else { input.files = e.dataTransfer.files; render(); }
+          }
+        });
+      }
+      if (list) {
+        list.addEventListener('click', (e) => {
+          const q = e.target.closest('button[data-i]');
+          if (q && dt) { dt.items.remove(+q.dataset.i); input.files = dt.files; render(); return; }
+          const k = e.target.closest('[data-att-drop]');
+          if (k) { k.closest('.att-item').remove(); counts(); }
+        });
+        list.addEventListener('change', (e) => {
+          const cb = e.target.closest('[data-att-remove]');
+          if (!cb) return;
+          const li = cb.closest('.att-item');
+          li.classList.toggle('is-removing', cb.checked);
+          const lab = cb.parentElement.querySelector('span');
+          if (lab) lab.textContent = cb.checked ? ' Undo' : ' Remove';
+          counts();
+        });
+        list.querySelectorAll('[data-att-remove]:checked').forEach((cb) => { const lab = cb.parentElement.querySelector('span'); if (lab) lab.textContent = ' Undo'; });
+      }
+      if (send && box.tagName === 'FORM') {
+        box.addEventListener('submit', () => {
+          const b = send.querySelector('button');
+          if (b) { b.disabled = true; b.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Attaching…'; }
+        });
+      }
+    });
+  })();
+
   // ------------------------------------------------------------------ long forms travel in one field
   // PHP reads only the first max_input_vars fields of a form (1000 as installed) and silently drops the rest:
   // a bill of 122 lines has more than 1,400 fields and would be saved without its last 40 lines. A long form
@@ -925,7 +1051,7 @@
     const form = e.target;
     if (e.defaultPrevented || !(form instanceof HTMLFormElement)) return;
     if ((form.getAttribute('method') || 'get').toLowerCase() !== 'post') return;
-    if ((form.getAttribute('enctype') || '').toLowerCase() === 'multipart/form-data') return;
+    // a form that sends files (multipart) is packed too: its files are left out of the pairs and go as they are
     const named = Array.prototype.filter.call(form.elements, (el) => el.name && !el.disabled);
     if (named.length <= PACK_ABOVE) return;
     let fd;
@@ -935,7 +1061,7 @@
     fd.forEach((v, k) => { if (k === '_csrf') { csrf = v; } else if (typeof v === 'string') { pairs.push([k, v]); } });
     // everything else is left out of this submission; the boxes are given back at once, so a form that opens in
     // another tab, or a page the browser keeps, still works
-    const off = named.filter((el) => el.name !== '_csrf');
+    const off = named.filter((el) => el.name !== '_csrf' && el.type !== 'file');
     off.forEach((el) => { el.disabled = true; });
     if (e.submitter && e.submitter.name) { e.submitter.dataset.packName = e.submitter.name; e.submitter.removeAttribute('name'); }
     let box = form.querySelector('input[name="_packed"]');

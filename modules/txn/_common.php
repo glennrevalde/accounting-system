@@ -746,6 +746,7 @@ function render_txn_view(array $t, string $pageKey): void
             <?php if ($advLeft !== null): ?><tr><td>Applied to bills</td><td class="num"><?= money(Advances::applied($id)) ?></td></tr><tr class="fw-semibold"><td>Left to apply</td><td class="num"><?= money($advLeft) ?></td></tr><?php endif; ?>
           </table>
         </div></div>
+        <?= Attachments::viewCard($t, $pageKey) ?>
         <?php $whtRows = in_array($type, ['bill_payment', 'payment'], true) ? Withholding::forPayment($id) : []; if ($whtRows): ?>
         <div class="card mb-3"><div class="card-header small fw-semibold"><?= $type === 'payment' ? 'Taxes withheld by the customer' : 'Taxes withheld from the supplier' ?></div>
           <div class="table-responsive"><table class="table table-sm mb-0 small"><thead><tr><th>Document</th><th>Tax</th><th class="num">Base</th><th class="num">Amount</th></tr></thead>
@@ -1255,6 +1256,9 @@ function render_txn_list(string $pageKey, array $types, string $title, array $op
         ], $rows));
     }
 
+    // v40: a paper clip beside the number of a document with attached files
+    $attCounts = array_intersect($types, Attachments::TYPES) ? Attachments::counts(array_column($rows, 'id')) : [];
+
     $actions = $opt['actions'] ?? '';
     if (Access::can($pageKey, 'create') && empty($opt['no_new'])) {
         $actions = btn_link(url($pageKey, ['a' => 'new']), $opt['new_label'] ?? 'New', 'btn-primary', 'plus-lg') . ' ' . $actions;
@@ -1299,7 +1303,7 @@ function render_txn_list(string $pageKey, array $types, string $title, array $op
         <tr class="<?= (int)$r['is_voided'] ? 'text-muted text-decoration-line-through' : '' ?>">
           <td><?= h(fdate($r['txn_date'])) ?></td>
           <?php if (count($types) > 1): ?><td><?= h(Txn::label($r['txn_type'])) ?></td><?php endif; ?>
-          <td><a href="<?= h(!empty($opt['own_link']) ? Txn::url($r) : url($pageKey, ['a' => 'view', 'id' => $r['id']])) ?>"><?= h($r['txn_no'] ?: '#' . $r['id']) ?></a></td>
+          <td><a href="<?= h(!empty($opt['own_link']) ? Txn::url($r) : url($pageKey, ['a' => 'view', 'id' => $r['id']])) ?>"><?= h($r['txn_no'] ?: '#' . $r['id']) ?></a><?= Attachments::clip($attCounts[(int)$r['id']] ?? 0) ?></td>
           <?php if ($siteCols): ?>
             <td><?= h($siteNames[$r['site_id']] ?? '') ?></td><td><i class="bi bi-arrow-right-short text-muted"></i> <?= h($siteNames[$r['site2_id']] ?? '') ?></td>
           <?php else: ?>

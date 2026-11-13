@@ -276,5 +276,6 @@ return [
         'api.lookup'           => 'api/lookup.php',
         'file.logo'            => 'files/logo.php',
         'file.item_image'      => 'files/item_image.php',
+        'file.attachment'      => 'files/attachment.php',
     ],
 ];

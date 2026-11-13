@@ -1889,3 +1889,83 @@ body.is-popup .page-bar { display: none; }
   .ccs-sheet { border: 0; border-radius: 0; box-shadow: none; margin: 0; page-break-after: always; break-after: page; }
   .ccs-sheet:last-child { page-break-after: auto; break-after: auto; }
 }
+
+/* ------------------------------------------------------------------ v40: attachments on transactions */
+.att-head { display: flex; align-items: center; justify-content: space-between; gap: .75rem; }
+.att-head-plain { padding-bottom: .55rem; margin-bottom: .55rem; border-bottom: 1px dashed var(--line); }
+.att-title { font-weight: 600; color: var(--ink); display: inline-flex; align-items: center; gap: .4rem; }
+.att-title .bi { color: var(--blue-deep); font-size: 1.05em; }
+.att-count { font-size: .8rem; color: var(--muted); }
+.att-list { list-style: none; margin: 0 0 .6rem; padding: 0; display: grid; gap: .45rem; }
+.att-list:empty { display: none; }
+.att-item {
+  display: flex; align-items: center; gap: .7rem; padding: .5rem .6rem; border: 1px solid var(--line);
+  border-radius: var(--radius-sm); background: linear-gradient(180deg, #ffffff, #f8f9fb);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, .9) inset, 0 1px 2px rgba(15, 23, 42, .06);
+  transition: opacity .15s ease, background-color .15s ease;
+}
+.att-item.is-new { border-style: dashed; border-color: #9ec5fe; background: linear-gradient(180deg, #f7fbff, #eef5ff); }
+.att-item.is-removing { opacity: .55; background: #fff5f5; border-color: #f1c0c0; }
+.att-item.is-removing .att-name { text-decoration: line-through; }
+.att-ico {
+  flex: 0 0 auto; width: 2.2rem; height: 2.2rem; display: grid; place-items: center; border-radius: 8px;
+  background: linear-gradient(180deg, #eef4ff, #dfeaff); color: var(--blue-deep); font-size: 1.1rem;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, .8) inset, 0 1px 2px rgba(13, 110, 253, .18);
+}
+.att-ico .bi-file-earmark-pdf { color: #c4302b; }
+.att-ico .bi-file-earmark-excel { color: #1e7b45; }
+.att-ico .bi-file-earmark-word { color: #2b5797; }
+.att-ico .bi-file-earmark-ppt { color: #c55a11; }
+.att-text { min-width: 0; flex: 1 1 auto; display: flex; flex-direction: column; line-height: 1.25; }
+.att-name { font-weight: 600; color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+a.att-name { color: var(--bs-link-color); text-decoration: none; }
+a.att-name:hover { text-decoration: underline; }
+.att-meta { font-size: .76rem; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.att-actions { flex: 0 0 auto; display: flex; gap: .3rem; align-items: center; }
+.att-btn { border: 1px solid var(--line); padding: .2rem .5rem; font-size: .78rem; background: #fff; white-space: nowrap; }
+.att-btn:hover { background: var(--blue-tint); border-color: #b6d4fe; }
+.att-rm:hover { background: #fdecec; border-color: #f1b0b0; color: #b02a37; }
+.att-drop {
+  position: relative; display: flex; align-items: center; gap: .8rem; margin: 0; padding: .8rem .9rem; cursor: pointer;
+  border: 1.5px dashed #b8c4d4; border-radius: var(--radius-sm); background: var(--surface-2); box-shadow: var(--inset);
+  transition: border-color .15s ease, background-color .15s ease;
+}
+.att-drop:hover, .att-drop.is-over { border-color: var(--blue); background: var(--blue-tint); }
+.att-drop:focus-within { border-color: var(--blue); box-shadow: 0 0 0 .2rem rgba(13, 110, 253, .2); }
+.att-drop input[type=file] { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
+.att-drop-ico {
+  flex: 0 0 auto; width: 2.4rem; height: 2.4rem; display: grid; place-items: center; border-radius: 50%;
+  background: linear-gradient(180deg, #3d8bfd, #0b5ed7); color: #fff; font-size: 1.15rem;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, .35) inset, 0 4px 10px -4px rgba(13, 110, 253, .6);
+}
+.att-drop-text { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 .35rem; line-height: 1.35; }
+.att-drop-text strong { color: var(--blue-deep); }
+.att-drop-or { color: var(--ink-soft); }
+.att-drop-hint { flex-basis: 100%; font-size: .76rem; color: var(--muted); }
+.att-drop-sm { padding: .6rem .75rem; }
+.att-warn, .att-problem { margin-top: .5rem; font-size: .8rem; color: #8a5300; background: #fff8e6; border: 1px solid #f5d98b; border-radius: var(--radius-sm); padding: .4rem .6rem; }
+.att-problem { margin: 0 0 .5rem; }
+.att-empty { font-size: .82rem; color: var(--muted); margin-bottom: .6rem; }
+.att-send { margin-top: .6rem; display: flex; justify-content: flex-end; }
+.att-queue { margin-top: .6rem; }
+.att-clip { color: var(--muted); font-size: .8rem; margin-left: .2rem; white-space: nowrap; }
+.att-clip .bi { font-size: .85rem; }
+.att-section .att-list { margin-top: .1rem; }
+/* a narrow box (the side column of a document's page, a half-width column, a phone): the buttons go under the name */
+.att-card { container-type: inline-size; }
+@container (max-width: 460px) {
+  .att-item { flex-wrap: wrap; }
+  .att-text { flex-basis: calc(100% - 3rem); }
+  .att-meta { white-space: normal; }
+  .att-actions { flex-basis: 100%; justify-content: flex-end; }
+}
+@media (max-width: 575.98px) {
+  .att-item { flex-wrap: wrap; }
+  .att-text { flex-basis: calc(100% - 3rem); }
+  .att-meta { white-space: normal; }
+  .att-actions { flex-basis: 100%; justify-content: flex-end; }
+  .att-btn span { display: none; }
+  .att-btn { padding: .3rem .65rem; font-size: .95rem; }
+  .att-drop { padding: .75rem; }
+}
+@media print { .att-card { display: none !important; } }

@@ -53,7 +53,8 @@ handle_post(function () use ($receipt, $pageKey) {
         'audit_action' => 'convert',
         'reason' => 'Item receipt ' . $receipt['txn_no'] . ' converted to a bill',
     ]);
-    flash('success', 'Bill entered. Inventory value and the payable were adjusted to the billed cost.');
+    $files = Attachments::claim($id, $pageKey);
+    flash('success', 'Bill entered. Inventory value and the payable were adjusted to the billed cost.' . ($files !== '' ? ' ' . $files : ''));
     redirect_after_save(url($pageKey), url('vend.bills', ['a' => 'view', 'id' => $id]));
 });
 
@@ -79,7 +80,7 @@ layout_start('Enter Bill for Received Items');
   </form>
 </div></div>
 <?php if ($receipt): ?>
-<form method="post">
+<form method="post"<?= Attachments::enctype('bill') ?>>
 <?= csrf_field() ?>
 <div class="card mb-3"><div class="card-body row g-2">
   <div class="col-md-3 small">Received <?= h(fdate($receipt['txn_date'])) ?> at cost <?= money($receipt['total']) ?></div>
@@ -97,7 +98,7 @@ layout_start('Enter Bill for Received Items');
     <p class="small text-muted mb-0">Quantities are fixed to what was received. Change the cost if the vendor billed a different price; the inventory value is adjusted.</p></div>
   <div class="tab-pane fade" id="be"><?= expense_grid(is_post() ? grid_rows('expenses') : [], ['min_rows' => 1]) ?></div>
 </div>
-<div class="row"><div class="col-md-6"></div><div class="col-md-6"><?= totals_box() ?></div></div>
+<div class="row"><div class="col-md-6"><?= Attachments::formCard('bill', null) ?></div><div class="col-md-6"><?= totals_box() ?></div></div>
 <div class="mt-2"><?= save_buttons('Enter bill', url($pageKey), Access::can($pageKey, 'create')) ?></div>
 </form>
 <?php endif; ?>
