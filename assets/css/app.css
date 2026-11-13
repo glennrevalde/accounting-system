@@ -1844,3 +1844,48 @@ body.is-popup .page-bar { display: none; }
   .rcpt-foot tr { background: var(--surface-2); border-top: 1px solid var(--line); }
   .rcpt-foot .rcpt-total { background: linear-gradient(180deg, #f7f9fc, #eef2f8); }
 }
+
+/* ------------------------------------------------------------------ v39: Cash Count Sheet on a quarter sheet; Print / Save as PDF */
+.print-bar .btn { min-width: 120px; }
+.ccs-bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: .5rem; margin: 0 auto 1rem; padding: .65rem .85rem; max-width: 760px;
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--raise-1); }
+.ccs-bar .form-select { width: auto; min-width: 250px; }
+.ccs-bar .btn { white-space: nowrap; }
+.ccs-sheets { display: flex; flex-wrap: wrap; justify-content: center; gap: 1.25rem; }
+.ccs-sheet { width: 4.25in; height: 5.5in; padding: .2in .24in; box-sizing: border-box; overflow: hidden; background: #fff; color: #111;
+  border: 1px solid var(--line); border-radius: 4px; box-shadow: 0 10px 28px -16px rgba(15, 23, 42, .45); display: flex; flex-direction: column;
+  font-size: 7.4pt; line-height: 1.25; font-variant-numeric: tabular-nums; }
+.paper-legal4 .ccs-sheet { height: 6.5in; font-size: 8pt; }
+.ccs-co { text-align: center; font-weight: 700; font-size: 8.6pt; }
+.ccs-title { text-align: center; font-weight: 800; font-size: 11pt; letter-spacing: .02em; text-transform: uppercase; margin: 1pt 0 4pt; }
+.ccs-info { font-size: 6.9pt; margin-bottom: 4pt; }
+.ccs-info span { color: #555; }
+.ccs-table { width: 100%; border-collapse: collapse; }
+.ccs-table th { font-size: 6.9pt; color: #333; background: #ececec; padding: 1.6pt 3pt; border-bottom: 1px solid #999; }
+.ccs-table td { padding: 1.15pt 3pt; border-bottom: .5pt solid #ddd; }
+.paper-legal4 .ccs-table td { padding: 2.1pt 3pt; }
+.ccs-table td:first-child { font-weight: 700; }
+.ccs-table tr.ccs-first td { border-top: .8pt solid #999; }
+.ccs-table .num { text-align: right; }
+.ccs-table tfoot td { border-bottom: 0; font-weight: 400; }
+.ccs-table tfoot td:first-child { font-weight: 400; }
+.ccs-table .ccs-total td { font-weight: 800 !important; font-size: 8.4pt; border-top: 1.2pt solid #222; background: #f3f3f3; }
+.ccs-note { font-size: 6.2pt; color: #666; margin-top: 2pt; }
+.ccs-sign { margin-top: auto; display: grid; grid-template-columns: 1fr 1fr; gap: 10pt; padding-top: 10pt; font-size: 6.8pt; }
+.ccs-sign > div { display: grid; grid-template-columns: auto 1fr; column-gap: 3pt; align-items: end; }
+.ccs-lab { font-weight: 700; }
+.ccs-line { border-bottom: .8pt solid #222; height: 10pt; }
+.ccs-name { grid-column: 2; text-align: center; font-weight: 700; font-size: 6.6pt; margin-top: 1pt; }
+.ccs-cap { grid-column: 2; text-align: center; color: #666; font-size: 6.2pt; }
+@media (max-width: 575.98px) {
+  .ccs-bar .form-select { min-width: 0; width: 100%; }
+  .ccs-bar .btn { flex: 1; }
+  .ccs-sheets { justify-content: flex-start; overflow-x: auto; }
+}
+@media print {
+  body:has(.ccs-sheets) { background: #fff !important; }
+  body:has(.ccs-sheets) main { padding: 0 !important; margin: 0 !important; }
+  .ccs-sheets { display: block; }
+  .ccs-sheet { border: 0; border-radius: 0; box-shadow: none; margin: 0; page-break-after: always; break-after: page; }
+  .ccs-sheet:last-child { page-break-after: auto; break-after: auto; }
+}

@@ -345,7 +345,7 @@ layout_start('Company, Security & Closing Date', ['js' => ['js/btprint.js']]);
               </div></div>
           <?php endforeach; ?>
         </div>
-        <div class="form-text">The logo is printed beside the company name on the reports and vouchers ticked here, on screen, on Print / PDF and on the printed page.</div>
+        <div class="form-text">The logo is printed beside the company name on the reports and vouchers ticked here, on screen, on the print page and on the printed page.</div>
       </div>
     </div>
   </div></div></div>
