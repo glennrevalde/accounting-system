@@ -229,7 +229,7 @@ function seed_master_data(): void
     }
     $adminSetup = ['admin.users', 'admin.roles', 'admin.page_access', 'admin.effective_access', 'admin.settings',
         'admin.utilities', 'admin.import', 'admin.backup', 'admin.multi_company',
-        'company.profile', 'company.users', 'company.join_requests'];
+        'company.profile', 'company.users', 'company.join_requests', 'comm.manage'];
     $select = function (string $pattern) use ($pageDefs): array {
         // "module:*", "module:report", "module:!report", "group:Sales Reports", exact key
         if (isset($pageDefs[$pattern])) {
@@ -338,6 +338,11 @@ function seed_master_data(): void
         }
         foreach ($def['deny'] ?? [] as $k) {
             unset($grant[$k]);
+        }
+        // v41: every role reads the community; a role that may create anything may post (and edit and delete its own)
+        $poster = (bool)array_filter($grant, fn($l) => str_contains($l, 'C'));
+        foreach (['comm.chat', 'comm.inquiries'] as $k) {
+            $grant[$k] = ($grant[$k] ?? '') . ($poster ? 'CED' : '');
         }
         foreach ($grant as $k => $letters) {
             DB::insert('role_page_access', [
@@ -592,5 +597,10 @@ function seed_master_data(): void
         ['maintenance', 'MNT-', 1, 5], ['debit_memo', 'DM-', 1, 5], ['vendor_advance', 'ADV-', 1, 5], ['advance_apply', 'AAP-', 1, 5],
     ] as [$k, $pfx, $next, $pad]) {
         DB::insert('sequences', ['seq_key' => $k, 'prefix' => $pfx, 'next_no' => $next, 'pad' => $pad]);
+    }
+
+    // ---------------------------------------------------------------- community (v41): channels and inquiry categories
+    if (Community::ready()) {
+        Community::seedDefaults();
     }
 }

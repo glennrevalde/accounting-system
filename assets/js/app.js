@@ -915,6 +915,59 @@
     if (document.readyState === 'complete') setTimeout(show, 50); else window.addEventListener('load', () => setTimeout(show, 50));
   })();
 
+  // ------------------------------------------------------------------ Community notifications in the top bar (v41)
+  // The count is asked for every 45 seconds in the background (a background request does not keep an idle session
+  // alive); the list is loaded when the menu opens. A click opens the conversation or the inquiry and marks it read.
+  (function () {
+    const box = document.querySelector('[data-cm-notif]');
+    if (!box) return;
+    const api = box.dataset.api;
+    const count = box.querySelector('[data-cm-count]');
+    const icon = box.querySelector('.bell-btn .bi');
+    const btn = box.querySelector('.bell-btn');
+    const list = box.querySelector('[data-cm-list]');
+    const csrf = (document.querySelector('meta[name="csrf-token"]') || {}).content || '';
+    const esc = (v) => String(v == null ? '' : v).replace(/[&<>"']/g, (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
+    const icons = { mention: 'at', reply: 'reply', dm: 'envelope', response: 'chat-left-text', official: 'patch-check', accepted: 'check2-circle', announcement: 'megaphone', resolved: 'check2-all' };
+    let stopped = false;
+    function show(n) {
+      n = +n || 0;
+      count.hidden = !n;
+      count.textContent = n > 99 ? '99+' : String(n);
+      btn.classList.toggle('is-quiet', !n);
+      icon.className = 'bi bi-chat-dots' + (n ? '-fill' : '');
+      btn.setAttribute('aria-label', 'Community notifications' + (n ? ', ' + n + ' unread' : ''));
+    }
+    window.addEventListener('comm:notif', (e) => show(e.detail));
+    async function ask(params, post) {
+      const opt = { credentials: 'same-origin', headers: { Accept: 'application/json', 'X-Background': '1' } };
+      if (post) { const fd = new FormData(); fd.append('_csrf', csrf); Object.keys(post).forEach((k) => fd.append(k, post[k])); opt.method = 'POST'; opt.body = fd; }
+      const r = await fetch(api + '&' + new URLSearchParams(params).toString(), opt);
+      if (!(r.headers.get('content-type') || '').includes('json')) { stopped = true; throw new Error('session'); }
+      return r.json();
+    }
+    async function load() {
+      try {
+        const j = await ask({ a: 'notifications' });
+        show(j.notif);
+        list.innerHTML = (j.items || []).length ? j.items.map((n) => '<a class="cm-notif-item' + (n.read ? '' : ' is-unread') + '" href="' + esc(n.url) + '">'
+          + '<span class="cm-notif-ico"><i class="bi bi-' + (icons[n.kind] || 'bell') + '"></i></span>'
+          + '<span class="cm-notif-text">' + esc(n.text) + '<small>' + esc(n.ago) + '</small></span></a>').join('')
+          : '<div class="cm-notif-empty">No notifications yet. Mentions, replies, private messages and answers to your inquiries show here.</div>';
+      } catch (e) { list.innerHTML = '<div class="cm-notif-empty">Could not load the notifications.</div>'; }
+    }
+    btn.addEventListener('show.bs.dropdown', load);
+    box.addEventListener('show.bs.dropdown', load);
+    box.querySelector('[data-cm-readall]').addEventListener('click', async () => {
+      try { const j = await ask({ a: 'notif_read' }, { id: 'all' }); show(j.notif); load(); } catch (e) { /* the next check retries */ }
+    });
+    if (document.body.classList.contains('cm-page')) return;   // the chat page keeps the count itself
+    setInterval(async () => {
+      if (stopped || document.hidden) return;
+      try { const j = await ask({ a: 'badge' }); if (j.ok) show(j.notif); } catch (e) { /* offline: try again later */ }
+    }, 45000);
+  })();
+
   // ------------------------------------------------------------------ attachments (v40, app/Attachments.php)
   // The Attachments box of a form keeps every file chosen (more can be added with the button or by dropping them on
   // it), lists each with its size and a Remove, and turns away a file the server would not take before anything is

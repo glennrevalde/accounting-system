@@ -1,0 +1,91 @@
+G-SMaRT Accounting - version 41 (2027-02-04)
+=============================================
+
+This package holds only the files that were added or changed since version 40.
+Copy the accounting-system folder over your installation, keeping the folder
+structure. config/config.php is not included and is never changed.
+
+Database
+--------
+1. Back up the database.
+2. Run database/migrations/2027_02_04_community.sql on it (phpMyAdmin: Import;
+   Navicat: Execute SQL File). It works on MySQL 5.5 and can be run a second
+   time. It adds:
+    - the Community tables: channels (and the roles of a restricted channel),
+      channel members and how far each has read, messages, reactions, files,
+      inquiry categories, inquiries, responses, private conversations and their
+      messages, blocked users, community settings, notifications, reports,
+      mutes and suspensions, and the moderation log;
+    - six channels (General Discussion, Questions and Inquiries, Help and
+      Support, Announcements, Suggestions and Feedback, Community Concerns) and
+      six inquiry categories;
+    - the menu Community with Community Chat and Questions & Inquiries for every
+      role (roles that may create anything anywhere may post; the others read),
+      and Community Management for the roles that may open User Accounts (the
+      Administrator always has it).
+   Nothing is deleted and no amount changes. With several companies, run it on
+   every company's database (Super Admin: Companies > Update databases).
+3. Press Ctrl+F5 once in the browser (the page script and the style sheet changed).
+
+What is new: the Community
+--------------------------
+1. Community Chat (Community > Community Chat)
+ - Channels on the left, messages in the middle with the box to write in,
+   pinned messages and the people active now on the right; on a phone the two
+   side parts slide in.
+ - Messages appear without reloading the page. Unread messages are counted per
+   channel and per private conversation.
+ - Enter sends, Shift+Enter starts a new line; @ mentions (with a list of
+   names), emoji, pictures and documents (up to 6 per message: JPG, PNG, GIF,
+   WebP, PDF, Word, Excel, PowerPoint, CSV, text, ZIP; up to 10 MB each, or
+   the PHP limit), drop or paste a screenshot, links made clickable.
+ - On each message: React, Reply, Edit and Delete (own), Copy link, Report;
+   moderators: Pin, Hide, Delete.
+ - Search a channel by words, with files, pinned, or mentioning me.
+ - Sending..., Sent, Not sent (Retry / Discard), and Seen in private messages.
+   A message sent twice on a bad connection is kept once.
+ - Private messages between two people: only those two can read them, no
+   administrator or moderator can open them. Each person chooses who may
+   message them (everyone, moderators only, nobody) and can block and report.
+ - Settings: picture, who may send private messages, which notifications.
+ - Announcements: only moderators post; everyone is notified.
+
+2. Questions & Inquiries (Community > Questions & Inquiries)
+ - Ask a question with a title, category, description and attachments;
+   similar questions are shown while the title is typed.
+ - Responses (with files), comments on responses, Official responses from
+   moderators, and the accepted answer chosen by the author or a moderator.
+ - Status: Open, Answered (an answer accepted), Resolved (closed; Reopen).
+ - List with tabs by status, search (questions and answers), category, sort,
+   Mine and No responses yet.
+
+3. Notifications
+ - The chat icon in the top bar shows the unread community notifications:
+   mentions, replies, private messages, responses, official responses,
+   accepted answers, resolved inquiries and announcements. A click opens the
+   conversation or the inquiry. One notification per conversation or inquiry,
+   never duplicated.
+
+4. Community Management (moderators)
+ - Overview: activity, unresolved inquiries, open reports; publish an
+   announcement (pinned if ticked).
+ - Reports: the words reported, the reason; hide the post, close or dismiss.
+   A reported private message is seen only as the words reported.
+ - Channels: add, edit, reorder, archive and restore; limit a channel to some
+   roles. Inquiry categories: add, rename, stop using.
+ - Members: mute (may read, not post) or suspend (no community), for 1 hour to
+   30 days or until lifted, with the reason the member sees.
+ - Moderation log; every moderation is also in the Audit Trail.
+ - Rights: Community Management View = moderator; Edit = hide, pin, announce,
+   official answers, reports; Delete = delete others' posts, mute, suspend;
+   Create = channels and categories.
+
+5. Safety
+ - Every action is checked on the server; text is always shown as text; posts
+   are rate-limited (too many too fast, or the same text repeated, is refused);
+   files are checked and kept in the database; the page's background requests
+   do not keep an idle session alive (the automatic log-out still applies).
+
+The user's manual has a new chapter 14, Community (the Appendices are now
+chapter 15), in the Help pages and in the Word edition
+(GSMaRT_Accounting_Users_Manual_v41.docx).

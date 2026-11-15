@@ -19,6 +19,7 @@ return [
         'bir'   => ['BIR Reports', 'file-earmark-ruled', 9],
         'admin' => ['System Administration', 'shield-lock', 10],
         'company' => ['Company', 'buildings', 11],
+        'comm'  => ['Community', 'chat-dots', 12],
     ],
 
     // key => [module, name, type, group, file, params, show_in_menu]
@@ -254,6 +255,11 @@ return [
         'company.profile'        => ['company', 'Company Profile & Code', 'admin', 'Company', 'company/profile.php', [], 1],
         'company.users'          => ['company', 'Employees & Users', 'admin', 'Company', 'company/users.php', [], 1],
         'company.join_requests'  => ['company', 'Join Requests', 'admin', 'Company', 'company/users.php', ['tab' => 'pending'], 1],
+
+        // ---------------- Community (v41)
+        'comm.chat'              => ['comm', 'Community Chat', 'center', 'Community', 'community/chat.php', [], 1],
+        'comm.inquiries'         => ['comm', 'Questions & Inquiries', 'center', 'Community', 'community/inquiries.php', [], 1],
+        'comm.manage'            => ['comm', 'Community Management', 'admin', 'Moderation', 'community/manage.php', [], 1],
     ],
 
     // Pages shown in more than one module menu (page access is still one setting)
@@ -277,5 +283,7 @@ return [
         'file.logo'            => 'files/logo.php',
         'file.item_image'      => 'files/item_image.php',
         'file.attachment'      => 'files/attachment.php',
+        'comm.api'             => 'community/api.php',
+        'comm.file'            => 'community/file.php',
     ],
 ];

@@ -49,6 +49,9 @@ final class Provision
         'uom_units'                => 'Units of measure (units)',
         'asset_categories'         => 'Fixed asset categories and their accounts',
         'withholding_taxes'        => 'Withholding Tax Table (BIR Reports)',
+        'community_channels'       => 'Community channels (no messages)',
+        'community_channel_roles'  => 'Community channels: the roles of a restricted channel',
+        'community_inquiry_categories' => 'Community inquiry categories (no inquiries)',
     ];
 
     /** settings that describe the template company itself, replaced or cleared on the copy */

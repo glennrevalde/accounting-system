@@ -141,7 +141,10 @@ final class Auth
         if (!self::user()) {
             redirect(base_url() . '/login.php');
         }
-        $_SESSION['last_activity'] = time();
+        // v41: a page asking in the background what is new (the Community's polling) is not activity
+        if (($_SERVER['HTTP_X_BACKGROUND'] ?? '') !== '1') {
+            $_SESSION['last_activity'] = time();
+        }
 
         // a user of another company working here: the password and its rules are those of their own company
         if ($route !== 'auth.change_password' && $route !== 'auth.logout' && (self::user()['created_via'] ?? '') !== 'link') {

@@ -8,7 +8,7 @@ declare(strict_types=1);
  */
 final class Schema
 {
-    private const FLAG = 'schema_ok_2027_01_28';
+    private const FLAG = 'schema_ok_2027_02_04';
 
     /**
      * file => one cheap probe.
@@ -118,6 +118,12 @@ final class Schema
         'database/migrations/2027_01_28_transaction_attachments.sql' =>
             'SELECT (SELECT COUNT(transaction_id) + COUNT(stage_key) FROM txn_attachments WHERE 1 = 0)
                   + (SELECT COUNT(*) FROM txn_attachment_chunks WHERE 1 = 0)',
+        // v41: the Community: its tables (the query fails without them) and its three pages
+        'database/migrations/2027_02_04_community.sql' =>
+            ['SELECT (SELECT COUNT(*) FROM pages WHERE page_key IN (\'comm.chat\', \'comm.inquiries\', \'comm.manage\'))
+                   + (SELECT COUNT(*) FROM community_messages WHERE 1 = 0) + (SELECT COUNT(*) FROM community_dm_messages WHERE 1 = 0)
+                   + (SELECT COUNT(*) FROM community_inquiry_responses WHERE 1 = 0) + (SELECT COUNT(*) FROM community_notifications WHERE 1 = 0)
+                   + (SELECT COUNT(*) FROM community_mod_log WHERE 1 = 0) + (SELECT COUNT(*) FROM community_file_chunks WHERE 1 = 0)', 3],
     ];
 
     private static ?array $pending = null;

@@ -127,6 +127,7 @@ function layout_start(string $title, array $opt = []): void
 <link rel="stylesheet" href="<?= h(vendor_asset('bootstrap.css')) ?>">
 <link rel="stylesheet" href="<?= h(vendor_asset('icons.css')) ?>">
 <link rel="stylesheet" href="<?= h(asset('css/app.css')) ?>">
+<?php if ($user): ?><meta name="csrf-token" content="<?= h(csrf_token()) ?>"><?php endif; ?>
 <script src="<?= h(asset('js/fmt.js')) ?>"></script>
 <script src="<?= h(asset('js/wht.js')) ?>"></script>
 </head>
@@ -166,6 +167,23 @@ function layout_start(string $title, array $opt = []): void
     <?php endif; ?>
     <?php if (Access::page('home.find')): ?>
     <a class="bell-btn find-btn" href="<?= h(url('home.find')) ?>" title="Find transactions: any module, any combination of filters" aria-label="Find"><i class="bi bi-funnel"></i><span class="find-btn-text">Find</span></a>
+    <?php endif; ?>
+    <?php
+      // v41: the Community's notifications (mentions, replies, private messages, answers, announcements)
+      if (Community::ready() && Schema::ready() && (Access::page('comm.chat') || Access::page('comm.inquiries')) && !Community::suspended()):
+        $cmN = Community::unreadNotifications(); ?>
+    <div class="dropdown cm-notif" data-cm-notif data-api="<?= h(url('comm.api')) ?>">
+      <button class="bell-btn<?= $cmN ? '' : ' is-quiet' ?>" type="button" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false"
+        title="Community notifications" aria-label="Community notifications"><i class="bi bi-chat-dots<?= $cmN ? '-fill' : '' ?>"></i><span class="bell-count" data-cm-count<?= $cmN ? '' : ' hidden' ?>><?= $cmN > 99 ? '99+' : $cmN ?></span></button>
+      <div class="dropdown-menu dropdown-menu-end cm-notif-menu">
+        <div class="cm-notif-head"><strong>Notifications</strong><button type="button" class="btn btn-link btn-sm p-0" data-cm-readall>Mark all as read</button></div>
+        <div class="cm-notif-list" data-cm-list><div class="cm-notif-empty">Loading…</div></div>
+        <div class="cm-notif-foot">
+          <?php if (Access::page('comm.chat')): ?><a href="<?= h(url('comm.chat')) ?>"><i class="bi bi-chat-dots"></i> Community Chat</a><?php endif; ?>
+          <?php if (Access::page('comm.inquiries')): ?><a href="<?= h(url('comm.inquiries')) ?>"><i class="bi bi-patch-question"></i> Questions &amp; Inquiries</a><?php endif; ?>
+        </div>
+      </div>
+    </div>
     <?php endif; ?>
     <?php
       // preventive maintenance reminders: they stay here until the tasks are acknowledged as complete
