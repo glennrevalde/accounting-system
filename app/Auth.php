@@ -119,6 +119,7 @@ final class Auth
     {
         if (self::user()) {
             Audit::log($reason === 'timeout' ? 'session_timeout' : 'logout', 'security', 'user', self::id(), self::user()['username']);
+            Community::away((int)self::id());    // v41.1: off the Community's "Active now"
         }
         $_SESSION = [];
         if (session_status() === PHP_SESSION_ACTIVE) {

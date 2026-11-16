@@ -334,7 +334,10 @@
   async function poll() {
     if (!S.view || S.loading) { schedule(); return; }
     const v = S.view;
-    const p = { a: 'poll', after: S.lastId, since: S.since, online: Math.random() < 0.15 ? '1' : '0' };
+    // the people active now are asked for every 30 seconds
+    const wantOnline = !S.onlineAt || Date.now() - S.onlineAt > 30000;
+    if (wantOnline) S.onlineAt = Date.now();
+    const p = { a: 'poll', after: S.lastId, since: S.since, online: wantOnline ? '1' : '0' };
     if (v.type === 'dm') p.dm = v.id; else p.ch = v.id;
     try {
       const j = await get(p, true);

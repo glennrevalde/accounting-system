@@ -17,6 +17,7 @@ if (Tenant::isMulti() && !Tenant::id()) {
 }
 
 Auth::requireLogin($route);
+Community::seen();    // v41.1: "Active now" in the Community Chat counts every page of the system
 $GLOBALS['CURRENT_PAGE'] = $route;
 
 // The program files are newer than the database: stop with clear instructions instead of failing half-way through a save.

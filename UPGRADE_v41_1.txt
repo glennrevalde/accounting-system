@@ -1,0 +1,15 @@
+G-SMaRT Accounting - version 41.1 (2027-02-05)
+===============================================
+
+A correction to version 41. Copy the accounting-system folder over your
+installation, keeping the folder structure. No database update is needed.
+Press Ctrl+F5 once in the browser (the Community Chat script changed).
+
+Community Chat: "Active now"
+ - Before: a user was listed only while they had the Community Chat page itself
+   open, so cashiers working at the POS Register (or anyone on another page)
+   were not shown.
+ - Now: everyone who has had any page of G-SMaRT Accounting open in the last
+   five minutes, and who may use the Community Chat, is listed, whatever page
+   they are on. A user who logs out leaves the list at once.
+ - The list refreshes every 30 seconds while the chat is open.

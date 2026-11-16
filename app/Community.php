@@ -235,13 +235,43 @@ final class Community
             ['u' => self::me(), 'n' => self::now(), 'o' => date('Y-m-d H:i:s', time() - 60)]);
     }
 
-    /** The users seen in the last five minutes */
+    /**
+     * v41.1: called on every page of the system (index.php), so "Active now" lists everyone who has the system open,
+     * whatever page they are on (a cashier at the POS Register too), not only those on the Community Chat. Written at
+     * most once a minute per user.
+     */
+    public static function seen(): void
+    {
+        try {
+            if (session_status() !== PHP_SESSION_ACTIVE || !self::me() || (int)($_SESSION['comm_seen_at'] ?? 0) > time() - 60 || !self::ready()) {
+                return;
+            }
+            $_SESSION['comm_seen_at'] = time();
+            self::touch();
+        } catch (Throwable $e) {
+            // presence is a convenience: never stop a page for it
+        }
+    }
+
+    /** Logging out: no longer shown under "Active now" */
+    public static function away(int $uid): void
+    {
+        try {
+            if (self::ready()) {
+                DB::run('UPDATE community_settings SET last_seen_at = NULL WHERE user_id = :u', ['u' => $uid]);
+            }
+        } catch (Throwable $e) {
+        }
+    }
+
+    /** The users who had a page of the system open in the last five minutes and may use the Community Chat */
     public static function online(int $limit = 30): array
     {
-        $ids = array_map('intval', DB::column('SELECT s.user_id FROM community_settings s JOIN users u ON u.id = s.user_id AND u.status = \'active\'
-                                                 WHERE s.last_seen_at >= :t ORDER BY s.last_seen_at DESC LIMIT ' . (int)$limit,
+        $ids = array_map('intval', DB::column('SELECT s.user_id FROM community_settings s JOIN users u ON u.id = s.user_id AND u.status = \'active\' AND u.is_platform = 0
+                                                 WHERE s.last_seen_at >= :t ORDER BY s.last_seen_at DESC LIMIT 100',
             ['t' => date('Y-m-d H:i:s', time() - 300)]));
-        return array_values(self::users($ids));
+        $ids = array_values(array_filter($ids, fn($id) => Access::page('comm.chat', $id) && !self::suspended($id)));
+        return array_values(self::users(array_slice($ids, 0, $limit)));
     }
 
     /** Users whose name or username starts with / contains the text, who may use the community (for @mentions and new messages) */
