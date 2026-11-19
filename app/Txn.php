@@ -202,6 +202,9 @@ final class Txn
                 fail('Enter a valid date.');
             }
             self::assertPeriod($h['txn_date'], $old);
+            if ($old) {
+                Signatures::assertUnlocked($old, 'changed');   // v42: a signed voucher stays as signed
+            }
             // an inventory part (or the items of an item group) with no unit cost can not be sold (v29)
             self::assertCosted($type, $lines);
             if (isset($h['site_id']) && $h['site_id'] && !Access::siteAllowed((int)$h['site_id'])) {
@@ -474,6 +477,7 @@ final class Txn
                 fail('Enter a reason for voiding.');
             }
             self::assertPeriod(null, $t);
+            Signatures::assertUnlocked($t, 'voided');
             if ($b = self::blockers($t, false)) {
                 fail(implode(' ', $b));
             }
@@ -519,6 +523,7 @@ final class Txn
                 fail('Enter a reason for deleting.');
             }
             self::assertPeriod(null, $t);
+            Signatures::assertUnlocked($t, 'deleted');
             if ($b = self::blockers($t, true)) {
                 fail(implode(' ', $b));
             }

@@ -1857,6 +1857,87 @@ CREATE TABLE community_mod_log (
   KEY ix_cml_target_user (target_user_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- v42: digital voucher signatures (migration 2027_02_11)
+
+DROP TABLE IF EXISTS voucher_sign_requests;
+CREATE TABLE voucher_sign_requests (
+  id               INT UNSIGNED    NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  transaction_id   BIGINT UNSIGNED NOT NULL,
+  slot             VARCHAR(12)     NOT NULL,                 -- prepared, checked, approved, received
+  signer_name      VARCHAR(120)    NOT NULL,
+  signer_email     VARCHAR(160)    NULL,
+  message          VARCHAR(255)    NULL,
+  token_hash       CHAR(64)        NOT NULL,                 -- SHA-256 of the secret part of the link
+  token_enc        VARCHAR(255)    NULL,                     -- the link, encrypted, so it can be copied again
+  status           VARCHAR(10)     NOT NULL DEFAULT 'pending', -- pending, signed, revoked, expired
+  expires_at       DATETIME        NOT NULL,
+  created_by       INT UNSIGNED    NULL,
+  created_at       DATETIME        NOT NULL,
+  first_opened_at  DATETIME        NULL,
+  last_opened_at   DATETIME        NULL,
+  open_count       INT UNSIGNED    NOT NULL DEFAULT 0,
+  revoked_by       INT UNSIGNED    NULL,
+  revoked_at       DATETIME        NULL,
+  revoke_reason    VARCHAR(255)    NULL,
+  signed_at        DATETIME        NULL,
+  signature_id     INT UNSIGNED    NULL,
+  UNIQUE KEY uq_vsr_token (token_hash),
+  KEY ix_vsr_txn (transaction_id, status),
+  CONSTRAINT fk_vsr_txn FOREIGN KEY (transaction_id) REFERENCES transactions(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+DROP TABLE IF EXISTS voucher_signatures;
+CREATE TABLE voucher_signatures (
+  id               INT UNSIGNED    NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  transaction_id   BIGINT UNSIGNED NOT NULL,
+  slot             VARCHAR(12)     NOT NULL,
+  signer_name      VARCHAR(120)    NOT NULL,
+  signer_user_id   INT UNSIGNED    NULL,                     -- signed in the system
+  request_id       INT UNSIGNED    NULL,                     -- signed through a link
+  method           VARCHAR(8)      NOT NULL DEFAULT 'internal', -- internal, link
+  strokes          MEDIUMTEXT      NOT NULL,                 -- the drawing: {"w":..,"h":..,"s":[[x,y,x,y,...],...]}
+  doc_hash         CHAR(64)        NOT NULL,                 -- SHA-256 of the voucher content that was signed
+  ip_address       VARCHAR(45)     NULL,
+  user_agent       VARCHAR(255)    NULL,
+  signed_at        DATETIME        NOT NULL,
+  is_active        TINYINT(1)      NULL DEFAULT 1,           -- 1 = on the voucher; empty once reset
+  cleared_by       INT UNSIGNED    NULL,
+  cleared_at       DATETIME        NULL,
+  clear_reason     VARCHAR(255)    NULL,
+  UNIQUE KEY uq_vs_slot (transaction_id, slot, is_active),  -- one active signature per line
+  KEY ix_vs_user (signer_user_id),
+  CONSTRAINT fk_vs_txn FOREIGN KEY (transaction_id) REFERENCES transactions(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+DROP TABLE IF EXISTS voucher_documents;
+CREATE TABLE voucher_documents (
+  id               INT UNSIGNED    NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  transaction_id   BIGINT UNSIGNED NOT NULL,
+  kind             VARCHAR(8)      NOT NULL,                 -- original, signed
+  version          INT UNSIGNED    NOT NULL DEFAULT 1,
+  file_name        VARCHAR(160)    NOT NULL,
+  file_size        INT UNSIGNED    NOT NULL DEFAULT 0,
+  sha256           CHAR(64)        NOT NULL,
+  doc_hash         CHAR(64)        NULL,
+  signature_count  TINYINT UNSIGNED NOT NULL DEFAULT 0,
+  chunks           INT UNSIGNED    NOT NULL DEFAULT 0,
+  created_by       INT UNSIGNED    NULL,
+  created_note     VARCHAR(160)    NULL,
+  created_at       DATETIME        NOT NULL,
+  KEY ix_vd_txn (transaction_id, kind, version),
+  CONSTRAINT fk_vd_txn FOREIGN KEY (transaction_id) REFERENCES transactions(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+DROP TABLE IF EXISTS voucher_document_chunks;
+CREATE TABLE voucher_document_chunks (
+  document_id  INT UNSIGNED NOT NULL,
+  seq          INT UNSIGNED NOT NULL,
+  data         MEDIUMBLOB   NOT NULL,
+  PRIMARY KEY (document_id, seq),
+  CONSTRAINT fk_vdc_doc FOREIGN KEY (document_id) REFERENCES voucher_documents(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
 -- ---------------------------------------------------------------------
 --  2. DATA
 -- ---------------------------------------------------------------------

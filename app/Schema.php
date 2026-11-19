@@ -8,7 +8,7 @@ declare(strict_types=1);
  */
 final class Schema
 {
-    private const FLAG = 'schema_ok_2027_02_04';
+    private const FLAG = 'schema_ok_2027_02_11';
 
     /**
      * file => one cheap probe.
@@ -124,6 +124,10 @@ final class Schema
                    + (SELECT COUNT(*) FROM community_messages WHERE 1 = 0) + (SELECT COUNT(*) FROM community_dm_messages WHERE 1 = 0)
                    + (SELECT COUNT(*) FROM community_inquiry_responses WHERE 1 = 0) + (SELECT COUNT(*) FROM community_notifications WHERE 1 = 0)
                    + (SELECT COUNT(*) FROM community_mod_log WHERE 1 = 0) + (SELECT COUNT(*) FROM community_file_chunks WHERE 1 = 0)', 3],
+        // v42: digital voucher signatures: links, signatures and the PDF copies (the query fails without the tables)
+        'database/migrations/2027_02_11_voucher_signatures.sql' =>
+            'SELECT (SELECT COUNT(token_hash) FROM voucher_sign_requests WHERE 1 = 0) + (SELECT COUNT(strokes) FROM voucher_signatures WHERE 1 = 0)
+                  + (SELECT COUNT(*) FROM voucher_documents WHERE 1 = 0) + (SELECT COUNT(*) FROM voucher_document_chunks WHERE 1 = 0)',
     ];
 
     private static ?array $pending = null;

@@ -135,6 +135,108 @@ final class SimplePdf
         $this->cur .= sprintf("%.3F G %.2F w %.2F %.2F %.2F %.2F re S\n", $gray, $width, $x, $this->h - $y - $h, $w, $h);
     }
 
+    /**
+     * v42: a hand-drawn signature, as smooth ink strokes (vectors, so it prints sharp at any size).
+     * $strokes: lists of x, y pairs [x0, y0, x1, y1, ...] in a drawing area $srcW x $srcH. The drawing is fitted
+     * into the box $x, $y, $w, $h (top-left corner, keeping its proportions), centred across and resting on the
+     * bottom of the box, as a signature sits on its line. $rgb: the ink colour, 0 to 1 each.
+     */
+    public function strokes(array $strokes, float $srcW, float $srcH, float $x, float $y, float $w, float $h, float $lineW = 1.1, array $rgb = [0.09, 0.16, 0.42]): void
+    {
+        // the part of the drawing area that has ink, so a small signature in a corner of the pad still fills the line
+        $minX = $minY = INF;
+        $maxX = $maxY = -INF;
+        foreach ($strokes as $s) {
+            for ($i = 0, $n = count($s) - 1; $i < $n; $i += 2) {
+                $minX = min($minX, (float)$s[$i]);
+                $maxX = max($maxX, (float)$s[$i]);
+                $minY = min($minY, (float)$s[$i + 1]);
+                $maxY = max($maxY, (float)$s[$i + 1]);
+            }
+        }
+        if ($minX === INF || $srcW <= 0 || $srcH <= 0) {
+            return;
+        }
+        $pad = 4.0;
+        $minX -= $pad;
+        $minY -= $pad;
+        $bw = max(1.0, $maxX - $minX + $pad);
+        $bh = max(1.0, $maxY - $minY + $pad);
+        $scale = min($w / $bw, $h / $bh);
+        $offX = $x + ($w - $bw * $scale) / 2;
+        $offY = $y + $h - $bh * $scale;
+        $px = fn(float $v) => $offX + ($v - $minX) * $scale;
+        $py = fn(float $v) => $this->h - ($offY + ($v - $minY) * $scale);
+        $out = sprintf("q %.3F %.3F %.3F RG 1 J 1 j %.2F w\n", $rgb[0], $rgb[1], $rgb[2], $lineW);
+        foreach ($strokes as $s) {
+            $pts = [];
+            for ($i = 0, $n = count($s) - 1; $i < $n; $i += 2) {
+                $pts[] = [$px((float)$s[$i]), $py((float)$s[$i + 1])];
+            }
+            if (!$pts) {
+                continue;
+            }
+            $out .= sprintf("%.2F %.2F m\n", $pts[0][0], $pts[0][1]);
+            $c = count($pts);
+            if ($c === 1) {
+                $out .= sprintf("%.2F %.2F l\n", $pts[0][0] + 0.01, $pts[0][1]);   // a dot
+            } else {
+                // quadratic curves through the midpoints, written as the cubic curves PDF draws
+                $cur = $pts[0];
+                for ($i = 1; $i < $c - 1; $i++) {
+                    $q = $pts[$i];
+                    $end = [($pts[$i][0] + $pts[$i + 1][0]) / 2, ($pts[$i][1] + $pts[$i + 1][1]) / 2];
+                    $out .= sprintf("%.2F %.2F %.2F %.2F %.2F %.2F c\n",
+                        $cur[0] + 2 / 3 * ($q[0] - $cur[0]), $cur[1] + 2 / 3 * ($q[1] - $cur[1]),
+                        $end[0] + 2 / 3 * ($q[0] - $end[0]), $end[1] + 2 / 3 * ($q[1] - $end[1]),
+                        $end[0], $end[1]);
+                    $cur = $end;
+                }
+                $out .= sprintf("%.2F %.2F l\n", $pts[$c - 1][0], $pts[$c - 1][1]);
+            }
+            $out .= "S\n";
+        }
+        $this->cur .= $out . "Q\n";
+    }
+
+    /** v42: text in a colour ($rgb 0 to 1 each) */
+    public function textRgb(float $x, float $y, string $s, float $size, bool $bold, string $align, array $rgb): void
+    {
+        $before = $this->cur;
+        $this->text($x, $y, $s, $size, $bold, $align);
+        if ($this->cur !== $before) {
+            $added = substr($this->cur, strlen($before));
+            $this->cur = $before . preg_replace('/^BT [0-9.]+ g /', sprintf('BT %.3F %.3F %.3F rg ', $rgb[0], $rgb[1], $rgb[2]), $added);
+        }
+    }
+
+    /** v42: a box filled with a colour ($rgb 0 to 1 each) */
+    public function fillRgb(float $x, float $y, float $w, float $h, array $rgb): void
+    {
+        $this->cur .= sprintf("%.3F %.3F %.3F rg %.2F %.2F %.2F %.2F re f\n", $rgb[0], $rgb[1], $rgb[2], $x, $this->h - $y - $h, $w, $h);
+    }
+
+    /** v42: the number of pages so far (the page being written counts) */
+    public function pageCount(): int
+    {
+        return count($this->pages) + 1;
+    }
+
+    /** v42: writes on every page once all are done, e.g. "Page 1 of 3": $fn(int $page, int $total) */
+    public function forEachPage(callable $fn): void
+    {
+        $all = $this->pages;
+        $all[] = $this->cur;
+        $total = count($all);
+        foreach ($all as $i => $content) {
+            $this->cur = $content;
+            $fn($i + 1, $total);
+            $all[$i] = $this->cur;
+        }
+        $this->cur = (string)array_pop($all);
+        $this->pages = $all;
+    }
+
     /** The PDF file */
     public function output(): string
     {

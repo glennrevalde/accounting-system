@@ -6,6 +6,8 @@ declare(strict_types=1);
  * void / delete / email handling.
  */
 
+require_once __DIR__ . '/_signatures.php';   // v42: voucher signatures
+
 const SALES_TYPES = ['estimate', 'sales_order', 'invoice', 'sales_receipt', 'statement_charge', 'credit_memo', 'finance_charge', 'pos_sale', 'pos_return'];
 const PURCHASE_TYPES = ['purchase_order', 'bill', 'vendor_credit', 'item_receipt', 'check'];
 
@@ -322,7 +324,16 @@ function grid_rows(string $key): array
 function txn_common_actions(string $pageKey, array $types): bool
 {
     $a = g('a');
-    if (!in_array($a, ['view', 'print', 'void', 'delete', 'email', 'close', 'reopen'], true)) {
+    // v42: a signed voucher is not opened for editing (Txn::save refuses it as well)
+    if ($a === 'edit' && (int)g('id') && Signatures::ready()) {
+        $t = Txn::load((int)g('id'));
+        if ($t && in_array($t['txn_type'], $types, true) && Signatures::supports($t['txn_type']) && Signatures::locked((int)$t['id'])) {
+            flash('warning', Txn::ref($t) . ' is signed and cannot be edited. Reset its signatures first (Signatures box).');
+            redirect(Txn::url($t));
+        }
+        return false;
+    }
+    if (!in_array($a, ['view', 'print', 'void', 'delete', 'email', 'close', 'reopen', 'sign', 'sign_request', 'sign_revoke', 'sign_reset', 'sign_pdf'], true)) {
         return false;
     }
     $id = (int)g('id');
@@ -333,6 +344,9 @@ function txn_common_actions(string $pageKey, array $types): bool
     }
     if (!Access::siteAllowed($t['site_id'] ? (int)$t['site_id'] : null)) {
         Access::denyPage($pageKey, 'open a transaction of another site on');
+    }
+    if (str_starts_with($a, 'sign')) {
+        return voucher_sign_actions($pageKey, $t, $a);
     }
     switch ($a) {
         case 'view':
@@ -503,12 +517,15 @@ function render_txn_view(array $t, string $pageKey): void
     $credit = in_array($type, array_merge(Balances::CUSTOMER_CREDITS, Balances::VENDOR_CREDITS), true) ? Balances::creditRemaining($t) : null;
     $advLeft = $type === 'vendor_advance' ? Advances::remaining($t) : null;
     $voided = (int)$t['is_voided'] === 1;
+    // v42: the vouchers that are signed (check, cash voucher, journal entry); a signed one is locked
+    $signing = Signatures::on($t);
+    $sigLocked = $signing && Signatures::locked($id);
 
     $actions = [];
     // finance charges and the documents the system makes itself have no edit form of their own: they are corrected by
     // voiding and entering them again, so they get no Edit button (item receipts, inventory adjustments, transfers and
     // builds are edited on their own pages)
-    $editable = !$voided && Access::can($pageKey, 'edit') && !in_array($type, ['pos_sale', 'pos_return', 'depreciation', 'asset_disposal', 'bank_charge', 'bank_interest', 'pos_over_short', 'refund',
+    $editable = !$voided && !$sigLocked && Access::can($pageKey, 'edit') && !in_array($type, ['pos_sale', 'pos_return', 'depreciation', 'asset_disposal', 'bank_charge', 'bank_interest', 'pos_over_short', 'refund',
         'finance_charge'], true);
     if ($editable) {
         $actions[] = btn_link(url($pageKey, ['a' => 'edit', 'id' => $id]), 'Edit', 'btn-primary', 'pencil');
@@ -579,7 +596,11 @@ function render_txn_view(array $t, string $pageKey): void
         }
     }
     $posting = !in_array($type, Posting::NON_POSTING, true);
-    if (Access::can($pageKey, 'delete')) {
+    if ($signing && !$voided && Signatures::canSign($pageKey) && sign_free_slots($t)
+        && !array_filter(Signatures::active($id), fn($s) => (int)$s['signer_user_id'] === (int)Auth::id())) {
+        $actions[] = btn_link(Txn::url($t, 'sign'), 'Sign Voucher', 'btn-outline-primary', 'pen');
+    }
+    if (Access::can($pageKey, 'delete') && !$sigLocked) {
         if (!$voided && $posting) {
             $actions[] = '<button class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#voidModal"><i class="bi bi-slash-circle"></i> Void</button>';
         }
@@ -592,7 +613,7 @@ function render_txn_view(array $t, string $pageKey): void
     }
     $actions[] = btn_link(url($pageKey), 'Back to list', 'btn-outline-secondary');
 
-    layout_start(Txn::ref($t), ['actions' => implode(' ', $actions)]);
+    layout_start(Txn::ref($t), ['actions' => implode(' ', $actions), 'js' => $signing ? ['js/signature.js'] : []]);
     if ($voided) {
         echo '<div class="alert alert-dark"><strong>VOID</strong> — ' . h($t['void_reason']) . ' (' . h(fdatetime($t['voided_at'])) . ')</div>';
     }
@@ -608,6 +629,10 @@ function render_txn_view(array $t, string $pageKey): void
         'Number' => $t['txn_no'],
         'Status' => status_badge($t['status']),
     ];
+    if ($signing) {
+        $sigSum = Signatures::summary($t);
+        $info['Signatures'] = '<a class="sig-info sig-st-' . h($sigSum['key']) . '" href="#signatures">' . h($sigSum['label']) . ' (' . (int)$sigSum['signed'] . ' of ' . (int)$sigSum['total'] . ')</a>';
+    }
     $ent = entity_name($t);
     if ($ent !== '') {
         $info[$type === Posting::CASH_VOUCHER ? 'Paid to' : ($t['vendor_id'] ? 'Vendor' : ($t['customer_id'] ? 'Customer' : 'Payee'))] = h($ent);
@@ -746,6 +771,7 @@ function render_txn_view(array $t, string $pageKey): void
             <?php if ($advLeft !== null): ?><tr><td>Applied to bills</td><td class="num"><?= money(Advances::applied($id)) ?></td></tr><tr class="fw-semibold"><td>Left to apply</td><td class="num"><?= money($advLeft) ?></td></tr><?php endif; ?>
           </table>
         </div></div>
+        <?= $signing ? signatures_card($t, $pageKey) : '' ?>
         <?= Attachments::viewCard($t, $pageKey) ?>
         <?php $whtRows = in_array($type, ['bill_payment', 'payment'], true) ? Withholding::forPayment($id) : []; if ($whtRows): ?>
         <div class="card mb-3"><div class="card-header small fw-semibold"><?= $type === 'payment' ? 'Taxes withheld by the customer' : 'Taxes withheld from the supplier' ?></div>
@@ -780,7 +806,10 @@ function render_txn_view(array $t, string $pageKey): void
     if (in_array($type, Memorized::TYPES, true) && (int)$t['is_voided'] === 0 && Access::can('coa.memorized_txns', 'create')) {
         echo memorize_modal($t);
     }
-    if (Access::can($pageKey, 'delete')) {
+    if ($signing) {
+        echo signatures_modals($t, $pageKey);
+    }
+    if (Access::can($pageKey, 'delete') && !$sigLocked) {
         echo reason_modal('voidModal', 'Void transaction', Txn::url($t, 'void'), 'btn-warning',
             '<p class="small text-muted mt-2">Voiding keeps the document but removes its effect on the ledger and inventory.</p>');
         echo reason_modal('deleteModal', 'Delete transaction', Txn::url($t, 'delete'), 'btn-danger',
@@ -919,15 +948,28 @@ function print_company_block(string $logoKey): string
         . ($s['company_phone'] ? ', ' . h($s['company_phone']) : '') . '</div></div></div>';
 }
 
-/** Prepared by / Checked by / Approved by (/ Received by) */
+/**
+ * Prepared by / Checked by / Approved by (/ Received by).
+ * v42: on the vouchers that are signed, a signed line shows the signature above it, the signer's name on it and
+ * the date under it.
+ */
 function print_signatures(array $t, bool $received = false): string
 {
     $who = fn($id) => $id ? h((string)DB::value('SELECT full_name FROM users WHERE id = :id', ['id' => $id])) : '&nbsp;';
-    return '<div class="row mt-5 small signatures">'
-        . '<div class="col"><div class="sig-label">Prepared by:</div><div class="sig-line">' . $who($t['created_by']) . '</div></div>'
-        . '<div class="col"><div class="sig-label">Checked by:</div><div class="sig-line">&nbsp;</div></div>'
-        . '<div class="col"><div class="sig-label">Approved by:</div><div class="sig-line">' . $who($t['approved_by'] ?? null) . '</div></div>'
-        . ($received ? '<div class="col"><div class="sig-label">Received by:</div><div class="sig-line">&nbsp;</div></div>' : '')
+    $sigs = Signatures::on($t) ? Signatures::active((int)$t['id']) : [];
+    $cell = function (string $slot, string $label, string $name) use ($sigs): string {
+        $s = $sigs[$slot] ?? null;
+        if (!$s) {
+            return '<div class="col"><div class="sig-label">' . $label . ':</div><div class="sig-line">' . $name . '</div></div>';
+        }
+        return '<div class="col"><div class="sig-label">' . $label . ':</div><div class="sig-line is-signed"><span class="sig-mark">' . Signatures::svg((string)$s['strokes']) . '</span>'
+            . h($s['signer_name']) . '</div><div class="sig-when">Signed ' . h(fdatetime($s['signed_at'])) . '</div></div>';
+    };
+    return '<div class="row mt-5 small signatures' . ($sigs ? ' has-signed' : '') . '">'
+        . $cell('prepared', 'Prepared by', $who($t['created_by']))
+        . $cell('checked', 'Checked by', '&nbsp;')
+        . $cell('approved', 'Approved by', $who($t['approved_by'] ?? null))
+        . ($received ? $cell('received', 'Received by', '&nbsp;') : '')
         . '</div>';
 }
 
